@@ -4,14 +4,14 @@ Stand: 2026-08-28
 
 Arbeitstitel: **Pips & Paws** (siehe §15.4 — jederzeit änderbar).
 
-**Fortschritt:** M0–M4 + M6 gebaut und im Browser verifiziert (Zwei-Tab-Test SL+Spieler).
-Solo-Charakterbogen, Drag-&-Drop-Inventar, Würfeln, Charaktererschaffung, DE/EN,
-**serverloser PeerJS-Multiplayer** (Raum-Code + `?join`-Link, Reconnect, GM-Dashboard mit
-Live-Log, GM-Aktionen: Schaden/Heilen/Pips/Rettungswurf/Flüstern/Ansage). Regeldaten aus dem
-offiziellen SRD 2.3.1 + den freien PDFs (`reference/`, PDFs gitignored).
-Repo: <https://github.com/DonDavis-vibe/pips-and-paws> (Pages-Deploy via Actions).
-**Noch offen: M5 (Shared Stash / Tischmitte).** 
-Pages in den Repo-Settings aktivieren (Source = GitHub Actions).
+**Fortschritt:** M0–M6 gebaut und verifiziert. Solo-Charakterbogen, Drag-&-Drop-Inventar, Würfeln,
+Charaktererschaffung, DE/EN, **serverloser PeerJS-Multiplayer**, SL-Dashboard, **Tischmitte (M5)**
+inkl. SL gibt Item/EP/Zustand. Live: <https://dondavis-vibe.github.io/pips-and-paws/>
+(Repo: <https://github.com/DonDavis-vibe/pips-and-paws>, Pages-Deploy via Actions, SEO drin).
+`reference/` ist nur noch lokal (nicht im Repo).
+
+**SL-Werkzeuge, Schritt für Schritt:** [1] Tischmitte ✔ · [2] Zeit-/Fackel-/Begegnungs-Tracker (nächster) ·
+[3] NSC-/Kampf-Tracker · [4] SL-Sitzung speichern/laden + allgemeine Notizen.
 
 ---
 
