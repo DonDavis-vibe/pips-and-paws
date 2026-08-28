@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["react", "unicorn"],
+  "env": { "browser": true, "es2024": true },
+  "rules": {
+    "no-unused-vars": "warn",
+    "eqeqeq": ["warn", "smart"]
+  },
+  "ignorePatterns": ["dist", "node_modules"]
+}

@@ -1,0 +1,89 @@
+import { Users, ScrollText, Megaphone } from 'lucide-react';
+import { useLang } from '../i18n/index.jsx';
+import GmPlayerCard from './GmPlayerCard.jsx';
+import { GM_BROADCAST } from '../multiplayer/protocol.js';
+
+function formatEntry(e, t) {
+  if (e.kind === 'system') return t(e.key, e.vars || {});
+  if (e.kind === 'say') return `${e.playerName}: ${e.text}`;
+  if (e.kind === 'gm') return t(e.key, e.vars || {});
+  if (e.kind === 'event' && e.ev) {
+    const ev = e.ev;
+    if (ev.kind === 'save') {
+      return `${e.playerName} · ${t('dice.saveVs', { attr: t(`attr.${ev.attr}`) })} — d20 ${ev.roll} ≤ ${ev.target} · ${ev.ok ? t('dice.success') : t('dice.fail')}`;
+    }
+    if (ev.kind === 'roll') {
+      return `${e.playerName} · ${ev.label}: ${ev.value}`;
+    }
+  }
+  return JSON.stringify(e);
+}
+
+export default function GmDashboard({ mp }) {
+  const { t } = useLang();
+  const entries = Object.entries(mp.players);
+
+  return (
+    <div className="gm-dash">
+      <section className="panel">
+        <div className="panel-head">
+          <h2>
+            <Users size={18} /> {t('gm.dashboard')} · {t('mp.playersConnected', { n: entries.length })}
+          </h2>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              const text = window.prompt(t('gm.prompt.broadcast'));
+              if (text) {
+                mp.sendGmCommand(null, { cmd: GM_BROADCAST, text });
+                mp.logGmAction({ key: 'gm.log.broadcast', vars: { text } });
+              }
+            }}
+          >
+            <Megaphone size={16} /> {t('gm.action.broadcast')}
+          </button>
+        </div>
+
+        {entries.length === 0 ? (
+          <p className="hint">{t('gm.noPlayers')}</p>
+        ) : (
+          <div className="gm-grid">
+            {entries.map(([peerId, player]) => (
+              <GmPlayerCard
+                key={peerId}
+                player={player}
+                onCommand={(cmd) => {
+                  mp.sendGmCommand(peerId, cmd);
+                  mp.logGmAction({ key: `gm.log.${cmd.cmd}`, vars: { name: player.character?.name || '?', ...cmd } });
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="panel">
+        <div className="panel-head">
+          <h2>
+            <ScrollText size={18} /> {t('gm.liveLog')}
+          </h2>
+        </div>
+        <ul className="dice-log">
+          {mp.liveLog.length === 0 ? (
+            <li className="dice-empty">{t('dice.emptyLog')}</li>
+          ) : (
+            mp.liveLog.map((e) => (
+              <li key={e.id}>
+                <span className="dice-detail">
+                  {new Date(e.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span>{formatEntry(e, t)}</span>
+              </li>
+            ))
+          )}
+        </ul>
+      </section>
+    </div>
+  );
+}
