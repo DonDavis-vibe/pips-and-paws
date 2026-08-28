@@ -1,12 +1,10 @@
 {
   "app.title": "Pips & Paws",
   "app.tagline": "Charakterbogen fuer Mausritter",
-
   "header.new": "Neue Maus",
   "header.export": "Export",
   "header.import": "Import",
   "header.language": "Sprache",
-
   "sheet.identity": "Maus",
   "sheet.name": "Name",
   "sheet.player": "Spieler",
@@ -17,7 +15,6 @@
   "sheet.detail": "Besonderes Merkmal",
   "sheet.notes": "Notizen",
   "sheet.notesPlaceholder": "Verbuendete, Hinweise, Auftraege ...",
-
   "attr.str": "Staerke (STR)",
   "attr.dex": "Geschick (DEX)",
   "attr.wil": "Wille (WIL)",
@@ -25,14 +22,12 @@
   "attr.max": "Max",
   "attr.save": "Rettungswurf",
   "attr.saveShort": "RW",
-
   "res.hp": "Trefferpunkte",
   "res.hpShort": "TP",
   "res.pips": "Pips",
   "res.xp": "EP",
   "res.level": "Stufe",
   "res.grit": "Mumm",
-
   "inv.title": "Inventar",
   "inv.tab.catalog": "Ausruestung",
   "inv.tab.spell": "Zauber",
@@ -49,7 +44,6 @@
   "inv.noRoom": "Kein Platz im Inventar",
   "inv.slotOccupied": "Platz belegt",
   "inv.needsTwoSlots": "Braucht zwei freie, benachbarte Plaetze",
-
   "item.uses": "Nutzungen",
   "item.damage": "Schaden",
   "item.defense": "Ruestung",
@@ -58,7 +52,6 @@
   "item.markCleared": "Als erledigt markieren",
   "item.markActive": "Als aktiv markieren",
   "item.twoSlots": "2 Plaetze",
-
   "type.standard": "Ausruestung",
   "type.weapon": "Waffe",
   "type.armour": "Ruestung",
@@ -66,7 +59,6 @@
   "type.condition": "Zustand",
   "type.light": "Licht",
   "type.ration": "Nahrung",
-
   "dice.title": "Wuerfeln",
   "dice.d6": "W6",
   "dice.d66": "W66",
@@ -77,7 +69,6 @@
   "dice.rolled": "Gewuerfelt: {value}",
   "dice.clearLog": "Verlauf leeren",
   "dice.emptyLog": "Noch nichts gewuerfelt.",
-
   "wizard.title": "Maus erschaffen",
   "wizard.step": "Schritt {n} von {total}",
   "wizard.next": "Weiter",
@@ -103,7 +94,6 @@
   "wizard.identityHint": "Sternzeichen, Fell und ein besonderes Merkmal. Wuerfeln oder frei waehlen.",
   "wizard.roll": "Wuerfeln",
   "wizard.pips": "Pips",
-
   "mp.title": "Multiplayer",
   "mp.intro": "Serverlos ueber WebRTC. Der Spielleiter eroeffnet einen Raum, die Spieler treten mit dem 4-stelligen Code oder ueber den Einladungslink bei. Keine Anmeldung.",
   "mp.host": "Als Spielleiter hosten",
@@ -137,7 +127,6 @@
   "mp.log.left": "{name} hat den Raum verlassen.",
   "mp.log.serverLost": "Verbindung zum Signalling-Server verloren. Dashboard verlassen und neu hosten.",
   "mp.log.serverBack": "Verbindung zum Server wiederhergestellt.",
-
   "gm.dashboard": "Spielleiter-Dashboard",
   "gm.noPlayers": "Noch keine Spieler verbunden. Teile den Raum-Code oder den Einladungslink.",
   "gm.liveLog": "Live-Protokoll",
@@ -163,21 +152,19 @@
   "gm.log.whisper": "Fluestern an {name}",
   "gm.log.broadcast": "Ansage: {text}",
   "gm.log.roll": "SL wuerfelt {label}: {value}",
-
   "player.gm.heal": "Spielleiter heilt dich um {n} TP.",
   "player.gm.pips": "Spielleiter: {n} Pips.",
   "player.gm.damage": "Spielleiter: {n} Schaden.",
   "player.gm.strDamage": "Spielleiter: {n} Schaden — {s} davon auf STR. Wuerfle einen STR-Rettungswurf.",
   "player.gm.whisper": "Spielleiter fluestert",
   "player.gm.broadcast": "Spielleiter",
-
   "confirm.new": "Aktuelle Maus verwerfen und neu anfangen?",
   "toast.exported": "Charakter exportiert.",
   "toast.imported": "Charakter importiert.",
   "toast.importFailed": "Datei konnte nicht gelesen werden.",
-
   "footer.tagline": "Ein Fan-Werkzeug fuer Mausritter — Charakterbogen, Spielleiter-Dashboard und Echtzeit-Multiplayer im Browser. Keine Anmeldung, alles bleibt auf deinem Geraet.",
   "footer.links": "Links",
+  "footer.liveApp": "Web-App (GitHub Pages)",
   "footer.about": "Ueber & Regeln",
   "footer.github": "Quellcode auf GitHub",
   "footer.mausritter": "Mausritter (offiziell)",
@@ -187,7 +174,6 @@
   "footer.rulesLicense": "Regeln: CC BY 4.0",
   "footer.disclaimer1": "Pips & Paws is an independent production by {name} and is not affiliated with Losing Games.",
   "footer.disclaimer2": "This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence.",
-
   "common.close": "Schliessen",
   "common.or": "oder"
 }

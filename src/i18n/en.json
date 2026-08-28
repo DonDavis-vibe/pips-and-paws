@@ -1,12 +1,10 @@
 {
   "app.title": "Pips & Paws",
   "app.tagline": "A character sheet for Mausritter",
-
   "header.new": "New mouse",
   "header.export": "Export",
   "header.import": "Import",
   "header.language": "Language",
-
   "sheet.identity": "Mouse",
   "sheet.name": "Name",
   "sheet.player": "Player",
@@ -17,7 +15,6 @@
   "sheet.detail": "Physical detail",
   "sheet.notes": "Notes",
   "sheet.notesPlaceholder": "Allies, clues, jobs ...",
-
   "attr.str": "Strength (STR)",
   "attr.dex": "Dexterity (DEX)",
   "attr.wil": "Will (WIL)",
@@ -25,14 +22,12 @@
   "attr.max": "Max",
   "attr.save": "Save",
   "attr.saveShort": "Save",
-
   "res.hp": "Hit protection",
   "res.hpShort": "HP",
   "res.pips": "Pips",
   "res.xp": "XP",
   "res.level": "Level",
   "res.grit": "Grit",
-
   "inv.title": "Inventory",
   "inv.tab.catalog": "Gear",
   "inv.tab.spell": "Spells",
@@ -49,7 +44,6 @@
   "inv.noRoom": "No room in inventory",
   "inv.slotOccupied": "Slot occupied",
   "inv.needsTwoSlots": "Needs two free, adjacent slots",
-
   "item.uses": "Usage",
   "item.damage": "Damage",
   "item.defense": "Defence",
@@ -58,7 +52,6 @@
   "item.markCleared": "Mark as cleared",
   "item.markActive": "Mark as active",
   "item.twoSlots": "2 slots",
-
   "type.standard": "Equipment",
   "type.weapon": "Weapon",
   "type.armour": "Armour",
@@ -66,7 +59,6 @@
   "type.condition": "Condition",
   "type.light": "Light",
   "type.ration": "Food",
-
   "dice.title": "Roll",
   "dice.d6": "d6",
   "dice.d66": "d66",
@@ -77,7 +69,6 @@
   "dice.rolled": "Rolled: {value}",
   "dice.clearLog": "Clear log",
   "dice.emptyLog": "Nothing rolled yet.",
-
   "wizard.title": "Create a mouse",
   "wizard.step": "Step {n} of {total}",
   "wizard.next": "Next",
@@ -103,7 +94,6 @@
   "wizard.identityHint": "Birthsign, coat and a physical detail. Roll or pick freely.",
   "wizard.roll": "Roll",
   "wizard.pips": "Pips",
-
   "mp.title": "Multiplayer",
   "mp.intro": "Serverless over WebRTC. The GM opens a room, players join with the 4-letter code or the invite link. No sign-up.",
   "mp.host": "Host as GM",
@@ -137,7 +127,6 @@
   "mp.log.left": "{name} left the room.",
   "mp.log.serverLost": "Lost connection to the signalling server. Leave the dashboard and re-host.",
   "mp.log.serverBack": "Reconnected to the server.",
-
   "gm.dashboard": "GM dashboard",
   "gm.noPlayers": "No players connected yet. Share the room code or the invite link.",
   "gm.liveLog": "Live log",
@@ -163,21 +152,19 @@
   "gm.log.whisper": "Whisper to {name}",
   "gm.log.broadcast": "Announcement: {text}",
   "gm.log.roll": "GM rolls {label}: {value}",
-
   "player.gm.heal": "GM heals you for {n} HP.",
   "player.gm.pips": "GM: {n} pips.",
   "player.gm.damage": "GM: {n} damage.",
   "player.gm.strDamage": "GM: {n} damage — {s} of it to STR. Roll a STR save.",
   "player.gm.whisper": "GM whispers",
   "player.gm.broadcast": "GM",
-
   "confirm.new": "Discard the current mouse and start over?",
   "toast.exported": "Character exported.",
   "toast.imported": "Character imported.",
   "toast.importFailed": "Could not read the file.",
-
   "footer.tagline": "A fan tool for Mausritter — character sheet, GM dashboard and real-time multiplayer in the browser. No sign-up, everything stays on your device.",
   "footer.links": "Links",
+  "footer.liveApp": "Web app (GitHub Pages)",
   "footer.about": "About & rules",
   "footer.github": "Source on GitHub",
   "footer.mausritter": "Mausritter (official)",
@@ -187,7 +174,6 @@
   "footer.rulesLicense": "Rules: CC BY 4.0",
   "footer.disclaimer1": "Pips & Paws is an independent production by {name} and is not affiliated with Losing Games.",
   "footer.disclaimer2": "This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence.",
-
   "common.close": "Close",
   "common.or": "or"
 }

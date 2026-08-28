@@ -1,6 +1,6 @@
-import { Github, BookOpen, ExternalLink, Heart } from 'lucide-react';
+import { Github, BookOpen, ExternalLink, Heart, Link as LinkIcon } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
-import { PRODUCER, PRODUCER_URL, REPO_URL, APP_VERSION, LINKS } from '../config.js';
+import { PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, APP_VERSION, LINKS } from '../config.js';
 
 function Ext({ href, icon: Icon, children }) {
   return (
@@ -30,6 +30,9 @@ export default function Footer() {
 
         <nav className="footer-col" aria-label={t('footer.links')}>
           <h4>{t('footer.links')}</h4>
+          <Ext href={SITE_URL} icon={LinkIcon}>
+            {t('footer.liveApp')}
+          </Ext>
           <Ext href={REPO_URL} icon={Github}>
             {t('footer.github')}
           </Ext>

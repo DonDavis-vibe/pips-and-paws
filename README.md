@@ -1,36 +1,51 @@
 # Pips & Paws
 
-Digitaler Charakterbogen (und spaeter: Spielleiter-Dashboard mit Echtzeit-Multiplayer)
-fuer das Pen-&-Paper-Rollenspiel **Mausritter**.
+Digitaler Charakterbogen, Spielleiter-Dashboard und **Echtzeit-Multiplayer** fuer das
+Pen-&-Paper-Rollenspiel **Mausritter** — alles im Browser, ohne Anmeldung.
 
-Status: **Solo-Charakterbogen** (M0–M3 aus [PLAN.md](PLAN.md)). Multiplayer folgt.
+**▶ Web-App: <https://dondavis-vibe.github.io/pips-and-paws/>**
+
+## Was drin ist
+
+- **Charakterbogen** — Attribute (aktuell/max), Trefferpunkte / Pips / EP / Mumm,
+  Wuerfeln (W6, W66, Rettungswurf W20 ≤ Attribut)
+- **Drag-and-Drop-Inventar** — Pfoten / Koerper / Rucksack, 1- und 2-Platz-Gegenstaende,
+  Tausch, Nutzungspunkte, Zustaende als Kaertchen
+- **Charaktererschaffung** nach SRD 2.3.1 — 3W6 (zwei hoechste), Trefferpunkte/Pips je 1W6,
+  vollstaendige 36er-Hintergrundtabelle, Startausruestung, Schwache-Maus-Regel,
+  Sternzeichen / Fell / Merkmal
+- **Serverloser Multiplayer** (WebRTC/PeerJS) — SL eroeffnet einen Raum, Spieler treten
+  per 4-Zeichen-Code oder `?join`-Link bei. Reconnect, Reload-Wiederherstellung.
+- **SL-Dashboard** — alle Helden auf einen Blick (TP, Werte, Ruestung, belegte Plaetze,
+  Waffen, Zustaende), Aktionen (Schaden / Heilen / Pips / Rettungswurf fordern / Fluestern /
+  Ansage), eigener SL-Wuerfelbereich, Live-Protokoll
+- **Zweisprachig DE / EN**, Persistenz im `localStorage`, JSON-Export/-Import
+
+Noch offen: gemeinsame Tischmitte (Loot zwischen SL und Spielern schieben).
 
 ## Entwickeln
 
 ```bash
 npm install
-npm run dev
-```
-
-Dann `http://localhost:5173` aufrufen.
-
-```bash
-npm run build     # -> dist/index.html (eine portable Datei, viteSingleFile)
+npm run dev        # http://localhost:5173
+npm run build      # -> dist/index.html (eine portable Datei, viteSingleFile)
 npm run preview
-npm run lint
+npm run lint        # oxlint
 ```
+
+Push auf `main` deployt via GitHub Actions auf GitHub Pages.
 
 ## Stack
 
-Vite + React 19 (plain JS), `@dnd-kit` fuers Inventar-Raster, `lucide-react` fuer Icons.
-Kein Backend, kein Account. Alles im `localStorage`, Export/Import als `.json`.
+Vite + React 19 (plain JS), `@dnd-kit` fuers Inventar-Raster, `peerjs` fuer den
+Multiplayer, `lucide-react` fuer Icons. Kein Backend, kein Account.
 
 ## Regeldaten
 
-`src/data/*` enthaelt eine **erste Auswahl** an Gegenstaenden, Hintergruenden und
-Aussehen-Tabellen. Die vollstaendigen Tabellen aus dem Mausritter-SRD sind noch
-nicht eingepflegt (mit `TODO(M3)` markiert). Wirkungstexte sind zusammengefasst,
-nicht woertlich uebernommen.
+`src/data/*` ist aus dem offiziellen **Mausritter SRD 2.3.1** abgeleitet
+(`reference/mausritter-srd-2.3.1.md`, CC BY 4.0). Wirkungstexte sind zusammengefasst,
+nicht woertlich uebernommen. Die freien PDFs unter `reference/` liegen nur lokal
+(Artwork nicht CC BY, per `.gitignore` ausgeschlossen).
 
 ## Lizenz
 
