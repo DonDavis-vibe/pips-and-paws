@@ -1,17 +1,21 @@
 import { useState } from 'react';
-import { Heart, Coins, ChevronDown, ChevronRight } from 'lucide-react';
+import { Heart, Coins, Shield, Swords, Backpack, ChevronDown, ChevronRight } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
-import {
-  GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER,
-} from '../multiplayer/protocol.js';
+import { gritForLevel, ALL_SLOTS, PAW_SLOTS } from '../rules/character.js';
+import { GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER } from '../multiplayer/protocol.js';
 
 const NOTE_KEY = (id) => `pips-paws-gmnote-${id}`;
+const SLOT_LABELS = {
+  paw_left: 'P1', paw_right: 'P2', body_1: 'K1', body_2: 'K2',
+  pack_1: 'R1', pack_2: 'R2', pack_3: 'R3', pack_4: 'R4', pack_5: 'R5', pack_6: 'R6',
+};
 
 export default function GmPlayerCard({ player, onCommand }) {
   const { t, lang } = useLang();
   const c = player.character || {};
   const items = player.items || {};
+  const inv = c.inventory || {};
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(() => readJSON(NOTE_KEY(c.id), '') || '');
 
@@ -19,7 +23,14 @@ export default function GmPlayerCard({ player, onCommand }) {
   const hpColor = hpPct > 50 ? 'var(--ok)' : hpPct > 25 ? 'var(--warn)' : 'var(--bad)';
 
   const conditions = Object.values(items).filter((i) => i.type === 'condition' && !i.cleared);
-  const invList = Object.values(items).filter((i) => i.type !== 'condition');
+  const grit = gritForLevel(c.level || 1);
+  const usedSlots = ALL_SLOTS.filter((s) => inv[s]).length;
+  const defence = Object.values(items)
+    .filter((i) => i.type === 'armour')
+    .reduce((sum, i) => sum + (i.defense || 0), 0);
+  const pawItems = PAW_SLOTS
+    .map((s) => inv[s] && !inv[s].cont && items[inv[s].itemId])
+    .filter((i) => i && (i.type === 'weapon' || i.damage));
 
   const ask = (labelKey, cmd, allowNeg = false) => {
     const raw = window.prompt(t(labelKey));
@@ -32,12 +43,15 @@ export default function GmPlayerCard({ player, onCommand }) {
   return (
     <div className="gm-card">
       <div className="gm-card-head">
-        <div>
+        <div className="gm-card-id">
           <strong>{c.name || '?'}</strong>
-          <span className="gm-bg">{c.background || ''}</span>
+          <span className="gm-bg">
+            {c.background || ''}
+            {c.disposition ? ` · ${c.disposition}` : ''}
+          </span>
         </div>
         <span className="gm-lvl">
-          {t('res.level')} {c.level || 1}
+          {t('res.level')} {c.level || 1} · {t('res.grit')} {grit} · {t('res.xp')} {c.xp ?? 0}
         </span>
       </div>
 
@@ -68,12 +82,30 @@ export default function GmPlayerCard({ player, onCommand }) {
         <span className="gm-attr">
           <Coins size={12} /> {c.pips ?? 0}
         </span>
+        <span className="gm-attr">
+          <Shield size={12} /> {defence}
+        </span>
+        <span className={`gm-attr${usedSlots >= 10 ? ' gm-attr-hurt' : ''}`}>
+          <Backpack size={12} /> {usedSlots}/10
+        </span>
       </div>
+
+      {pawItems.length ? (
+        <div className="gm-gear">
+          <Swords size={12} />
+          {pawItems.map((i) => (
+            <span key={i.itemId}>
+              {loc(i.name, lang)}
+              {i.damage ? ` (${i.damage})` : ''}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {conditions.length ? (
         <div className="gm-conditions">
           {conditions.map((cond) => (
-            <span key={cond.itemId} className="chip chip-bad">
+            <span key={cond.itemId} className="chip chip-bad" title={loc(cond.effect, lang)}>
               {loc(cond.name, lang)}
             </span>
           ))}
@@ -109,20 +141,37 @@ export default function GmPlayerCard({ player, onCommand }) {
       </div>
 
       <button type="button" className="link-btn" onClick={() => setOpen((v) => !v)}>
-        {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />} {t('gm.expandInv')} ({invList.length})
+        {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />} {t('gm.details')}
       </button>
       {open ? (
-        <div className="gm-inv">
-          {invList.map((i) => (
-            <span key={i.itemId} className="chip">
-              {loc(i.name, lang)}
-              {i.usage ? ` (${i.usage.current}/${i.usage.max})` : ''}
-            </span>
-          ))}
+        <div className="gm-details">
+          <div className="gm-inv-full">
+            {ALL_SLOTS.map((s) => {
+              const cell = inv[s];
+              const it = cell && !cell.cont ? items[cell.itemId] : null;
+              return (
+                <div key={s} className={`gm-inv-slot${it ? '' : ' empty'}${cell?.cont ? ' cont' : ''}`}>
+                  <span className="gm-inv-pos">{SLOT_LABELS[s]}</span>
+                  <span>
+                    {it ? loc(it.name, lang) : cell?.cont ? '↑' : '—'}
+                    {it?.usage ? ` (${it.usage.current}/${it.usage.max})` : ''}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {c.notes ? (
+            <div className="gm-player-notes">
+              <span className="gm-mini-label">{t('gm.playerNotes')}</span>
+              <p>{c.notes}</p>
+            </div>
+          ) : null}
+
+          <span className="gm-mini-label">{t('gm.secretNotes')}</span>
           <textarea
             className="notes gm-note"
             rows={2}
-            placeholder={t('gm.secretNotes')}
             value={note}
             onChange={(e) => {
               setNote(e.target.value);

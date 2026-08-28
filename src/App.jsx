@@ -14,6 +14,7 @@ import CharacterWizard from './components/CharacterWizard.jsx';
 import ConnectionBadge from './components/ConnectionBadge.jsx';
 import MultiplayerModal from './components/MultiplayerModal.jsx';
 import GmDashboard from './components/GmDashboard.jsx';
+import Footer from './components/Footer.jsx';
 
 const STORAGE_KEY = 'pips-paws-character-v1';
 
@@ -186,10 +187,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="disclaimer">
-        <p>{t('footer.disclaimer1')}</p>
-        <p>{t('footer.disclaimer2')}</p>
-      </footer>
+      <Footer />
 
       {showWizard && !isGm ? (
         <CharacterWizard

@@ -36,7 +36,7 @@ nicht woertlich uebernommen.
 
 Code: MIT (`LICENSE`).
 
-*Pips & Paws is an independent production by [Name] and is not affiliated with Losing Games.*
+*Pips & Paws is an independent production by DonDavis and is not affiliated with Losing Games.*
 
 *This work is based on Mausritter, a product of Losing Games and Isaac Williams, and
 is licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence.*

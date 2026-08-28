@@ -10,7 +10,7 @@ Solo-Charakterbogen, Drag-&-Drop-Inventar, Würfeln, Charaktererschaffung, DE/EN
 Live-Log, GM-Aktionen: Schaden/Heilen/Pips/Rettungswurf/Flüstern/Ansage). Regeldaten aus dem
 offiziellen SRD 2.3.1 + den freien PDFs (`reference/`, PDFs gitignored).
 Repo: <https://github.com/DonDavis-vibe/pips-and-paws> (Pages-Deploy via Actions).
-**Noch offen: M5 (Shared Stash / Tischmitte).** Außerdem `[Name]` in den Disclaimern eintragen,
+**Noch offen: M5 (Shared Stash / Tischmitte).** 
 Pages in den Repo-Settings aktivieren (Source = GitHub Actions).
 
 ---
@@ -447,7 +447,7 @@ Entscheidung: **so nah am Mausritter-SRD wie möglich, keine Hausregeln.**
 
 **Footer / Impressum der App — wörtlich einzubauen (englisch, unabhängig von der UI-Sprache):**
 
-> *Pips & Paws is an independent production by [Name] and is not affiliated with Losing Games.*
+> *Pips & Paws is an independent production by DonDavis and is not affiliated with Losing Games.*
 >
 > *This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence.*
 

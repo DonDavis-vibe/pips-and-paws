@@ -1,7 +1,8 @@
-import { Users, ScrollText, Megaphone } from 'lucide-react';
+import { Users, ScrollText, Megaphone, Dices } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
 import { GM_BROADCAST } from '../multiplayer/protocol.js';
+import { rollDice, rollD66 } from '../rules/dice.js';
 
 function formatEntry(e, t) {
   if (e.kind === 'system') return t(e.key, e.vars || {});
@@ -17,6 +18,39 @@ function formatEntry(e, t) {
     }
   }
   return JSON.stringify(e);
+}
+
+function GmDiceBar({ onRoll }) {
+  const { t } = useLang();
+  return (
+    <div className="gm-dice-bar">
+      <Dices size={15} />
+      <span className="gm-save-label">{t('gm.roll')}:</span>
+      {[6, 8, 10, 12, 20].map((sides) => (
+        <button
+          key={sides}
+          type="button"
+          className="btn btn-sm btn-ghost"
+          onClick={() => {
+            const r = rollDice(1, sides);
+            onRoll(`W${sides}`, r.total);
+          }}
+        >
+          W{sides}
+        </button>
+      ))}
+      <button
+        type="button"
+        className="btn btn-sm btn-ghost"
+        onClick={() => {
+          const r = rollD66();
+          onRoll('W66', r.value);
+        }}
+      >
+        W66
+      </button>
+    </div>
+  );
 }
 
 export default function GmDashboard({ mp }) {
@@ -44,6 +78,8 @@ export default function GmDashboard({ mp }) {
             <Megaphone size={16} /> {t('gm.action.broadcast')}
           </button>
         </div>
+
+        <GmDiceBar onRoll={(label, value) => mp.logGmAction({ key: 'gm.log.roll', vars: { label, value } })} />
 
         {entries.length === 0 ? (
           <p className="hint">{t('gm.noPlayers')}</p>
