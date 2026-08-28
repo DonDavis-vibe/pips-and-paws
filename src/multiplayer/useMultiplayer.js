@@ -20,7 +20,10 @@ const loadSession = () => {
   try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
 };
 
-let logSeq = 0;
+let uidSeq = 0;
+// Kollisionssicher auch nach einem HMR-Modul-Reset (Zeitstempel + Zufall + Zaehler).
+const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}-${(uidSeq += 1)}`;
+const newEid = uid;
 
 export function useMultiplayer() {
   const [role, setRole] = useState(null); // null | 'gm' | 'player'
@@ -32,6 +35,11 @@ export function useMultiplayer() {
   const [liveLog, setLiveLog] = useState([]);
   const [gmCommand, setGmCommand] = useState(null); // Spieler: zuletzt empfangener SL-Befehl
 
+  // Spiegel von `players` fuer synchrone Namens-Lookups ausserhalb von State-Updatern
+  // (pushLog darf NIE in einem setState-Updater laufen — StrictMode ruft die doppelt auf).
+  const playersRef = useRef({});
+  playersRef.current = players;
+
   const peerRef = useRef(null);
   const hostConnRef = useRef(null); // Spieler -> SL
   const clientConnsRef = useRef({}); // SL -> Spieler
@@ -42,10 +50,11 @@ export function useMultiplayer() {
   const retryJoinPendingRef = useRef(false);
   const wireHostRef = useRef(null);
   const autoRestoreRef = useRef(false);
+  const seenEidsRef = useRef(new Set()); // Deduplizierung doppelt zugestellter Nachrichten
 
   const pushLog = useCallback((entry) => {
-    logSeq += 1;
-    setLiveLog((prev) => [{ id: logSeq, time: Date.now(), ...entry }, ...prev].slice(0, 200));
+    const id = uid();
+    setLiveLog((prev) => [{ id, time: Date.now(), ...entry }, ...prev].slice(0, 200));
   }, []);
 
   const cleanupPeer = useCallback(() => {
@@ -108,23 +117,24 @@ export function useMultiplayer() {
 
   const handleIncoming = useCallback((peerId, payload) => {
     if (!isMessage(payload)) return;
+    // Doppelt zugestellte Nachrichten (Reconnect / mehrfache DataConnection) verwerfen
+    if (payload.eid != null) {
+      if (seenEidsRef.current.has(payload.eid)) return;
+      seenEidsRef.current.add(payload.eid);
+      if (seenEidsRef.current.size > 400) {
+        seenEidsRef.current = new Set([...seenEidsRef.current].slice(-200));
+      }
+    }
+    const name = playersRef.current[peerId]?.character?.name || '?';
     if (payload.t === T_STATE) {
       setPlayers((prev) => ({
         ...prev,
         [peerId]: { character: payload.character, items: payload.items || {}, lastSeen: Date.now() },
       }));
     } else if (payload.t === T_EVENT) {
-      setPlayers((prev) => {
-        const name = prev[peerId]?.character?.name || '?';
-        pushLog({ kind: 'event', playerId: peerId, playerName: name, ev: payload.ev });
-        return prev;
-      });
+      pushLog({ kind: 'event', playerId: peerId, playerName: name, ev: payload.ev });
     } else if (payload.t === T_SAY) {
-      setPlayers((prev) => {
-        const name = prev[peerId]?.character?.name || '?';
-        pushLog({ kind: 'say', playerId: peerId, playerName: name, text: String(payload.text || '') });
-        return prev;
-      });
+      pushLog({ kind: 'say', playerId: peerId, playerName: name, text: String(payload.text || '') });
     }
   }, [pushLog]);
 
@@ -140,8 +150,11 @@ export function useMultiplayer() {
     const code = preferredCode || generateRoomCode();
     const peer = new Peer(ROOM_PREFIX + code, peerConfig());
     peerRef.current = peer;
+    let opened = false;
 
     peer.on('open', () => {
+      if (opened) return; // 'open' feuert nach Reconnect erneut
+      opened = true;
       reconnectAttemptsRef.current = 0;
       setRoomCode(code);
       setRoomOnline(true);
@@ -158,12 +171,18 @@ export function useMultiplayer() {
     });
 
     peer.on('connection', (conn) => {
+      // Alte Verbindung desselben Spielers ersetzen (Reconnect / Doppelverbindung)
+      const old = clientConnsRef.current[conn.peer];
+      if (old && old !== conn) {
+        try { old.close(); } catch { /* */ }
+      }
       conn.on('data', (data) => handleIncoming(conn.peer, data));
       conn.on('close', () => {
+        if (clientConnsRef.current[conn.peer] !== conn) return; // wurde bereits ersetzt
         delete clientConnsRef.current[conn.peer];
+        const name = playersRef.current[conn.peer]?.character?.name;
+        if (name) pushLog({ kind: 'system', key: 'mp.log.left', vars: { name } });
         setPlayers((prev) => {
-          const name = prev[conn.peer]?.character?.name || '?';
-          pushLog({ kind: 'system', key: 'mp.log.left', vars: { name } });
           const next = { ...prev };
           delete next[conn.peer];
           return next;
@@ -205,6 +224,10 @@ export function useMultiplayer() {
   }, []);
 
   const wireHostConnection = useCallback((conn, code) => {
+    const prev = hostConnRef.current;
+    if (prev && prev !== conn) {
+      try { prev.close(); } catch { /* */ }
+    }
     hostConnRef.current = conn;
 
     conn.on('open', () => {
@@ -220,11 +243,13 @@ export function useMultiplayer() {
     conn.on('data', (payload) => {
       if (!isMessage(payload)) return;
       if (payload.t === T_GM) {
-        setGmCommand({ ...payload, id: Date.now() + Math.random() });
+        // id vom Absender (eid) -> App entdedupliziert doppelt zugestellte Befehle
+        setGmCommand({ ...payload, id: payload.eid ?? Date.now() + Math.random() });
       }
     });
 
     conn.on('close', () => {
+      if (hostConnRef.current !== conn) return; // bereits ersetzt
       hostConnRef.current = null;
       setConnectionState('connecting');
       setStatusMessage('hostInterrupted');
@@ -248,8 +273,11 @@ export function useMultiplayer() {
 
     const peer = new Peer(peerConfig());
     peerRef.current = peer;
+    let connected = false;
 
     peer.on('open', () => {
+      if (connected) return; // 'open' kann nach Reconnect erneut feuern
+      connected = true;
       const conn = peer.connect(ROOM_PREFIX + code, { reliable: true });
       joinTimeoutRef.current = setTimeout(() => {
         if (conn.open) return;
@@ -279,17 +307,17 @@ export function useMultiplayer() {
 
   const sendEvent = useCallback((ev) => {
     const conn = hostConnRef.current;
-    if (conn && conn.open) conn.send({ t: T_EVENT, ev });
+    if (conn && conn.open) conn.send({ t: T_EVENT, ev, eid: newEid() });
   }, []);
 
   const sendSay = useCallback((text) => {
     const conn = hostConnRef.current;
-    if (conn && conn.open) conn.send({ t: T_SAY, text });
+    if (conn && conn.open) conn.send({ t: T_SAY, text, eid: newEid() });
   }, []);
 
   // --- Senden: SL -> Spieler ---
   const sendGmCommand = useCallback((peerId, cmd) => {
-    const payload = { t: T_GM, ...cmd };
+    const payload = { t: T_GM, eid: newEid(), ...cmd };
     if (peerId) {
       const conn = clientConnsRef.current[peerId];
       if (conn && conn.open) conn.send(payload);

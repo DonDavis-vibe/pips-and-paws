@@ -137,6 +137,11 @@ export const CATALOG_KEYS = Object.keys(ITEM_CATALOG);
 
 // Zustaende (SRD): belegen einen Inventarplatz, bis die "clear"-Bedingung erfuellt ist.
 export const CONDITION_CATALOG = {
+  exhausted: {
+    name: { de: 'Erschoepft', en: 'Exhausted' },
+    effect: { de: 'Belegt einen Inventarplatz. Fuer Maeuse ohne Rast oder als Folge koerperlicher Anstrengung.', en: 'Takes an inventory slot. For mice who go without rest, or as a consequence of physical exertion.' },
+    clear: { de: 'Nach einer langen Rast', en: 'After a long rest' },
+  },
   frightened: {
     name: { de: 'Veraengstigt', en: 'Frightened' },
     effect: { de: 'WIL-Rettungswurf noetig, um sich der Quelle der Angst zu naehern.', en: 'WIL save to approach the source of fear.' },
@@ -144,23 +149,23 @@ export const CONDITION_CATALOG = {
   },
   hungry: {
     name: { de: 'Hungrig', en: 'Hungry' },
-    effect: { de: 'Belegt einen Platz. Entsteht, wenn die Maus einen Tag nichts isst.', en: 'Takes a slot. Gained when the mouse does not eat for a day.' },
+    effect: { de: 'Belegt einen Platz. Entsteht, wenn die Maus einen Tag lang keine Ration isst.', en: 'Takes a slot. Gained if the mouse goes a day without eating a ration.' },
     clear: { de: 'Nach einer Mahlzeit', en: 'After a meal' },
-  },
-  exhausted: {
-    name: { de: 'Erschoepft', en: 'Exhausted' },
-    effect: { de: 'Belegt einen Platz.', en: 'Takes a slot.' },
-    clear: { de: 'Nach einer langen Rast', en: 'After a long rest' },
   },
   injured: {
     name: { de: 'Verletzt', en: 'Injured' },
-    effect: { de: 'Bei kritischem Schaden: handlungsunfaehig, bis ein Verbuendeter hilft und eine kurze Rast folgt.', en: 'From critical damage: incapacitated until an ally tends to you and you take a short rest.' },
+    effect: { de: 'Nachteil auf STR- und DEX-Rettungswuerfe. Bei kritischem Schaden oder schwerer Verletzung.', en: 'Disadvantage on STR & DEX saves. From critical damage or serious injury.' },
     clear: { de: 'Nach einer vollen Rast', en: 'After a full rest' },
   },
   drained: {
     name: { de: 'Ausgelaugt', en: 'Drained' },
-    effect: { de: 'Folge eines Zauber-Patzers.', en: 'Result of a spell miscast.' },
+    effect: { de: 'Nachteil auf WIL-Rettungswuerfe. Folge eines misslungenen Zaubers.', en: 'Disadvantage on WIL saves. From a failed spellcast.' },
     clear: { de: 'Nach einer vollen Rast', en: 'After a full rest' },
+  },
+  encumbered: {
+    name: { de: 'Ueberladen', en: 'Encumbered' },
+    effect: { de: 'Nachteil auf ALLE Rettungswuerfe, kein Rennen. Wenn mehr getragen wird als Plaetze frei sind.', en: 'Disadvantage on ALL saves, cannot run. When carrying more than your slots allow.' },
+    clear: { de: 'Sobald genug Platz frei ist', en: 'Once enough slots are free' },
   },
 };
 

@@ -3,15 +3,13 @@ import { Dices, Trash2 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { rollDice, rollD66, rollSave } from '../rules/dice.js';
 
-let seq = 0;
-
 export default function DiceRoller({ character, onEvent }) {
   const { t } = useLang();
   const [log, setLog] = useState([]);
 
   const push = (entry) => {
-    seq += 1;
-    setLog((prev) => [{ id: seq, ...entry }, ...prev].slice(0, 20));
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setLog((prev) => [{ id, ...entry }, ...prev].slice(0, 20));
   };
 
   const rollBasic = (sides, count = 1) => {

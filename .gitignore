@@ -2,3 +2,8 @@ node_modules
 dist
 *.local
 .DS_Store
+
+# Mausritter-PDFs: frei herunterladbar, aber Artwork/Layout stehen NICHT unter
+# CC BY 4.0 — daher nicht ins oeffentliche Repo. Nur das SRD-Markdown (CC BY) wird
+# eingecheckt. Siehe reference/README.md.
+reference/*.pdf
