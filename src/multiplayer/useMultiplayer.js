@@ -2,9 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import {
   ROOM_PREFIX, JOIN_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
-  T_STATE, T_EVENT, T_SAY, T_GM,
+  T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE,
+  GM_GIVE, GM_STASH_DENY,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
+import { readJSON, writeJSON, remove as removeStore } from '../utils/storage.js';
+
+const GM_STASH_KEY = 'pips-paws-gm-stash';
 
 // Serverloses Multiplayer ueber WebRTC (PeerJS). Der Spielleiter ist Host & Autoritaet:
 // feste Peer-ID = Raum-Code, Spieler verbinden sich direkt. Muster aus dem
@@ -25,6 +29,9 @@ let uidSeq = 0;
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}-${(uidSeq += 1)}`;
 const newEid = uid;
 
+// Kurzes Label fuers Live-Log (das Log laeuft in der Sprache des SL; hier reicht ein fester Griff).
+const itemLabel = (it) => (it?.name && (it.name.de || it.name.en)) || String(it?.name || '?');
+
 export function useMultiplayer() {
   const [role, setRole] = useState(null); // null | 'gm' | 'player'
   const [roomCode, setRoomCode] = useState('');
@@ -34,11 +41,16 @@ export function useMultiplayer() {
   const [players, setPlayers] = useState({}); // peerId -> { character, items, lastSeen }
   const [liveLog, setLiveLog] = useState([]);
   const [gmCommand, setGmCommand] = useState(null); // Spieler: zuletzt empfangener SL-Befehl
+  const [stash, setStash] = useState([]); // Tischmitte: beim SL kanonisch, bei Spielern eine Kopie
 
   // Spiegel von `players` fuer synchrone Namens-Lookups ausserhalb von State-Updatern
   // (pushLog darf NIE in einem setState-Updater laufen — StrictMode ruft die doppelt auf).
   const playersRef = useRef({});
   playersRef.current = players;
+  const stashRef = useRef([]);
+  stashRef.current = stash;
+  const roleRef = useRef(null);
+  roleRef.current = role;
 
   const peerRef = useRef(null);
   const hostConnRef = useRef(null); // Spieler -> SL
@@ -55,6 +67,36 @@ export function useMultiplayer() {
   const pushLog = useCallback((entry) => {
     const id = uid();
     setLiveLog((prev) => [{ id, time: Date.now(), ...entry }, ...prev].slice(0, 200));
+  }, []);
+
+  // --- Tischmitte (SL ist Autoritaet, verteilt nach jeder Aenderung den kompletten Stand) ---
+  const commitStash = useCallback((next) => {
+    stashRef.current = next;
+    setStash(next);
+    if (roleRef.current === 'gm') {
+      writeJSON(GM_STASH_KEY, next);
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) conn.send({ t: T_STASH, items: next });
+      });
+    }
+  }, []);
+
+  const stashAddItem = useCallback((item) => {
+    commitStash([{ ...item }, ...stashRef.current]);
+  }, [commitStash]);
+
+  const stashRemoveItem = useCallback((itemId) => {
+    commitStash(stashRef.current.filter((i) => i.itemId !== itemId));
+  }, [commitStash]);
+
+  // Spieler: Gegenstand in die Mitte legen bzw. einen herausnehmen wollen
+  const stashDrop = useCallback((item) => {
+    const conn = hostConnRef.current;
+    if (conn && conn.open) conn.send({ t: T_STASH_DROP, item, eid: newEid() });
+  }, []);
+  const stashTake = useCallback((itemId) => {
+    const conn = hostConnRef.current;
+    if (conn && conn.open) conn.send({ t: T_STASH_TAKE, itemId, eid: newEid() });
   }, []);
 
   const cleanupPeer = useCallback(() => {
@@ -74,6 +116,7 @@ export function useMultiplayer() {
   const leaveSession = useCallback(() => {
     cleanupPeer();
     clearSession();
+    roleRef.current = null;
     setRole(null);
     setRoomCode('');
     setRoomOnline(false);
@@ -82,7 +125,15 @@ export function useMultiplayer() {
     setPlayers({});
     setLiveLog([]);
     setGmCommand(null);
+    stashRef.current = [];
+    setStash([]);
   }, [cleanupPeer]);
+
+  // SL raeumt die Tischmitte komplett ab (auch aus dem lokalen Speicher).
+  const clearStash = useCallback(() => {
+    removeStore(GM_STASH_KEY);
+    commitStash([]);
+  }, [commitStash]);
 
   // --- SL: Reconnect zum Signalling-Server ---
   const reconnectHost = useCallback(() => {
@@ -126,6 +177,11 @@ export function useMultiplayer() {
       }
     }
     const name = playersRef.current[peerId]?.character?.name || '?';
+    const sendTo = (pid, msg) => {
+      const conn = clientConnsRef.current[pid];
+      if (conn && conn.open) conn.send({ eid: newEid(), ...msg });
+    };
+
     if (payload.t === T_STATE) {
       setPlayers((prev) => ({
         ...prev,
@@ -135,8 +191,20 @@ export function useMultiplayer() {
       pushLog({ kind: 'event', playerId: peerId, playerName: name, ev: payload.ev });
     } else if (payload.t === T_SAY) {
       pushLog({ kind: 'say', playerId: peerId, playerName: name, text: String(payload.text || '') });
+    } else if (payload.t === T_STASH_DROP && payload.item) {
+      commitStash([{ ...payload.item, origin: 'stash' }, ...stashRef.current]);
+      pushLog({ kind: 'system', key: 'gm.log.stashDrop', vars: { name, item: itemLabel(payload.item) } });
+    } else if (payload.t === T_STASH_TAKE) {
+      const found = stashRef.current.find((i) => i.itemId === payload.itemId);
+      if (found) {
+        commitStash(stashRef.current.filter((i) => i.itemId !== payload.itemId));
+        sendTo(peerId, { t: T_GM, cmd: GM_GIVE, item: found });
+        pushLog({ kind: 'system', key: 'gm.log.stashTake', vars: { name, item: itemLabel(found) } });
+      } else {
+        sendTo(peerId, { t: T_GM, cmd: GM_STASH_DENY, itemId: payload.itemId });
+      }
     }
-  }, [pushLog]);
+  }, [pushLog, commitStash]);
 
   // --- SL: Sitzung hosten ---
   const hostSession = useCallback((preferredCodeArg) => {
@@ -156,6 +224,10 @@ export function useMultiplayer() {
       if (opened) return; // 'open' feuert nach Reconnect erneut
       opened = true;
       reconnectAttemptsRef.current = 0;
+      roleRef.current = 'gm';
+      const savedStash = readJSON(GM_STASH_KEY, []) || [];
+      stashRef.current = savedStash;
+      setStash(savedStash);
       setRoomCode(code);
       setRoomOnline(true);
       setRole('gm');
@@ -176,6 +248,10 @@ export function useMultiplayer() {
       if (old && old !== conn) {
         try { old.close(); } catch { /* */ }
       }
+      conn.on('open', () => {
+        // Neu (wieder) verbundene Spieler bekommen den aktuellen Stand der Tischmitte
+        try { conn.send({ t: T_STASH, items: stashRef.current }); } catch { /* */ }
+      });
       conn.on('data', (data) => handleIncoming(conn.peer, data));
       conn.on('close', () => {
         if (clientConnsRef.current[conn.peer] !== conn) return; // wurde bereits ersetzt
@@ -242,7 +318,9 @@ export function useMultiplayer() {
 
     conn.on('data', (payload) => {
       if (!isMessage(payload)) return;
-      if (payload.t === T_GM) {
+      if (payload.t === T_STASH) {
+        commitStash(Array.isArray(payload.items) ? payload.items : []);
+      } else if (payload.t === T_GM) {
         // id vom Absender (eid) -> App entdedupliziert doppelt zugestellte Befehle
         setGmCommand({ ...payload, id: payload.eid ?? Date.now() + Math.random() });
       }
@@ -257,7 +335,7 @@ export function useMultiplayer() {
     });
 
     conn.on('error', () => clearTimeout(joinTimeoutRef.current));
-  }, [attemptReconnectToHost]);
+  }, [attemptReconnectToHost, commitStash]);
 
   wireHostRef.current = wireHostConnection;
 
@@ -364,6 +442,7 @@ export function useMultiplayer() {
     players,
     liveLog,
     gmCommand,
+    stash,
     hostSession,
     joinSession,
     leaveSession,
@@ -373,5 +452,10 @@ export function useMultiplayer() {
     sendGmCommand,
     logGmAction,
     clearGmCommand,
+    stashAddItem,
+    stashRemoveItem,
+    stashDrop,
+    stashTake,
+    clearStash,
   };
 }

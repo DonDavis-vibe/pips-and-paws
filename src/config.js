@@ -4,6 +4,7 @@ export const PRODUCER = 'DonDavis';
 export const PRODUCER_URL = 'https://github.com/DonDavis-vibe';
 export const REPO_URL = 'https://github.com/DonDavis-vibe/pips-and-paws';
 export const SITE_URL = 'https://dondavis-vibe.github.io/pips-and-paws/';
+export const DISCORD_URL = 'https://discord.gg/s6J6JqBQ8w';
 export const APP_VERSION = '0.1.0';
 
 export const LINKS = {

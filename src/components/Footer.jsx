@@ -1,6 +1,6 @@
-import { Github, BookOpen, ExternalLink, Heart, Link as LinkIcon } from 'lucide-react';
+import { Github, BookOpen, ExternalLink, Heart, Link as LinkIcon, MessagesSquare, Bug } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
-import { PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, APP_VERSION, LINKS } from '../config.js';
+import { PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, DISCORD_URL, APP_VERSION, LINKS } from '../config.js';
 
 function Ext({ href, icon: Icon, children }) {
   return (
@@ -43,6 +43,16 @@ export default function Footer() {
             {t('footer.srd')}
           </Ext>
           <Ext href={LINKS.thirdParty}>{t('footer.thirdParty')}</Ext>
+        </nav>
+
+        <nav className="footer-col" aria-label={t('footer.community')}>
+          <h4>{t('footer.community')}</h4>
+          <Ext href={DISCORD_URL} icon={MessagesSquare}>
+            {t('footer.discord')}
+          </Ext>
+          <Ext href={`${REPO_URL}/issues/new`} icon={Bug}>
+            {t('footer.reportBug')}
+          </Ext>
         </nav>
 
         <div className="footer-col footer-col-legal">

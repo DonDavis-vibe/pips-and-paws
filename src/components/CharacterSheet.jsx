@@ -11,10 +11,11 @@ import InventoryGrid from './InventoryGrid.jsx';
 import ItemCard from './ItemCard.jsx';
 import AddItemMenu from './AddItemMenu.jsx';
 import DiceRoller from './DiceRoller.jsx';
+import SharedStash from './SharedStash.jsx';
 import { tryMove, addItem, removeItem } from '../rules/inventory.js';
 import { rollSave } from '../rules/dice.js';
 
-export default function CharacterSheet({ character, setCharacter, notify, onEvent }) {
+export default function CharacterSheet({ character, setCharacter, notify, onEvent, stash }) {
   const { t } = useLang();
   const [activeId, setActiveId] = useState(null);
 
@@ -29,6 +30,12 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
     setCharacter((c) => ({ ...c, items: { ...c.items, [next.itemId]: next } }));
 
   const onItemRemove = (itemId) => setCharacter((c) => removeItem(c, itemId));
+
+  // Spieler legt einen Gegenstand in die Tischmitte (optimistisch entfernen, dann melden).
+  const onItemStash = (item) => {
+    setCharacter((c) => removeItem(c, item.itemId));
+    stash.drop(item);
+  };
 
   const onAdd = (item) => {
     setCharacter((c) => {
@@ -123,10 +130,19 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
           onDragCancel={() => setActiveId(null)}
           onDragEnd={onDragEnd}
         >
-          <InventoryGrid character={character} onItemChange={onItemChange} onItemRemove={onItemRemove} />
+          <InventoryGrid
+            character={character}
+            onItemChange={onItemChange}
+            onItemRemove={onItemRemove}
+            onItemStash={stash ? onItemStash : undefined}
+          />
           <DragOverlay>{activeItem ? <ItemCard item={activeItem} overlay /> : null}</DragOverlay>
         </DndContext>
       </section>
+
+      {stash ? (
+        <SharedStash mode="player" items={stash.items} onTake={(id) => stash.take(id)} />
+      ) : null}
 
       <DiceRoller character={character} onEvent={onEvent} />
 

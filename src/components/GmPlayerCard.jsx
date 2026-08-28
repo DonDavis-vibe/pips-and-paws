@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { Heart, Coins, Shield, Swords, Backpack, ChevronDown, ChevronRight } from 'lucide-react';
+import { Heart, Coins, Shield, Swords, Backpack, Sparkles, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { gritForLevel, ALL_SLOTS, PAW_SLOTS } from '../rules/character.js';
-import { GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER } from '../multiplayer/protocol.js';
+import { CONDITION_CATALOG } from '../data/items.js';
+import AddItemMenu from './AddItemMenu.jsx';
+import {
+  GM_DAMAGE, GM_HEAL, GM_PIPS, GM_XP, GM_SAVE, GM_GIVE, GM_CONDITION, GM_WHISPER,
+} from '../multiplayer/protocol.js';
 
 const NOTE_KEY = (id) => `pips-paws-gmnote-${id}`;
 const SLOT_LABELS = {
@@ -17,6 +21,7 @@ export default function GmPlayerCard({ player, onCommand }) {
   const items = player.items || {};
   const inv = c.inventory || {};
   const [open, setOpen] = useState(false);
+  const [condOpen, setCondOpen] = useState(false);
   const [note, setNote] = useState(() => readJSON(NOTE_KEY(c.id), '') || '');
 
   const hpPct = c.hp?.max > 0 ? Math.max(0, Math.min(100, (c.hp.current / c.hp.max) * 100)) : 0;
@@ -122,12 +127,41 @@ export default function GmPlayerCard({ player, onCommand }) {
         <button type="button" className="btn btn-sm btn-ghost" onClick={() => ask('gm.prompt.pips', (n) => ({ cmd: GM_PIPS, amount: n }), true)}>
           {t('gm.action.pips')}
         </button>
+        <button type="button" className="btn btn-sm btn-ghost" onClick={() => ask('gm.prompt.xp', (n) => ({ cmd: GM_XP, amount: n }), true)}>
+          <Sparkles size={13} /> {t('res.xp')}
+        </button>
         <span className="gm-save-label">{t('gm.action.save')}:</span>
         {['str', 'dex', 'wil'].map((k) => (
           <button key={k} type="button" className="btn btn-sm btn-ghost" onClick={() => onCommand({ cmd: GM_SAVE, attr: k })}>
             {k.toUpperCase()}
           </button>
         ))}
+        <AddItemMenu
+          triggerClass="btn btn-sm btn-ghost"
+          triggerLabel={t('gm.action.give')}
+          onAdd={(item) => onCommand({ cmd: GM_GIVE, item })}
+        />
+        <span className="gm-cond-picker">
+          <button type="button" className="btn btn-sm btn-ghost" onClick={() => setCondOpen((v) => !v)}>
+            <AlertTriangle size={13} /> {t('gm.action.condition')}
+          </button>
+          {condOpen ? (
+            <div className="gm-cond-menu">
+              {Object.keys(CONDITION_CATALOG).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    onCommand({ cmd: GM_CONDITION, key });
+                    setCondOpen(false);
+                  }}
+                >
+                  {loc(CONDITION_CATALOG[key].name, lang)}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </span>
         <button
           type="button"
           className="btn btn-sm btn-ghost"

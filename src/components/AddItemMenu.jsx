@@ -8,7 +8,7 @@ import { Modal, Field, TextInput } from './ui.jsx';
 
 const TABS = ['catalog', 'spell', 'condition', 'custom'];
 
-export default function AddItemMenu({ onAdd }) {
+export default function AddItemMenu({ onAdd, triggerLabel, triggerClass = 'btn' }) {
   const { t, lang } = useLang();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('catalog');
@@ -25,8 +25,8 @@ export default function AddItemMenu({ onAdd }) {
 
   return (
     <>
-      <button type="button" className="btn" onClick={() => setOpen(true)}>
-        <Plus size={16} /> {t('inv.add')}
+      <button type="button" className={triggerClass} onClick={() => setOpen(true)}>
+        <Plus size={16} /> {triggerLabel || t('inv.add')}
       </button>
 
       {open ? (

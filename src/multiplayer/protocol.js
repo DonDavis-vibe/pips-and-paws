@@ -17,13 +17,20 @@ export const STUN_SERVERS = [
 export const T_STATE = 'state'; // { character, items }
 export const T_EVENT = 'event'; // { ev } strukturiert, z.B. { kind:'save', attr, roll, ok }
 export const T_SAY = 'say'; //   { text } Freitext an den SL
+export const T_STASH_DROP = 'stash/drop'; // { item } Spieler legt Gegenstand in die Tischmitte
+export const T_STASH_TAKE = 'stash/take'; // { itemId } Spieler will einen Gegenstand nehmen
 
 // Spielleiter -> Spieler
+export const T_STASH = 'stash'; // { items } vollstaendiger Stand der Tischmitte (Broadcast)
 export const T_GM = 'gmCommand'; // { cmd, ... }
 export const GM_SAVE = 'save'; //      { attr, reason }
 export const GM_DAMAGE = 'damage'; //  { amount, target: 'hp'|'str'|'dex'|'wil', source }
 export const GM_HEAL = 'heal'; //      { amount, target }
 export const GM_PIPS = 'pips'; //      { amount }
+export const GM_XP = 'xp'; //          { amount }
+export const GM_GIVE = 'give'; //      { item } Gegenstand ins Inventar (Katalog oder Tischmitte)
+export const GM_CONDITION = 'condition'; // { key } Zustand zuweisen
+export const GM_STASH_DENY = 'stashDeny'; // { itemId } Nehmen abgelehnt (schon weg)
 export const GM_WHISPER = 'whisper'; // { text }
 export const GM_BROADCAST = 'broadcast'; // { text }
 

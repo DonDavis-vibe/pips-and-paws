@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  GripVertical, Trash2, Swords, Shield, Sparkles, Flame, Apple, Package, AlertTriangle, Info,
+  GripVertical, Trash2, Swords, Shield, Sparkles, Flame, Apple, Package, AlertTriangle, Info, PackagePlus,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 
@@ -16,7 +16,7 @@ const TYPE_ICON = {
   standard: Package,
 };
 
-export default function ItemCard({ item, onChange, onRemove, dragId, overlay }) {
+export default function ItemCard({ item, onChange, onRemove, onStash, dragId, overlay }) {
   const { t, lang } = useLang();
   const [showEffect, setShowEffect] = useState(false);
   const Icon = TYPE_ICON[item.type] || Package;
@@ -35,19 +35,26 @@ export default function ItemCard({ item, onChange, onRemove, dragId, overlay }) 
       className={`item-card type-${item.type}${item.cleared ? ' item-cleared' : ''}${item.size === 2 ? ' item-wide' : ''}${overlay ? ' item-overlay' : ''}`}
     >
       <div className="item-top">
-        <button
-          type="button"
-          className="item-grip"
-          aria-label="drag"
-          ref={overlay ? undefined : drag.setActivatorNodeRef}
-          {...(overlay ? {} : drag.listeners)}
-          {...(overlay ? {} : drag.attributes)}
-        >
-          <GripVertical size={14} />
-        </button>
+        {overlay ? null : (
+          <button
+            type="button"
+            className="item-grip"
+            aria-label="drag"
+            ref={drag.setActivatorNodeRef}
+            {...drag.listeners}
+            {...drag.attributes}
+          >
+            <GripVertical size={14} />
+          </button>
+        )}
         <Icon size={14} className="item-type-icon" />
         <span className="item-name">{loc(item.name, lang)}</span>
-        {!overlay && (
+        {!overlay && onStash && item.type !== 'condition' ? (
+          <button type="button" className="icon-btn" onClick={() => onStash(item)} aria-label={t('stash.send')} title={t('stash.send')}>
+            <PackagePlus size={14} />
+          </button>
+        ) : null}
+        {!overlay && onRemove && (
           <button type="button" className="icon-btn item-del" onClick={onRemove} aria-label={t('item.remove')}>
             <Trash2 size={14} />
           </button>

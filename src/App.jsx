@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Upload, Sparkles, Languages } from 'lucide-react';
-import { useLang } from './i18n/index.jsx';
-import { blankCharacter, isBlank, normalizeCharacter } from './rules/character.js';
+import { useLang, loc } from './i18n/index.jsx';
+import {
+  blankCharacter, isBlank, normalizeCharacter, levelForXp, gritForLevel,
+} from './rules/character.js';
+import { addItem, firstFreeFit } from './rules/inventory.js';
+import { makeCondition } from './data/items.js';
 import { readJSON, writeJSON } from './utils/storage.js';
 import { downloadCharacter, readCharacterFile } from './utils/exportImport.js';
 import { rollSave } from './rules/dice.js';
 import {
   GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER, GM_BROADCAST,
+  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY,
 } from './multiplayer/protocol.js';
 import { useMultiplayer } from './multiplayer/useMultiplayer.js';
 import CharacterSheet from './components/CharacterSheet.jsx';
@@ -66,7 +71,7 @@ export default function App() {
   }, [character, mpRole, sendState]);
 
   // Spieler: Befehle des Spielleiters anwenden
-  const { gmCommand, clearGmCommand, sendEvent } = mp;
+  const { gmCommand, clearGmCommand, sendEvent, stashDrop } = mp;
   useEffect(() => {
     if (!gmCommand || lastCmdRef.current === gmCommand.id) return;
     lastCmdRef.current = gmCommand.id;
@@ -101,13 +106,41 @@ export default function App() {
         r.ok ? 'ok' : 'bad',
       );
       sendEvent({ kind: 'save', attr: gmCommand.attr, roll: r.d, target: r.target, ok: r.ok });
+    } else if (cmd === GM_XP) {
+      setCharacter((c) => {
+        const xp = Math.max(0, (c.xp || 0) + gmCommand.amount);
+        const level = levelForXp(xp);
+        return { ...c, xp, level, grit: gritForLevel(level) };
+      });
+      notify(t('player.gm.xp', { n: gmCommand.amount }), gmCommand.amount >= 0 ? 'ok' : 'warn');
+    } else if (cmd === GM_GIVE && gmCommand.item) {
+      const item = gmCommand.item;
+      const label = loc(item.name, lang);
+      if (firstFreeFit(character.inventory, item.size === 2 ? 2 : 1)) {
+        setCharacter((c) => addItem(c, item).character || c);
+        notify(t('player.gm.give', { item: label }), 'ok');
+      } else {
+        stashDrop(item);
+        notify(t('player.gm.giveNoRoom', { item: label }), 'warn');
+      }
+    } else if (cmd === GM_CONDITION) {
+      const cond = makeCondition(gmCommand.key);
+      const label = loc(cond.name, lang);
+      if (firstFreeFit(character.inventory, 1)) {
+        setCharacter((c) => addItem(c, cond).character || c);
+        notify(t('player.gm.condition', { name: label }), 'bad');
+      } else {
+        notify(t('player.gm.conditionNoRoom', { name: label }), 'warn');
+      }
+    } else if (cmd === GM_STASH_DENY) {
+      notify(t('player.gm.stashGone'), 'warn');
     } else if (cmd === GM_WHISPER) {
       notify(`${t('player.gm.whisper')}: ${gmCommand.text}`, 'info');
     } else if (cmd === GM_BROADCAST) {
       notify(`${t('player.gm.broadcast')}: ${gmCommand.text}`, 'info');
     }
     clearGmCommand();
-  }, [gmCommand, clearGmCommand, notify, t, character, sendEvent]);
+  }, [gmCommand, clearGmCommand, notify, t, lang, character, sendEvent, stashDrop]);
 
   const onImport = async (file) => {
     if (!file) return;
@@ -126,10 +159,10 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark">🐭</span>
+          <span className="brand-mark" aria-hidden="true">🐭</span>
           <div>
-            <div className="brand-title">{t('app.title')}</div>
-            <div className="brand-sub">{t('app.tagline')}</div>
+            <h1 className="brand-title">{t('app.title')}</h1>
+            <p className="brand-sub">{t('app.tagline')}</p>
           </div>
         </div>
         <div className="topbar-actions">
@@ -183,6 +216,7 @@ export default function App() {
             setCharacter={setCharacter}
             notify={notify}
             onEvent={mp.role === 'player' ? sendEvent : null}
+            stash={mp.role === 'player' ? { items: mp.stash, take: mp.stashTake, drop: mp.stashDrop } : null}
           />
         )}
       </main>

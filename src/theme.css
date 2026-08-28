@@ -879,8 +879,14 @@ body {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1.4fr;
-  gap: 28px;
+  grid-template-columns: 1.7fr 1fr 1fr 1.5fr;
+  gap: 26px;
+}
+
+@media (max-width: 900px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .footer-col h4 {
@@ -1266,6 +1272,72 @@ body {
 
 .gm-note {
   margin-top: 2px;
+}
+
+.gm-cond-picker {
+  position: relative;
+  display: inline-block;
+}
+
+.gm-cond-menu {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.gm-cond-menu button {
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.gm-cond-menu button:hover {
+  background: var(--bg-sunk);
+  color: var(--accent);
+}
+
+/* ---- Tischmitte ---- */
+.stash-count {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  margin-left: 8px;
+}
+
+.stash-head-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.stash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.stash-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stash-item .item-card {
+  cursor: default;
 }
 
 @media (max-width: 640px) {

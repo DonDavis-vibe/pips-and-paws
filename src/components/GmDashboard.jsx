@@ -1,8 +1,18 @@
 import { Users, ScrollText, Megaphone, Dices } from 'lucide-react';
-import { useLang } from '../i18n/index.jsx';
+import { useLang, loc } from '../i18n/index.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
+import SharedStash from './SharedStash.jsx';
 import { GM_BROADCAST } from '../multiplayer/protocol.js';
 import { rollDice, rollD66 } from '../rules/dice.js';
+import { CONDITION_CATALOG } from '../data/items.js';
+
+// Menschenlesbares Label fuer eine SL-Aktion im Live-Log.
+function cmdVars(cmd, name, lang) {
+  const v = { name, ...cmd };
+  if (cmd.item?.name) v.item = loc(cmd.item.name, lang);
+  if (cmd.key && CONDITION_CATALOG[cmd.key]) v.cond = loc(CONDITION_CATALOG[cmd.key].name, lang);
+  return v;
+}
 
 function formatEntry(e, t) {
   if (e.kind === 'system') return t(e.key, e.vars || {});
@@ -54,7 +64,7 @@ function GmDiceBar({ onRoll }) {
 }
 
 export default function GmDashboard({ mp }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const entries = Object.entries(mp.players);
 
   return (
@@ -91,13 +101,21 @@ export default function GmDashboard({ mp }) {
                 player={player}
                 onCommand={(cmd) => {
                   mp.sendGmCommand(peerId, cmd);
-                  mp.logGmAction({ key: `gm.log.${cmd.cmd}`, vars: { name: player.character?.name || '?', ...cmd } });
+                  mp.logGmAction({ key: `gm.log.${cmd.cmd}`, vars: cmdVars(cmd, player.character?.name || '?', lang) });
                 }}
               />
             ))}
           </div>
         )}
       </section>
+
+      <SharedStash
+        mode="gm"
+        items={mp.stash}
+        onAdd={mp.stashAddItem}
+        onRemove={mp.stashRemoveItem}
+        onClear={mp.clearStash}
+      />
 
       <section className="panel">
         <div className="panel-head">

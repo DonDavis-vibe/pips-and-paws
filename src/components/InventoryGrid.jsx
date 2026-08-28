@@ -3,7 +3,7 @@ import { useLang } from '../i18n/index.jsx';
 import { PAW_SLOTS, BODY_SLOTS, PACK_SLOTS } from '../rules/character.js';
 import ItemCard from './ItemCard.jsx';
 
-function Slot({ slot, item, onChange, onRemove, wide }) {
+function Slot({ slot, item, onChange, onRemove, onStash, wide }) {
   const { t } = useLang();
   const { setNodeRef, isOver } = useDroppable({ id: slot });
   return (
@@ -12,7 +12,7 @@ function Slot({ slot, item, onChange, onRemove, wide }) {
       className={`inv-slot${isOver ? ' slot-over' : ''}${wide ? ' slot-wide' : ''}${item ? ' slot-filled' : ''}`}
     >
       {item ? (
-        <ItemCard item={item} onChange={onChange} onRemove={onRemove} />
+        <ItemCard item={item} onChange={onChange} onRemove={onRemove} onStash={onStash} />
       ) : (
         <span className="slot-empty">{t('inv.empty')}</span>
       )}
@@ -20,7 +20,7 @@ function Slot({ slot, item, onChange, onRemove, wide }) {
   );
 }
 
-function Group({ title, slots, inventory, items, onItemChange, onItemRemove }) {
+function Group({ title, slots, inventory, items, onItemChange, onItemRemove, onItemStash }) {
   const cells = [];
   for (let i = 0; i < slots.length; i += 1) {
     const slot = slots[i];
@@ -36,6 +36,7 @@ function Group({ title, slots, inventory, items, onItemChange, onItemRemove }) {
         wide={wide}
         onChange={(next) => onItemChange(next)}
         onRemove={() => onItemRemove(val.itemId)}
+        onStash={onItemStash && item ? onItemStash : undefined}
       />,
     );
     if (wide) i += 1; // das gepaarte Feld ueberspringen
@@ -49,17 +50,15 @@ function Group({ title, slots, inventory, items, onItemChange, onItemRemove }) {
   );
 }
 
-export default function InventoryGrid({ character, onItemChange, onItemRemove }) {
+export default function InventoryGrid({ character, onItemChange, onItemRemove, onItemStash }) {
   const { t } = useLang();
   const { inventory, items } = character;
+  const shared = { inventory, items, onItemChange, onItemRemove, onItemStash };
   return (
     <div className="inventory">
-      <Group title={t('inv.paws')} slots={PAW_SLOTS} inventory={inventory} items={items}
-        onItemChange={onItemChange} onItemRemove={onItemRemove} />
-      <Group title={t('inv.body')} slots={BODY_SLOTS} inventory={inventory} items={items}
-        onItemChange={onItemChange} onItemRemove={onItemRemove} />
-      <Group title={t('inv.pack')} slots={PACK_SLOTS} inventory={inventory} items={items}
-        onItemChange={onItemChange} onItemRemove={onItemRemove} />
+      <Group title={t('inv.paws')} slots={PAW_SLOTS} {...shared} />
+      <Group title={t('inv.body')} slots={BODY_SLOTS} {...shared} />
+      <Group title={t('inv.pack')} slots={PACK_SLOTS} {...shared} />
     </div>
   );
 }
