@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
-import { Swords, Plus, Minus, RotateCcw, X, Skull, ListOrdered } from 'lucide-react';
+import { Swords, Plus, Minus, RotateCcw, X, Skull, ListOrdered, HeartCrack } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
-import { rollDie } from '../rules/dice.js';
+import { rollDie, rollSave } from '../rules/dice.js';
 import { CREATURES, CREATURE_BY_KEY } from '../data/creatures.js';
 import { Field, TextInput, Stepper } from './ui.jsx';
 
@@ -19,6 +19,7 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
   const [customName, setCustomName] = useState('');
   const [customHp, setCustomHp] = useState(3);
   const [customDmg, setCustomDmg] = useState(6);
+  const [customWil, setCustomWil] = useState(8);
   const sRef = useRef(s);
   sRef.current = s;
 
@@ -40,7 +41,7 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
       ...s,
       npcs: [
         ...s.npcs,
-        { id: nid(), base, name: nameWithNumber(base), hp: { current: c.hp, max: c.hp }, dmg: c.dmg, armour: c.armour, note: loc(c.note, lang), attack: loc(c.attack, lang) },
+        { id: nid(), base, name: nameWithNumber(base), hp: { current: c.hp, max: c.hp }, dmg: c.dmg, armour: c.armour, wil: c.wil ?? 8, note: loc(c.note, lang), attack: loc(c.attack, lang) },
       ],
     });
     setAddOpen(false);
@@ -51,7 +52,7 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
     if (!base) return;
     commit({
       ...s,
-      npcs: [...s.npcs, { id: nid(), base, name: nameWithNumber(base), hp: { current: customHp, max: customHp }, dmg: customDmg, armour: 0, note: '', attack: `W${customDmg}` }],
+      npcs: [...s.npcs, { id: nid(), base, name: nameWithNumber(base), hp: { current: customHp, max: customHp }, dmg: customDmg, armour: 0, wil: customWil, note: '', attack: `W${customDmg}` }],
     });
     setCustomName('');
     setAddOpen(false);
@@ -65,6 +66,17 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
   const attack = (n) => {
     const roll = rollDie(n.dmg);
     onLog('combat.log.attack', { name: n.name, roll, die: `W${n.dmg}` });
+  };
+
+  const morale = (n) => {
+    const wil = n.wil ?? 8;
+    const r = rollSave(wil);
+    onLog('combat.log.morale', {
+      name: n.name,
+      roll: r.d,
+      wil,
+      result: t(r.ok ? 'combat.morale.hold' : 'combat.morale.flee'),
+    });
   };
 
   return (
@@ -129,6 +141,9 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
                 ))}
               </select>
             </Field>
+            <Field label={t('combat.wil')}>
+              <Stepper value={customWil} min={1} max={20} onChange={setCustomWil} />
+            </Field>
             <button type="button" className="btn btn-sm" disabled={!customName.trim()} onClick={addCustom}>
               {t('combat.add')}
             </button>
@@ -164,6 +179,9 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
                   {n.armour ? <span className="tag">{t('item.defense')} {n.armour}</span> : null}
                   <button type="button" className="btn btn-sm btn-danger" onClick={() => attack(n)}>
                     {t('combat.attack')} W{n.dmg}
+                  </button>
+                  <button type="button" className="btn btn-sm btn-ghost" onClick={() => morale(n)} title={t('combat.morale.hint')}>
+                    <HeartCrack size={13} /> {t('combat.morale')}
                   </button>
                 </div>
                 {n.attack ? <div className="time-dim combat-npc-note">{n.attack}{n.note ? ` · ${n.note}` : ''}</div> : null}

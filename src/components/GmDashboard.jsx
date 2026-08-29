@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
-import { Users, ScrollText, Megaphone, Dices, Save, FolderOpen } from 'lucide-react';
+import {
+  Users, ScrollText, Megaphone, Dices, Save, FolderOpen, Handshake, Gem,
+} from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { RollButton, DiceStage } from './DiceKit.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
@@ -8,12 +10,15 @@ import GmTimeTracker from './GmTimeTracker.jsx';
 import GmCombatTracker from './GmCombatTracker.jsx';
 import GmNotes from './GmNotes.jsx';
 import { GM_BROADCAST, GM_SAVE } from '../multiplayer/protocol.js';
-import { rollDice, rollD66 } from '../rules/dice.js';
+import { rollDice, rollD66, rollReaction, rollTreasure } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
 import { exportGmSession, importGmSession } from '../utils/gmSession.js';
 import { shareEvent } from '../utils/discord.js';
 
-const SHARE_KEYS = new Set(['gm.log.broadcast', 'gm.log.roll', 'combat.log.attack']);
+const SHARE_KEYS = new Set([
+  'gm.log.broadcast', 'gm.log.roll', 'combat.log.attack', 'combat.log.morale',
+  'gm.log.reaction', 'gm.log.treasure',
+]);
 
 // Menschenlesbares Label fuer eine SL-Aktion im Live-Log.
 function cmdVars(cmd, name, lang) {
@@ -77,6 +82,35 @@ function GmDiceBar({ onRoll }) {
         <RollButton d66 label={t('dice.d66')} kind="gm" onRoll={roll66} />
       </div>
       <DiceStage result={result} compact idleIcon={<Dices size={16} />} />
+    </div>
+  );
+}
+
+function GmQuickRolls({ onLog }) {
+  const { t } = useLang();
+  return (
+    <div className="gm-quick-rolls">
+      <button
+        type="button"
+        className="btn btn-sm btn-ghost"
+        onClick={() => {
+          const r = rollReaction();
+          onLog('gm.log.reaction', { roll: r.total, result: t(`reaction.${r.key}`) });
+        }}
+      >
+        <Handshake size={14} /> {t('gm.reaction')}
+      </button>
+      <button
+        type="button"
+        className="btn btn-sm btn-ghost"
+        onClick={() => {
+          const r = rollTreasure();
+          const result = r.key === 'pips' ? t('treasure.pips', { n: r.pips }) : t(`treasure.${r.key}`);
+          onLog('gm.log.treasure', { d: r.d, result });
+        }}
+      >
+        <Gem size={14} /> {t('gm.treasure')}
+      </button>
     </div>
   );
 }
@@ -146,6 +180,8 @@ export default function GmDashboard({ mp, notify }) {
         </div>
 
         <GmDiceBar onRoll={(label, value) => gmLog('gm.log.roll', { label, value })} />
+
+        <GmQuickRolls onLog={gmLog} />
 
         {entries.length === 0 ? (
           <p className="hint">{t('gm.noPlayers')}</p>

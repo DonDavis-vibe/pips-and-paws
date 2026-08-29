@@ -7,6 +7,7 @@ import { useLang } from '../i18n/index.jsx';
 import { Field, TextInput } from './ui.jsx';
 import AttributeBox from './AttributeBox.jsx';
 import ResourceBar from './ResourceBar.jsx';
+import RestControls from './RestControls.jsx';
 import InventoryGrid from './InventoryGrid.jsx';
 import ItemCard from './ItemCard.jsx';
 import AddItemMenu from './AddItemMenu.jsx';
@@ -117,6 +118,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
             onChange={(v) => patch({ wil: v })} onSave={onSave} />
         </div>
         <ResourceBar character={character} patch={patch} />
+        <RestControls character={character} setCharacter={setCharacter} notify={notify} />
       </section>
 
       <section className="panel">

@@ -98,17 +98,25 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
     setRolling(true);
     setShown(1 + Math.floor(Math.random() * span));
     let frames = 0;
+    let fallback;
     clearInterval(timer.current);
+    const settle = () => {
+      clearInterval(timer.current);
+      clearTimeout(fallback);
+      setShown(result.value);
+      setRolling(false);
+    };
     timer.current = setInterval(() => {
       frames += 1;
       setShown(1 + Math.floor(Math.random() * span));
-      if (frames >= 9) {
-        clearInterval(timer.current);
-        setShown(result.value);
-        setRolling(false);
-      }
+      if (frames >= 9) settle();
     }, 45);
-    return () => clearInterval(timer.current);
+    // Sicherheitsnetz gegen gedrosselte Timer (Hintergrund-Tab o.Ae.).
+    fallback = setTimeout(settle, 650);
+    return () => {
+      clearInterval(timer.current);
+      clearTimeout(fallback);
+    };
   }, [result?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!result) {

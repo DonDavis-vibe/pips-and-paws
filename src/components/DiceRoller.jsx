@@ -5,10 +5,13 @@ import { rollDice, rollD66, rollSave } from '../rules/dice.js';
 import { shareRoll, shareSave } from '../utils/discord.js';
 import { RollButton, DiceStage } from './DiceKit.jsx';
 
+const SAVE_MODES = ['disadv', 'normal', 'adv'];
+
 export default function DiceRoller({ character, onEvent }) {
   const { t } = useLang();
   const [log, setLog] = useState([]);
   const [result, setResult] = useState(null);
+  const [saveMode, setSaveMode] = useState('normal');
 
   const record = (logEntry, stage) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -47,27 +50,33 @@ export default function DiceRoller({ character, onEvent }) {
   };
 
   const save = (attrKey) => {
-    const r = rollSave(character[attrKey].current);
+    const r = rollSave(character[attrKey].current, saveMode);
     const attr = t(`attr.${attrKey}`);
     const tone = r.nat1 ? 'crit-good' : r.nat20 ? 'crit-bad' : r.ok ? 'ok' : 'bad';
     const verdict = (r.nat1 && t('dice.nat1')) || (r.nat20 && t('dice.nat20'))
       || (r.ok ? t('dice.success') : t('dice.fail'));
+    const modeTag = saveMode === 'normal' ? '' : ` (${t(`dice.mode.${saveMode}`)})`;
+    const parts = r.dice.length === 2
+      ? [
+        { value: r.dice[0], label: t('dice.roll') },
+        { value: r.dice[1], label: t('dice.roll') },
+        { value: `≤ ${r.target}`, label: t('dice.target') },
+      ]
+      : [
+        { value: r.d, label: t('dice.roll') },
+        { value: `≤ ${r.target}`, label: t('dice.target') },
+      ];
     record(
-      { label: t('dice.saveVs', { attr }), verdict: `${r.d} · ${r.ok ? t('dice.success') : t('dice.fail')}`, ok: r.ok, tone },
       {
-        label: t('dice.saveVs', { attr }),
-        value: r.d,
-        max: 20,
+        label: `${t('dice.saveVs', { attr })}${modeTag}`,
+        verdict: `${r.d} · ${r.ok ? t('dice.success') : t('dice.fail')}`,
+        ok: r.ok,
         tone,
-        verdict,
-        parts: [
-          { value: r.d, label: t('dice.roll') },
-          { value: `≤ ${r.target}`, label: t('dice.target') },
-        ],
       },
+      { label: `${t('dice.saveVs', { attr })}${modeTag}`, value: r.d, max: 20, tone, verdict, parts },
     );
-    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok });
-    shareSave(who, attr, r.d, r.target, r.ok);
+    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode: saveMode });
+    shareSave(who, `${attr}${modeTag}`, r.d, r.target, r.ok);
   };
 
   return (
@@ -103,6 +112,20 @@ export default function DiceRoller({ character, onEvent }) {
             title={t('dice.saveVs', { attr: t(`attr.${k}`) })}
             onRoll={() => save(k)}
           />
+        ))}
+      </div>
+
+      <div className="save-mode" role="group" aria-label={t('dice.mode.label')}>
+        {SAVE_MODES.map((m) => (
+          <button
+            key={m}
+            type="button"
+            className={`save-mode-btn${saveMode === m ? ' is-active' : ''}${m !== 'normal' ? ` save-mode-${m}` : ''}`}
+            aria-pressed={saveMode === m}
+            onClick={() => setSaveMode(m)}
+          >
+            {t(`dice.mode.${m}`)}
+          </button>
         ))}
       </div>
 

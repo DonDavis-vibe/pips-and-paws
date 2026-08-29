@@ -919,6 +919,85 @@ summary,
   margin-bottom: 0;
 }
 
+/* ---- Save mode toggle (Vorteil / Normal / Nachteil) ---- */
+.save-mode {
+  display: inline-flex;
+  margin-top: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-sunk);
+  box-shadow: var(--shadow-sm);
+}
+
+.save-mode-btn {
+  border: 0;
+  background: transparent;
+  padding: 5px 13px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink-dim);
+}
+
+.save-mode-btn + .save-mode-btn {
+  border-left: 1px solid var(--line);
+}
+
+.save-mode-btn:hover {
+  color: var(--ink);
+}
+
+.save-mode-btn.is-active {
+  background: var(--accent-2);
+  color: #fff;
+}
+
+.save-mode-btn.save-mode-adv.is-active {
+  background: var(--ok);
+}
+
+.save-mode-btn.save-mode-disadv.is-active {
+  background: var(--bad);
+}
+
+/* ---- GM quick rolls (reaction / treasure) ---- */
+.gm-quick-rolls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---- Rest controls (player sheet) ---- */
+.rest-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.rest-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-right: 2px;
+}
+
+.rest-label > svg { color: var(--accent-2); }
+
 /* ---- Roll buttons ---- */
 .roll-btn {
   --rb-tone: var(--accent);
