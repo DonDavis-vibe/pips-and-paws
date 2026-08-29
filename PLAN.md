@@ -10,8 +10,10 @@ inkl. SL gibt Item/EP/Zustand. Live: <https://dondavis-vibe.github.io/pips-and-p
 (Repo: <https://github.com/DonDavis-vibe/pips-and-paws>, Pages-Deploy via Actions, SEO drin).
 `reference/` ist nur noch lokal (nicht im Repo).
 
-**SL-Werkzeuge, Schritt für Schritt:** [1] Tischmitte ✔ · [2] Zeit-/Licht-/Begegnungs-Tracker ✔ ·
-[3] NSC-/Kampf-Tracker ✔ · [4] SL-Sitzung speichern/laden + allgemeine Notizen (nächster).
+**SL-Werkzeuge:** [1] Tischmitte ✔ · [2] Zeit-/Licht-/Begegnungs-Tracker ✔ · [3] NSC-/Kampf-Tracker ✔ ·
+[4] SL-Sitzung sichern/laden + allgemeine Notizen ✔ — Block abgeschlossen.
+Der SL hat damit alles fürs Führen einer Runde (Werte sehen, Schaden/Heilen/EP/Zustand/Item geben,
+Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kampf, Notizen, Sitzung sichern).
 
 ---
 
