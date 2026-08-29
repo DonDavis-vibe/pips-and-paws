@@ -92,7 +92,6 @@ select,
 summary,
 .catalog-item,
 .footer-link,
-.item-card,
 .inv-slot,
 .gm-card,
 .panel {
@@ -103,6 +102,15 @@ summary,
     box-shadow 0.16s ease,
     transform 0.12s ease,
     opacity 0.16s ease;
+}
+
+/* Item-Kaertchen: keine transform-/opacity-Transition — sonst schleift die
+   Drag-Quelle dem Zeiger hinterher. Nur die ruhigen Zustaende animieren. */
+.item-card {
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 :focus-visible {

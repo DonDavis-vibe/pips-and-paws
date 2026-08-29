@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import {
   GripVertical, Trash2, Swords, Shield, Sparkles, Flame, Apple, Package, AlertTriangle, Info, PackagePlus,
 } from 'lucide-react';
@@ -23,9 +22,9 @@ export default function ItemCard({ item, onChange, onRemove, onStash, dragId, ov
   const Icon = TYPE_ICON[item.type] || Package;
 
   const drag = useDraggable({ id: dragId ?? item.itemId, disabled: overlay });
-  const style = overlay
-    ? undefined
-    : { transform: CSS.Translate.toString(drag.transform), opacity: drag.isDragging ? 0.35 : 1 };
+  // Bei aktivem Ziehen uebernimmt das DragOverlay die Bewegung — die Quelle
+  // bleibt an Ort und Stelle und wird nur ausgegraut (kein doppeltes Kaertchen).
+  const style = overlay ? undefined : { opacity: drag.isDragging ? 0.3 : 1 };
 
   const effectText = loc(item.effect, lang);
 
