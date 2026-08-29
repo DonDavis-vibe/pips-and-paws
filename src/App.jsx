@@ -210,7 +210,7 @@ export default function App() {
 
       <main>
         {isGm ? (
-          <GmDashboard mp={mp} />
+          <GmDashboard mp={mp} notify={notify} />
         ) : (
           <CharacterSheet
             character={character}

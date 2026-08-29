@@ -1,12 +1,15 @@
-import { Users, ScrollText, Megaphone, Dices } from 'lucide-react';
+import { useRef } from 'react';
+import { Users, ScrollText, Megaphone, Dices, Save, FolderOpen } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
 import SharedStash from './SharedStash.jsx';
 import GmTimeTracker from './GmTimeTracker.jsx';
 import GmCombatTracker from './GmCombatTracker.jsx';
+import GmNotes from './GmNotes.jsx';
 import { GM_BROADCAST, GM_SAVE } from '../multiplayer/protocol.js';
 import { rollDice, rollD66 } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
+import { exportGmSession, importGmSession } from '../utils/gmSession.js';
 
 // Menschenlesbares Label fuer eine SL-Aktion im Live-Log.
 function cmdVars(cmd, name, lang) {
@@ -66,9 +69,21 @@ function GmDiceBar({ onRoll }) {
   );
 }
 
-export default function GmDashboard({ mp }) {
+export default function GmDashboard({ mp, notify }) {
   const { t, lang } = useLang();
   const entries = Object.entries(mp.players);
+  const fileInput = useRef(null);
+
+  const onLoadSession = async (file) => {
+    if (!file) return;
+    try {
+      await importGmSession(file);
+      notify?.(t('gm.session.loaded'), 'ok');
+      setTimeout(() => window.location.reload(), 500);
+    } catch {
+      notify?.(t('gm.session.loadFailed'), 'bad');
+    }
+  };
 
   return (
     <div className="gm-dash">
@@ -77,19 +92,37 @@ export default function GmDashboard({ mp }) {
           <h2>
             <Users size={18} /> {t('gm.dashboard')} · {t('mp.playersConnected', { n: entries.length })}
           </h2>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            onClick={() => {
-              const text = window.prompt(t('gm.prompt.broadcast'));
-              if (text) {
-                mp.sendGmCommand(null, { cmd: GM_BROADCAST, text });
-                mp.logGmAction({ key: 'gm.log.broadcast', vars: { text } });
-              }
-            }}
-          >
-            <Megaphone size={16} /> {t('gm.action.broadcast')}
-          </button>
+          <div className="stash-head-actions">
+            <button type="button" className="btn btn-ghost btn-sm" onClick={exportGmSession}>
+              <Save size={15} /> {t('gm.session.save')}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => fileInput.current?.click()}>
+              <FolderOpen size={15} /> {t('gm.session.load')}
+            </button>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={(e) => {
+                onLoadSession(e.target.files?.[0]);
+                e.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                const text = window.prompt(t('gm.prompt.broadcast'));
+                if (text) {
+                  mp.sendGmCommand(null, { cmd: GM_BROADCAST, text });
+                  mp.logGmAction({ key: 'gm.log.broadcast', vars: { text } });
+                }
+              }}
+            >
+              <Megaphone size={15} /> {t('gm.action.broadcast')}
+            </button>
+          </div>
         </div>
 
         <GmDiceBar onRoll={(label, value) => mp.logGmAction({ key: 'gm.log.roll', vars: { label, value } })} />
@@ -129,6 +162,8 @@ export default function GmDashboard({ mp }) {
         onRemove={mp.stashRemoveItem}
         onClear={mp.clearStash}
       />
+
+      <GmNotes />
 
       <section className="panel">
         <div className="panel-head">

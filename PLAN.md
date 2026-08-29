@@ -11,7 +11,7 @@ inkl. SL gibt Item/EP/Zustand. Live: <https://dondavis-vibe.github.io/pips-and-p
 `reference/` ist nur noch lokal (nicht im Repo).
 
 **SL-Werkzeuge, Schritt für Schritt:** [1] Tischmitte ✔ · [2] Zeit-/Licht-/Begegnungs-Tracker ✔ ·
-[3] NSC-/Kampf-Tracker (nächster) · [4] SL-Sitzung speichern/laden + allgemeine Notizen.
+[3] NSC-/Kampf-Tracker ✔ · [4] SL-Sitzung speichern/laden + allgemeine Notizen (nächster).
 
 ---
 

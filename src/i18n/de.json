@@ -232,5 +232,11 @@
   "combat.empty": "Keine NSC im Kampf. Ueber „NSC“ eine Kreatur aus dem SRD oder frei hinzufuegen.",
   "combat.attack": "Angriff",
   "combat.log.attack": "{name} greift an: {roll} Schaden ({die})",
-  "combat.log.initiative": "Initiative — alle Spieler wuerfeln DEX (Erfolg = vor den Gegnern)"
+  "combat.log.initiative": "Initiative — alle Spieler wuerfeln DEX (Erfolg = vor den Gegnern)",
+  "gm.notes.title": "SL-Notizen",
+  "gm.notes.placeholder": "Kampagne, Vorbereitung, NSC, offene Faeden ...",
+  "gm.session.save": "Sitzung sichern",
+  "gm.session.load": "Sitzung laden",
+  "gm.session.loaded": "SL-Sitzung geladen.",
+  "gm.session.loadFailed": "Datei konnte nicht gelesen werden."
 }

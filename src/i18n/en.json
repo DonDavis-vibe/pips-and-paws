@@ -232,5 +232,11 @@
   "combat.empty": "No NPCs in combat. Use “NPC” to add an SRD creature or a custom one.",
   "combat.attack": "Attack",
   "combat.log.attack": "{name} attacks: {roll} damage ({die})",
-  "combat.log.initiative": "Initiative — all players roll DEX (success = before the enemies)"
+  "combat.log.initiative": "Initiative — all players roll DEX (success = before the enemies)",
+  "gm.notes.title": "GM notes",
+  "gm.notes.placeholder": "Campaign, prep, NPCs, open threads ...",
+  "gm.session.save": "Save session",
+  "gm.session.load": "Load session",
+  "gm.session.loaded": "GM session loaded.",
+  "gm.session.loadFailed": "Could not read the file."
 }
