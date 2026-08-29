@@ -238,5 +238,15 @@
   "gm.session.save": "Save session",
   "gm.session.load": "Load session",
   "gm.session.loaded": "GM session loaded.",
-  "gm.session.loadFailed": "Could not read the file."
+  "gm.session.loadFailed": "Could not read the file.",
+  "mp.discord.title": "Discord (optional)",
+  "mp.discord.help": "Mirror rolls and events into a Discord channel. In the channel: Edit -> Integrations -> Webhooks, create one and paste its URL here. The URL only stays in this browser.",
+  "mp.discord.url": "Webhook URL",
+  "mp.discord.test": "Test",
+  "mp.discord.testOk": "Connected.",
+  "mp.discord.testBad": "Didn't work — check the URL.",
+  "mp.discord.rolls": "Rolls",
+  "mp.discord.events": "Events",
+  "mp.discord.share": "Send to all players",
+  "player.gm.webhookShared": "The GM shared the Discord channel."
 }

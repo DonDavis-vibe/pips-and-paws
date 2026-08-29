@@ -1,13 +1,81 @@
 import { useState } from 'react';
-import { Radio, Users, LogOut, Copy, Check } from 'lucide-react';
+import { Radio, Users, LogOut, Copy, Check, MessagesSquare, Send } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { Modal, Field, TextInput } from './ui.jsx';
+import { GM_WEBHOOK } from '../multiplayer/protocol.js';
+import {
+  getWebhook, setWebhook, isValidWebhook, getOpts, setOpts, testWebhook,
+} from '../utils/discord.js';
 
 function inviteLink(code) {
   const url = new URL(window.location.href);
   url.searchParams.set('join', code);
   url.hash = '';
   return url.toString();
+}
+
+function DiscordSettings({ mp }) {
+  const { t } = useLang();
+  const [url, setUrl] = useState(() => getWebhook());
+  const [opts, setLocalOpts] = useState(() => getOpts());
+  const [test, setTest] = useState(null); // null | 'ok' | 'bad' | 'pending'
+
+  const saveUrl = (v) => {
+    setUrl(v);
+    setWebhook(v);
+    setTest(null);
+  };
+  const toggle = (k) => {
+    const next = { ...opts, [k]: !opts[k] };
+    setLocalOpts(next);
+    setOpts(next);
+  };
+  const runTest = async () => {
+    setTest('pending');
+    setTest((await testWebhook(url)) ? 'ok' : 'bad');
+  };
+
+  const valid = isValidWebhook(url);
+
+  return (
+    <details className="mp-discord">
+      <summary>
+        <MessagesSquare size={15} /> {t('mp.discord.title')}
+      </summary>
+      <div className="mp-discord-body">
+        <p className="hint">{t('mp.discord.help')}</p>
+        <Field label={t('mp.discord.url')}>
+          <div className="inline-roll">
+            <TextInput value={url} onChange={saveUrl} placeholder="https://discord.com/api/webhooks/..." />
+            <button type="button" className="btn btn-sm" disabled={!valid || test === 'pending'} onClick={runTest}>
+              {t('mp.discord.test')}
+            </button>
+          </div>
+        </Field>
+        {test === 'ok' ? <p className="mp-status" style={{ color: 'var(--ok)' }}>{t('mp.discord.testOk')}</p> : null}
+        {test === 'bad' ? <p className="mp-status" style={{ color: 'var(--bad)' }}>{t('mp.discord.testBad')}</p> : null}
+
+        <div className="mp-discord-opts">
+          <label>
+            <input type="checkbox" checked={opts.rolls} onChange={() => toggle('rolls')} /> {t('mp.discord.rolls')}
+          </label>
+          <label>
+            <input type="checkbox" checked={opts.events} onChange={() => toggle('events')} /> {t('mp.discord.events')}
+          </label>
+        </div>
+
+        {mp.role === 'gm' && Object.keys(mp.players).length > 0 && valid ? (
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost"
+            onClick={() => mp.sendGmCommand(null, { cmd: GM_WEBHOOK, url })}
+          >
+            <Send size={14} /> {t('mp.discord.share')}
+          </button>
+        ) : null}
+      </div>
+    </details>
+  );
 }
 
 export default function MultiplayerModal({ mp, onClose }) {
@@ -84,6 +152,8 @@ export default function MultiplayerModal({ mp, onClose }) {
           </button>
         </div>
       )}
+
+      <DiscordSettings mp={mp} />
     </Modal>
   );
 }

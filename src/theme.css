@@ -1080,6 +1080,45 @@ body {
   color: var(--bad);
 }
 
+.mp-discord {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.mp-discord summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+}
+
+.mp-discord summary::-webkit-details-marker {
+  display: none;
+}
+
+.mp-discord-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.mp-discord-opts {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.mp-discord-opts label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 /* ---- GM dashboard ---- */
 .gm-dash {
   display: flex;

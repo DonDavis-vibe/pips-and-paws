@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dices, Trash2 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { rollDice, rollD66, rollSave } from '../rules/dice.js';
+import { shareRoll, shareSave } from '../utils/discord.js';
 
 export default function DiceRoller({ character, onEvent }) {
   const { t } = useLang();
@@ -12,17 +13,21 @@ export default function DiceRoller({ character, onEvent }) {
     setLog((prev) => [{ id, ...entry }, ...prev].slice(0, 20));
   };
 
+  const who = character.name || t('app.title');
+
   const rollBasic = (sides, count = 1) => {
     const { dice, total } = rollDice(count, sides);
     const label = `${count}W${sides}`;
     push({ kind: 'plain', label, detail: dice.join(' + '), value: total });
     if (onEvent) onEvent({ kind: 'roll', label, value: total });
+    shareRoll(who, label, total, dice.length > 1 ? dice.join(' + ') : '');
   };
 
   const roll66 = () => {
     const r = rollD66();
     push({ kind: 'plain', label: t('dice.d66'), detail: `${r.tens}${r.ones}`, value: r.value });
     if (onEvent) onEvent({ kind: 'roll', label: t('dice.d66'), value: r.value });
+    shareRoll(who, t('dice.d66'), r.value, '');
   };
 
   const save = (attrKey) => {
@@ -34,6 +39,7 @@ export default function DiceRoller({ character, onEvent }) {
       ok: r.ok,
     });
     if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok });
+    shareSave(who, t(`attr.${attrKey}`), r.d, r.target, r.ok);
   };
 
   return (

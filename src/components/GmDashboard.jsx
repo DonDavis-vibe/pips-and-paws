@@ -10,6 +10,9 @@ import { GM_BROADCAST, GM_SAVE } from '../multiplayer/protocol.js';
 import { rollDice, rollD66 } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
 import { exportGmSession, importGmSession } from '../utils/gmSession.js';
+import { shareEvent } from '../utils/discord.js';
+
+const SHARE_KEYS = new Set(['gm.log.broadcast', 'gm.log.roll', 'combat.log.attack']);
 
 // Menschenlesbares Label fuer eine SL-Aktion im Live-Log.
 function cmdVars(cmd, name, lang) {
@@ -74,6 +77,14 @@ export default function GmDashboard({ mp, notify }) {
   const entries = Object.entries(mp.players);
   const fileInput = useRef(null);
 
+  // SL-Log + optional an Discord (nur die fuer die Runde relevanten Meldungen).
+  const gmLog = (key, vars) => {
+    mp.logGmAction({ key, vars });
+    if (SHARE_KEYS.has(key)) {
+      shareEvent(t('mp.badge.gm'), t(key, vars), key === 'combat.log.attack' ? 'bad' : 'info');
+    }
+  };
+
   const onLoadSession = async (file) => {
     if (!file) return;
     try {
@@ -116,7 +127,7 @@ export default function GmDashboard({ mp, notify }) {
                 const text = window.prompt(t('gm.prompt.broadcast'));
                 if (text) {
                   mp.sendGmCommand(null, { cmd: GM_BROADCAST, text });
-                  mp.logGmAction({ key: 'gm.log.broadcast', vars: { text } });
+                  gmLog('gm.log.broadcast', { text });
                 }
               }}
             >
@@ -125,7 +136,7 @@ export default function GmDashboard({ mp, notify }) {
           </div>
         </div>
 
-        <GmDiceBar onRoll={(label, value) => mp.logGmAction({ key: 'gm.log.roll', vars: { label, value } })} />
+        <GmDiceBar onRoll={(label, value) => gmLog('gm.log.roll', { label, value })} />
 
         {entries.length === 0 ? (
           <p className="hint">{t('gm.noPlayers')}</p>
@@ -145,13 +156,13 @@ export default function GmDashboard({ mp, notify }) {
         )}
       </section>
 
-      <GmTimeTracker onLog={(key, vars) => mp.logGmAction({ key, vars })} />
+      <GmTimeTracker onLog={gmLog} />
 
       <GmCombatTracker
-        onLog={(key, vars) => mp.logGmAction({ key, vars })}
+        onLog={gmLog}
         onInitiative={() => {
           mp.sendGmCommand(null, { cmd: GM_SAVE, attr: 'dex', reason: 'initiative' });
-          mp.logGmAction({ key: 'combat.log.initiative', vars: {} });
+          gmLog('combat.log.initiative', {});
         }}
       />
 

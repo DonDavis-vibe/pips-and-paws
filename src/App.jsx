@@ -9,9 +9,10 @@ import { makeCondition } from './data/items.js';
 import { readJSON, writeJSON } from './utils/storage.js';
 import { downloadCharacter, readCharacterFile } from './utils/exportImport.js';
 import { rollSave } from './rules/dice.js';
+import { shareEvent, setWebhook } from './utils/discord.js';
 import {
   GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER, GM_BROADCAST,
-  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY,
+  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK,
 } from './multiplayer/protocol.js';
 import { useMultiplayer } from './multiplayer/useMultiplayer.js';
 import CharacterSheet from './components/CharacterSheet.jsx';
@@ -76,10 +77,12 @@ export default function App() {
     if (!gmCommand || lastCmdRef.current === gmCommand.id) return;
     lastCmdRef.current = gmCommand.id;
     const cmd = gmCommand.cmd;
+    const cn = character.name || t('app.title');
 
     if (cmd === GM_HEAL) {
       setCharacter((c) => ({ ...c, hp: { ...c.hp, current: Math.min(c.hp.max, c.hp.current + gmCommand.amount) } }));
       notify(t('player.gm.heal', { n: gmCommand.amount }), 'ok');
+      shareEvent(cn, `💚 ${t('player.gm.heal', { n: gmCommand.amount })}`, 'ok');
     } else if (cmd === GM_PIPS) {
       setCharacter((c) => ({ ...c, pips: Math.max(0, c.pips + gmCommand.amount) }));
       notify(t('player.gm.pips', { n: gmCommand.amount }), gmCommand.amount >= 0 ? 'ok' : 'warn');
@@ -99,6 +102,7 @@ export default function App() {
         strHit > 0 ? t('player.gm.strDamage', { n: gmCommand.amount, s: strHit }) : t('player.gm.damage', { n: gmCommand.amount }),
         'bad',
       );
+      shareEvent(cn, `🩸 ${gmCommand.amount} ${t('item.damage')}${strHit > 0 ? ` (${strHit} → STR)` : ''}`, 'bad');
     } else if (cmd === GM_SAVE) {
       const r = rollSave(character[gmCommand.attr]?.current ?? 0);
       const prefix = gmCommand.reason === 'initiative' ? `${t('combat.initiative')}: ` : '';
@@ -107,13 +111,18 @@ export default function App() {
         r.ok ? 'ok' : 'bad',
       );
       sendEvent({ kind: 'save', attr: gmCommand.attr, roll: r.d, target: r.target, ok: r.ok, reason: gmCommand.reason });
+      shareEvent(cn, `${prefix}🎲 ${t('dice.saveVs', { attr: t(`attr.${gmCommand.attr}`) })} — W20 ${r.d} ≤ ${r.target} · ${r.ok ? '✅' : '❌'}`, r.ok ? 'ok' : 'bad');
     } else if (cmd === GM_XP) {
+      const before = levelForXp(character.xp || 0);
+      const after = levelForXp(Math.max(0, (character.xp || 0) + gmCommand.amount));
       setCharacter((c) => {
         const xp = Math.max(0, (c.xp || 0) + gmCommand.amount);
         const level = levelForXp(xp);
         return { ...c, xp, level, grit: gritForLevel(level) };
       });
       notify(t('player.gm.xp', { n: gmCommand.amount }), gmCommand.amount >= 0 ? 'ok' : 'warn');
+      shareEvent(cn, `✨ ${t('player.gm.xp', { n: gmCommand.amount })}`, 'gold');
+      if (after > before) shareEvent(cn, `⭐ ${t('res.level')} ${after}!`, 'gold');
     } else if (cmd === GM_GIVE && gmCommand.item) {
       const item = gmCommand.item;
       const label = loc(item.name, lang);
@@ -124,17 +133,22 @@ export default function App() {
         stashDrop(item);
         notify(t('player.gm.giveNoRoom', { item: label }), 'warn');
       }
+      shareEvent(cn, `🎁 ${t('player.gm.give', { item: label })}`, 'info');
     } else if (cmd === GM_CONDITION) {
       const cond = makeCondition(gmCommand.key);
       const label = loc(cond.name, lang);
       if (firstFreeFit(character.inventory, 1)) {
         setCharacter((c) => addItem(c, cond).character || c);
         notify(t('player.gm.condition', { name: label }), 'bad');
+        shareEvent(cn, `⚠️ ${t('player.gm.condition', { name: label })}`, 'bad');
       } else {
         notify(t('player.gm.conditionNoRoom', { name: label }), 'warn');
       }
     } else if (cmd === GM_STASH_DENY) {
       notify(t('player.gm.stashGone'), 'warn');
+    } else if (cmd === GM_WEBHOOK && gmCommand.url) {
+      setWebhook(gmCommand.url);
+      notify(t('player.gm.webhookShared'), 'ok');
     } else if (cmd === GM_WHISPER) {
       notify(`${t('player.gm.whisper')}: ${gmCommand.text}`, 'info');
     } else if (cmd === GM_BROADCAST) {

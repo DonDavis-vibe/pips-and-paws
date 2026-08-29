@@ -238,5 +238,15 @@
   "gm.session.save": "Sitzung sichern",
   "gm.session.load": "Sitzung laden",
   "gm.session.loaded": "SL-Sitzung geladen.",
-  "gm.session.loadFailed": "Datei konnte nicht gelesen werden."
+  "gm.session.loadFailed": "Datei konnte nicht gelesen werden.",
+  "mp.discord.title": "Discord (optional)",
+  "mp.discord.help": "Wuerfe und Ereignisse in einen Discord-Kanal spiegeln. Im Kanal unter Bearbeiten -> Integrationen -> Webhooks einen Webhook anlegen und die URL hier einfuegen. Die URL bleibt nur in diesem Browser.",
+  "mp.discord.url": "Webhook-URL",
+  "mp.discord.test": "Testen",
+  "mp.discord.testOk": "Verbindung steht.",
+  "mp.discord.testBad": "Hat nicht geklappt — URL pruefen.",
+  "mp.discord.rolls": "Wuerfe",
+  "mp.discord.events": "Ereignisse",
+  "mp.discord.share": "An alle Spieler senden",
+  "player.gm.webhookShared": "Spielleiter hat den Discord-Kanal geteilt."
 }

@@ -14,6 +14,7 @@ import DiceRoller from './DiceRoller.jsx';
 import SharedStash from './SharedStash.jsx';
 import { tryMove, addItem, removeItem } from '../rules/inventory.js';
 import { rollSave } from '../rules/dice.js';
+import { shareSave } from '../utils/discord.js';
 
 export default function CharacterSheet({ character, setCharacter, notify, onEvent, stash }) {
   const { t } = useLang();
@@ -68,6 +69,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
       r.ok ? 'ok' : 'bad',
     );
     if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok });
+    shareSave(character.name || t('app.title'), t(`attr.${attrKey}`), r.d, r.target, r.ok);
   };
 
   const activeItem = activeId ? character.items[activeId] : null;

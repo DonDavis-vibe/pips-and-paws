@@ -31,6 +31,7 @@ export const GM_XP = 'xp'; //          { amount }
 export const GM_GIVE = 'give'; //      { item } Gegenstand ins Inventar (Katalog oder Tischmitte)
 export const GM_CONDITION = 'condition'; // { key } Zustand zuweisen
 export const GM_STASH_DENY = 'stashDeny'; // { itemId } Nehmen abgelehnt (schon weg)
+export const GM_WEBHOOK = 'webhook'; // { url } SL teilt den Discord-Webhook mit der Runde
 export const GM_WHISPER = 'whisper'; // { text }
 export const GM_BROADCAST = 'broadcast'; // { text }
 
