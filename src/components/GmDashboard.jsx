@@ -2,6 +2,7 @@ import { Users, ScrollText, Megaphone, Dices } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
 import SharedStash from './SharedStash.jsx';
+import GmTimeTracker from './GmTimeTracker.jsx';
 import { GM_BROADCAST } from '../multiplayer/protocol.js';
 import { rollDice, rollD66 } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
@@ -108,6 +109,8 @@ export default function GmDashboard({ mp }) {
           </div>
         )}
       </section>
+
+      <GmTimeTracker onLog={(key, vars) => mp.logGmAction({ key, vars })} />
 
       <SharedStash
         mode="gm"
