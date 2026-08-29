@@ -1,6 +1,6 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-08-28
+Stand: 2026-08-29
 
 Arbeitstitel: **Pips & Paws** (siehe §15.4 — jederzeit änderbar).
 
@@ -18,6 +18,13 @@ Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kam
 **Discord-Webhook** (optional, wie in den anderen Tools): im Multiplayer-Menü einklappbar. Würfe und
 Ereignisse werden in einen Discord-Kanal gespiegelt (Maus-Name als Absender, farbcodierte Embeds).
 URL nur im localStorage, nicht in der Charakterdatei. SL kann den Webhook an die Runde verteilen.
+
+**Optik-Überarbeitung** (nur CSS/Fonts, keine Struktur-/Logikänderung): Bricolage-Grotesque-Display +
+Fraunces-Serif (mit vollständigem Fallback-Stack für den `file://`-Release), abgestuftes Schatten- und
+Farbsystem mit zweitem Akzent (Grün) und Gold, Papier-Grain + Verlaufs-Hintergrund, Panels mit
+Akzentleiste/Tiefe/Einblendung, überarbeitete Attribut-/Ressourcen-Blöcke, HP-Leiste mit Verlauf,
+Inventar-Slots im Raster-Look mit deutlicherem Drop-Zustand, Pill-Buttons, animierte Toasts/Modals,
+GM-Karten mit Hover-Lift. `prefers-reduced-motion` respektiert. Build + Lint grün.
 
 ---
 

@@ -17,11 +17,12 @@ Pen-&-Paper-Rollenspiel **Mausritter** — alles im Browser, ohne Anmeldung.
 - **Serverloser Multiplayer** (WebRTC/PeerJS) — SL eroeffnet einen Raum, Spieler treten
   per 4-Zeichen-Code oder `?join`-Link bei. Reconnect, Reload-Wiederherstellung.
 - **SL-Dashboard** — alle Helden auf einen Blick (TP, Werte, Ruestung, belegte Plaetze,
-  Waffen, Zustaende), Aktionen (Schaden / Heilen / Pips / Rettungswurf fordern / Fluestern /
-  Ansage), eigener SL-Wuerfelbereich, Live-Protokoll
+  Waffen, Zustaende), Aktionen (Schaden / Heilen / Pips / EP / Rettungswurf fordern /
+  Fluestern / Ansage / Item / Zustand geben), eigener SL-Wuerfelbereich, Live-Protokoll
+- **SL-Werkzeuge** — gemeinsame Tischmitte (Loot schieben), Zeit-/Licht-/Begegnungs-Tracker,
+  NSC-/Kampf-Tracker, SL-Sitzung sichern/laden, allgemeine Notizen
+- **Optionaler Discord-Webhook** — spiegelt Wuerfe und Ereignisse in einen Kanal
 - **Zweisprachig DE / EN**, Persistenz im `localStorage`, JSON-Export/-Import
-
-Noch offen: gemeinsame Tischmitte (Loot zwischen SL und Spielern schieben).
 
 ## Entwickeln
 
