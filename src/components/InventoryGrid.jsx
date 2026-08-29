@@ -54,8 +54,10 @@ export default function InventoryGrid({ character, onItemChange, onItemRemove, o
   const { t } = useLang();
   const { inventory, items } = character;
   const shared = { inventory, items, onItemChange, onItemRemove, onItemStash };
+  const isEmpty = Object.keys(items || {}).length === 0;
   return (
     <div className="inventory">
+      {isEmpty ? <p className="hint inv-empty-hint">{t('inv.emptyHint')}</p> : null}
       <Group title={t('inv.paws')} slots={PAW_SLOTS} {...shared} />
       <Group title={t('inv.body')} slots={BODY_SLOTS} {...shared} />
       <Group title={t('inv.pack')} slots={PACK_SLOTS} {...shared} />

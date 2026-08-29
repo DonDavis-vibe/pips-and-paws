@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Info } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 
 export function Field({ label, children, hint }) {
@@ -9,6 +9,29 @@ export function Field({ label, children, hint }) {
       {children}
       {hint ? <span className="field-hint">{hint}</span> : null}
     </label>
+  );
+}
+
+export function InfoHint({ text }) {
+  const { t } = useLang();
+  const [open, setOpen] = useState(false);
+  return (
+    <span className={`info-hint${open ? ' info-hint-open' : ''}`}>
+      <button
+        type="button"
+        className="info-hint-btn"
+        aria-label={t('header.help')}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Info size={13} />
+      </button>
+      {open ? (
+        <span className="info-hint-pop" role="tooltip">
+          {text}
+        </span>
+      ) : null}
+    </span>
   );
 }
 

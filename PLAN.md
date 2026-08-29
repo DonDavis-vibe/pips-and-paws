@@ -19,6 +19,12 @@ Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kam
 Ereignisse werden in einen Discord-Kanal gespiegelt (Maus-Name als Absender, farbcodierte Embeds).
 URL nur im localStorage, nicht in der Charakterdatei. SL kann den Webhook an die Runde verteilen.
 
+**Hilfetexte:** [A] Hilfe-Modal (`?` in der Kopfzeile + Footer-Link) mit sieben Abschnitten (Was ist das,
+Speicherung & Datenschutz, Charakterbogen, Inventar, Multiplayer, SL-Werkzeuge, Regeln & Lizenz),
+zweisprachig. [B] Bessere Leerzustände: Inventar-Hinweis wenn nichts dabei ist, ausführlicheres
+Würfel-Log / „keine Maus verbunden" / leere Tischmitte. [C] Inline-`(i)`-Aufklapper an Rettungswurf,
+Pips, EP/Mumm und Nutzungspunkten (`InfoHint` in `ui.jsx`).
+
 **Optik-Überarbeitung** (nur CSS/Fonts, keine Struktur-/Logikänderung): Bricolage-Grotesque-Display +
 Fraunces-Serif (mit vollständigem Fallback-Stack für den `file://`-Release), abgestuftes Schatten- und
 Farbsystem mit zweitem Akzent (Grün) und Gold, Papier-Grain + Verlaufs-Hintergrund, Panels mit

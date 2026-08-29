@@ -1,6 +1,6 @@
 import { Dices } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
-import { Stepper } from './ui.jsx';
+import { Stepper, InfoHint } from './ui.jsx';
 
 export default function AttributeBox({ attrKey, labelKey, value, onChange, onSave }) {
   const { t } = useLang();
@@ -8,7 +8,10 @@ export default function AttributeBox({ attrKey, labelKey, value, onChange, onSav
 
   return (
     <div className={`attr-box${wounded ? ' attr-wounded' : ''}`}>
-      <div className="attr-title">{t(labelKey)}</div>
+      <div className="attr-title">
+        {t(labelKey)}
+        <InfoHint text={t('hint.save')} />
+      </div>
       <div className="attr-row">
         <div className="attr-cell">
           <span className="attr-cap">{t('attr.current')}</span>

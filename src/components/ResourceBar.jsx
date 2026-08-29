@@ -1,6 +1,6 @@
 import { Heart, Coins, Sparkles } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
-import { Stepper } from './ui.jsx';
+import { Stepper, InfoHint } from './ui.jsx';
 import { levelForXp, gritForLevel } from '../rules/character.js';
 
 export default function ResourceBar({ character, patch }) {
@@ -34,6 +34,7 @@ export default function ResourceBar({ character, patch }) {
       <div className="res-block">
         <div className="res-head">
           <Coins size={16} /> <span>{t('res.pips')}</span>
+          <InfoHint text={t('hint.pips')} />
         </div>
         <Stepper value={pips} min={0} max={99999} label={t('res.pips')} onChange={(n) => patch({ pips: n })} />
       </div>
@@ -41,6 +42,7 @@ export default function ResourceBar({ character, patch }) {
       <div className="res-block">
         <div className="res-head">
           <Sparkles size={16} /> <span>{t('res.xp')}</span>
+          <InfoHint text={t('hint.xp')} />
           <strong className="res-level">
             {t('res.level')} {level} · {t('res.grit')} {grit}
           </strong>

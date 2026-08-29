@@ -1,4 +1,4 @@
-import { Github, BookOpen, ExternalLink, Heart, Link as LinkIcon, MessagesSquare, Bug } from 'lucide-react';
+import { Github, BookOpen, ExternalLink, Heart, Link as LinkIcon, MessagesSquare, Bug, CircleHelp } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, DISCORD_URL, APP_VERSION, LINKS } from '../config.js';
 
@@ -12,7 +12,7 @@ function Ext({ href, icon: Icon, children }) {
   );
 }
 
-export default function Footer() {
+export default function Footer({ onHelp }) {
   const { t } = useLang();
   const [d1pre, d1post] = t('footer.disclaimer1').split('{name}');
   return (
@@ -47,6 +47,12 @@ export default function Footer() {
 
         <nav className="footer-col" aria-label={t('footer.community')}>
           <h4>{t('footer.community')}</h4>
+          {onHelp ? (
+            <button type="button" className="footer-link footer-link-btn" onClick={onHelp}>
+              <CircleHelp size={14} />
+              {t('footer.help')}
+            </button>
+          ) : null}
           <Ext href={DISCORD_URL} icon={MessagesSquare}>
             {t('footer.discord')}
           </Ext>

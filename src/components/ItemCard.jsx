@@ -5,6 +5,7 @@ import {
   GripVertical, Trash2, Swords, Shield, Sparkles, Flame, Apple, Package, AlertTriangle, Info, PackagePlus,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
+import { InfoHint } from './ui.jsx';
 
 const TYPE_ICON = {
   weapon: Swords,
@@ -76,17 +77,20 @@ export default function ItemCard({ item, onChange, onRemove, onStash, dragId, ov
       </div>
 
       {item.usage ? (
-        <div className="usage-dots" aria-label={t('item.uses')}>
-          {Array.from({ length: item.usage.max }).map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              className={`dot${i < item.usage.current ? ' dot-on' : ''}`}
-              disabled={overlay}
-              onClick={() => onChange({ ...item, usage: { ...item.usage, current: i < item.usage.current ? i : i + 1 } })}
-              aria-label={`${t('item.uses')} ${i + 1}`}
-            />
-          ))}
+        <div className="usage-row">
+          <div className="usage-dots" aria-label={t('item.uses')}>
+            {Array.from({ length: item.usage.max }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`dot${i < item.usage.current ? ' dot-on' : ''}`}
+                disabled={overlay}
+                onClick={() => onChange({ ...item, usage: { ...item.usage, current: i < item.usage.current ? i : i + 1 } })}
+                aria-label={`${t('item.uses')} ${i + 1}`}
+              />
+            ))}
+          </div>
+          {overlay ? null : <InfoHint text={t('hint.usage')} />}
         </div>
       ) : null}
 

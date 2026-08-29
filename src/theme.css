@@ -530,7 +530,6 @@ summary,
   display: flex;
   flex-direction: column;
   gap: 9px;
-  overflow: hidden;
 }
 
 .attr-box::before {
@@ -538,6 +537,7 @@ summary,
   position: absolute;
   inset: 0 0 auto 0;
   height: 3px;
+  border-radius: 12px 12px 0 0;
   background: linear-gradient(90deg, var(--accent), var(--gold));
 }
 
@@ -551,6 +551,9 @@ summary,
 }
 
 .attr-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 800;
@@ -662,6 +665,17 @@ summary,
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.inv-empty-hint {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-sunk));
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-dim);
 }
 
 .inv-group-title {
@@ -987,6 +1001,148 @@ summary,
 .modal-foot {
   padding: 12px 14px;
   border-top: 1px solid var(--line);
+}
+
+/* ---- Help ---- */
+.btn-icon-only {
+  padding: 8px;
+}
+
+.footer-link-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.help-lead {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.help-section {
+  padding: 14px 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
+}
+
+.help-section:first-of-type {
+  border-top: 0;
+}
+
+.help-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.help-section h3 > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.help-section p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+
+.help-section p + p {
+  margin-top: 7px;
+}
+
+.help-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 8px;
+}
+
+.help-links a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: 13px;
+}
+
+/* ---- Inline info hint ---- */
+.info-hint {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.info-hint-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg-panel);
+  color: var(--ink-dim);
+  line-height: 1;
+}
+
+.info-hint-btn:hover,
+.info-hint-open .info-hint-btn {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.info-hint-pop {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(260px, 72vw);
+  padding: 9px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12.5px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+  white-space: normal;
+  animation: rise-in 0.14s ease both;
+}
+
+.info-hint-pop::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: var(--line-strong);
+}
+
+.usage-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.res-head .info-hint {
+  margin-left: 1px;
 }
 
 /* ---- Wizard ---- */

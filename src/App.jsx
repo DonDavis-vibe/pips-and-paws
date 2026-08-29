@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Upload, Sparkles, Languages } from 'lucide-react';
+import { Download, Upload, Sparkles, Languages, CircleHelp } from 'lucide-react';
 import { useLang, loc } from './i18n/index.jsx';
 import {
   blankCharacter, isBlank, normalizeCharacter, levelForXp, gritForLevel,
@@ -20,6 +20,7 @@ import CharacterWizard from './components/CharacterWizard.jsx';
 import ConnectionBadge from './components/ConnectionBadge.jsx';
 import MultiplayerModal from './components/MultiplayerModal.jsx';
 import GmDashboard from './components/GmDashboard.jsx';
+import HelpModal from './components/HelpModal.jsx';
 import Footer from './components/Footer.jsx';
 
 const STORAGE_KEY = 'pips-paws-character-v1';
@@ -34,6 +35,7 @@ export default function App() {
   });
   const [showWizard, setShowWizard] = useState(() => isBlank(readJSON(STORAGE_KEY)));
   const [showMpModal, setShowMpModal] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
   const fileInput = useRef(null);
@@ -211,6 +213,15 @@ export default function App() {
               />
             </>
           ) : null}
+          <button
+            type="button"
+            className="btn btn-ghost btn-icon-only"
+            onClick={() => setShowHelp(true)}
+            aria-label={t('header.help')}
+            title={t('header.help')}
+          >
+            <CircleHelp size={16} />
+          </button>
           <div className="lang-switch" role="group" aria-label={t('header.language')}>
             <Languages size={15} />
             {['de', 'en'].map((l) => (
@@ -236,7 +247,7 @@ export default function App() {
         )}
       </main>
 
-      <Footer />
+      <Footer onHelp={() => setShowHelp(true)} />
 
       {showWizard && !isGm ? (
         <CharacterWizard
@@ -249,6 +260,8 @@ export default function App() {
       ) : null}
 
       {showMpModal ? <MultiplayerModal mp={mp} onClose={() => setShowMpModal(false)} /> : null}
+
+      {showHelp ? <HelpModal onClose={() => setShowHelp(false)} /> : null}
 
       {toast ? <div className={`toast toast-${toast.kind}`}>{toast.message}</div> : null}
     </div>
