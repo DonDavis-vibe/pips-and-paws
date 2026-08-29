@@ -222,5 +222,15 @@
   "time.log.light": "Light: mark usage (torch/lantern)",
   "time.log.encounter": "Encounter roll {roll}: {result}",
   "time.log.encHour": "... at hour {hour} of the watch",
-  "time.log.watch": "New watch — day {day}, watch {watch}"
+  "time.log.watch": "New watch — day {day}, watch {watch}",
+  "combat.title": "Combat & NPCs",
+  "combat.round": "Round",
+  "combat.initiative": "Initiative",
+  "combat.addNpc": "NPC",
+  "combat.add": "Add",
+  "combat.customName": "Custom NPC",
+  "combat.empty": "No NPCs in combat. Use “NPC” to add an SRD creature or a custom one.",
+  "combat.attack": "Attack",
+  "combat.log.attack": "{name} attacks: {roll} damage ({die})",
+  "combat.log.initiative": "Initiative — all players roll DEX (success = before the enemies)"
 }

@@ -222,5 +222,15 @@
   "time.log.light": "Licht: Nutzung markieren (Fackel/Laterne)",
   "time.log.encounter": "Begegnungswurf {roll}: {result}",
   "time.log.encHour": "... zur {hour}. Stunde der Wache",
-  "time.log.watch": "Neue Wache — Tag {day}, Wache {watch}"
+  "time.log.watch": "Neue Wache — Tag {day}, Wache {watch}",
+  "combat.title": "Kampf & NSC",
+  "combat.round": "Runde",
+  "combat.initiative": "Initiative",
+  "combat.addNpc": "NSC",
+  "combat.add": "Hinzufuegen",
+  "combat.customName": "Eigener NSC",
+  "combat.empty": "Keine NSC im Kampf. Ueber „NSC“ eine Kreatur aus dem SRD oder frei hinzufuegen.",
+  "combat.attack": "Angriff",
+  "combat.log.attack": "{name} greift an: {roll} Schaden ({die})",
+  "combat.log.initiative": "Initiative — alle Spieler wuerfeln DEX (Erfolg = vor den Gegnern)"
 }

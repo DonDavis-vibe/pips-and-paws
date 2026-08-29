@@ -101,11 +101,12 @@ export default function App() {
       );
     } else if (cmd === GM_SAVE) {
       const r = rollSave(character[gmCommand.attr]?.current ?? 0);
+      const prefix = gmCommand.reason === 'initiative' ? `${t('combat.initiative')}: ` : '';
       notify(
-        `${t('dice.saveVs', { attr: t(`attr.${gmCommand.attr}`) })} — d20 ${r.d} ≤ ${r.target} · ${r.ok ? t('dice.success') : t('dice.fail')}`,
+        `${prefix}${t('dice.saveVs', { attr: t(`attr.${gmCommand.attr}`) })} — d20 ${r.d} ≤ ${r.target} · ${r.ok ? t('dice.success') : t('dice.fail')}`,
         r.ok ? 'ok' : 'bad',
       );
-      sendEvent({ kind: 'save', attr: gmCommand.attr, roll: r.d, target: r.target, ok: r.ok });
+      sendEvent({ kind: 'save', attr: gmCommand.attr, roll: r.d, target: r.target, ok: r.ok, reason: gmCommand.reason });
     } else if (cmd === GM_XP) {
       setCharacter((c) => {
         const xp = Math.max(0, (c.xp || 0) + gmCommand.amount);

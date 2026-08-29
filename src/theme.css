@@ -1356,6 +1356,63 @@ body {
   font-size: 13px;
 }
 
+/* ---- Kampf-Tracker ---- */
+.combat-add {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.combat-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
+
+.combat-npc {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--bad);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.combat-npc.npc-dead {
+  opacity: 0.5;
+  border-left-color: var(--ink-dim);
+}
+
+.combat-npc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.combat-npc-top strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.combat-npc-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.combat-npc-note {
+  line-height: 1.35;
+}
+
 /* ---- Tischmitte ---- */
 .stash-count {
   font-size: 12px;

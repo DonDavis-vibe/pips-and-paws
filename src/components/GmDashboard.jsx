@@ -3,7 +3,8 @@ import { useLang, loc } from '../i18n/index.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
 import SharedStash from './SharedStash.jsx';
 import GmTimeTracker from './GmTimeTracker.jsx';
-import { GM_BROADCAST } from '../multiplayer/protocol.js';
+import GmCombatTracker from './GmCombatTracker.jsx';
+import { GM_BROADCAST, GM_SAVE } from '../multiplayer/protocol.js';
 import { rollDice, rollD66 } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
 
@@ -22,7 +23,8 @@ function formatEntry(e, t) {
   if (e.kind === 'event' && e.ev) {
     const ev = e.ev;
     if (ev.kind === 'save') {
-      return `${e.playerName} · ${t('dice.saveVs', { attr: t(`attr.${ev.attr}`) })} — d20 ${ev.roll} ≤ ${ev.target} · ${ev.ok ? t('dice.success') : t('dice.fail')}`;
+      const tag = ev.reason === 'initiative' ? `${t('combat.initiative')} · ` : '';
+      return `${e.playerName} · ${tag}${t('dice.saveVs', { attr: t(`attr.${ev.attr}`) })} — d20 ${ev.roll} ≤ ${ev.target} · ${ev.ok ? t('dice.success') : t('dice.fail')}`;
     }
     if (ev.kind === 'roll') {
       return `${e.playerName} · ${ev.label}: ${ev.value}`;
@@ -111,6 +113,14 @@ export default function GmDashboard({ mp }) {
       </section>
 
       <GmTimeTracker onLog={(key, vars) => mp.logGmAction({ key, vars })} />
+
+      <GmCombatTracker
+        onLog={(key, vars) => mp.logGmAction({ key, vars })}
+        onInitiative={() => {
+          mp.sendGmCommand(null, { cmd: GM_SAVE, attr: 'dex', reason: 'initiative' });
+          mp.logGmAction({ key: 'combat.log.initiative', vars: {} });
+        }}
+      />
 
       <SharedStash
         mode="gm"
