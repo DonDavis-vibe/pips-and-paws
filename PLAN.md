@@ -15,6 +15,10 @@ inkl. SL gibt Item/EP/Zustand. Live: <https://dondavis-vibe.github.io/pips-and-p
 Der SL hat damit alles fürs Führen einer Runde (Werte sehen, Schaden/Heilen/EP/Zustand/Item geben,
 Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kampf, Notizen, Sitzung sichern).
 
+**Discord-Webhook** (optional, wie in den anderen Tools): im Multiplayer-Menü einklappbar. Würfe und
+Ereignisse werden in einen Discord-Kanal gespiegelt (Maus-Name als Absender, farbcodierte Embeds).
+URL nur im localStorage, nicht in der Charakterdatei. SL kann den Webhook an die Runde verteilen.
+
 ---
 
 ## 1. Kernentscheidungen (TL;DR)
