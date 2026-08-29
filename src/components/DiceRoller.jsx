@@ -3,43 +3,71 @@ import { Dices, Trash2 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { rollDice, rollD66, rollSave } from '../rules/dice.js';
 import { shareRoll, shareSave } from '../utils/discord.js';
+import { RollButton, DiceStage } from './DiceKit.jsx';
 
 export default function DiceRoller({ character, onEvent }) {
   const { t } = useLang();
   const [log, setLog] = useState([]);
+  const [result, setResult] = useState(null);
 
-  const push = (entry) => {
+  const record = (logEntry, stage) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setLog((prev) => [{ id, ...entry }, ...prev].slice(0, 20));
+    setResult({ id, ...stage });
+    setLog((prev) => [{ id, ...logEntry }, ...prev].slice(0, 20));
   };
 
   const who = character.name || t('app.title');
 
-  const rollBasic = (sides, count = 1) => {
-    const { dice, total } = rollDice(count, sides);
-    const label = `${count}W${sides}`;
-    push({ kind: 'plain', label, detail: dice.join(' + '), value: total });
-    if (onEvent) onEvent({ kind: 'roll', label, value: total });
-    shareRoll(who, label, total, dice.length > 1 ? dice.join(' + ') : '');
+  const rollD6 = () => {
+    const { total } = rollDice(1, 6);
+    record(
+      { label: t('dice.d6'), verdict: t('dice.rolled', { value: total }) },
+      { label: t('dice.d6'), value: total, max: 6 },
+    );
+    if (onEvent) onEvent({ kind: 'roll', label: '1W6', value: total });
+    shareRoll(who, '1W6', total, '');
   };
 
   const roll66 = () => {
     const r = rollD66();
-    push({ kind: 'plain', label: t('dice.d66'), detail: `${r.tens}${r.ones}`, value: r.value });
+    record(
+      { label: t('dice.d66'), verdict: t('dice.rolled', { value: r.value }) },
+      {
+        label: t('dice.d66'),
+        value: r.value,
+        max: 66,
+        parts: [
+          { value: r.tens, label: t('dice.tens') },
+          { value: r.ones, label: t('dice.ones') },
+        ],
+      },
+    );
     if (onEvent) onEvent({ kind: 'roll', label: t('dice.d66'), value: r.value });
     shareRoll(who, t('dice.d66'), r.value, '');
   };
 
   const save = (attrKey) => {
     const r = rollSave(character[attrKey].current);
-    push({
-      kind: 'save',
-      label: t('dice.saveVs', { attr: t(`attr.${attrKey}`) }),
-      detail: `d20 = ${r.d} ≤ ${r.target}`,
-      ok: r.ok,
-    });
+    const attr = t(`attr.${attrKey}`);
+    const tone = r.nat1 ? 'crit-good' : r.nat20 ? 'crit-bad' : r.ok ? 'ok' : 'bad';
+    const verdict = (r.nat1 && t('dice.nat1')) || (r.nat20 && t('dice.nat20'))
+      || (r.ok ? t('dice.success') : t('dice.fail'));
+    record(
+      { label: t('dice.saveVs', { attr }), verdict: `${r.d} · ${r.ok ? t('dice.success') : t('dice.fail')}`, ok: r.ok, tone },
+      {
+        label: t('dice.saveVs', { attr }),
+        value: r.d,
+        max: 20,
+        tone,
+        verdict,
+        parts: [
+          { value: r.d, label: t('dice.roll') },
+          { value: `≤ ${r.target}`, label: t('dice.target') },
+        ],
+      },
+    );
     if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok });
-    shareSave(who, t(`attr.${attrKey}`), r.d, r.target, r.ok);
+    shareSave(who, attr, r.d, r.target, r.ok);
   };
 
   return (
@@ -49,44 +77,52 @@ export default function DiceRoller({ character, onEvent }) {
           <Dices size={18} /> {t('dice.title')}
         </h2>
         {log.length ? (
-          <button type="button" className="icon-btn" onClick={() => setLog([])} aria-label={t('dice.clearLog')}>
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={() => { setLog([]); setResult(null); }}
+            aria-label={t('dice.clearLog')}
+          >
             <Trash2 size={15} />
           </button>
         ) : null}
       </div>
 
+      <DiceStage result={result} idleIcon={<Dices size={24} />} idleText={t('dice.stageIdle')} />
+
       <div className="dice-buttons">
-        <button type="button" className="btn" onClick={() => rollBasic(6)}>
-          {t('dice.d6')}
-        </button>
-        <button type="button" className="btn" onClick={roll66}>
-          {t('dice.d66')}
-        </button>
-        <span className="dice-sep">{t('dice.save')}:</span>
+        <RollButton sides={6} label={t('dice.d6')} kind="basic" onRoll={rollD6} />
+        <RollButton d66 label={t('dice.d66')} kind="basic" onRoll={roll66} />
+        <span className="dice-sep">{t('dice.save')}</span>
         {['str', 'dex', 'wil'].map((k) => (
-          <button key={k} type="button" className="btn btn-ghost" onClick={() => save(k)}>
-            {k.toUpperCase()}
-          </button>
+          <RollButton
+            key={k}
+            sides={20}
+            label={k.toUpperCase()}
+            kind="save"
+            title={t('dice.saveVs', { attr: t(`attr.${k}`) })}
+            onRoll={() => save(k)}
+          />
         ))}
       </div>
 
-      <ul className="dice-log">
-        {log.length === 0 ? (
-          <li className="dice-empty">{t('dice.emptyLog')}</li>
-        ) : (
-          log.map((e) => (
-            <li key={e.id} className={e.kind === 'save' ? (e.ok ? 'roll-ok' : 'roll-bad') : ''}>
+      {log.length === 0 ? (
+        <p className="hint dice-hint">{t('dice.emptyLog')}</p>
+      ) : (
+        <ul className="dice-log">
+          {log.map((e) => (
+            <li
+              key={e.id}
+              className={`${e.ok === true ? 'roll-ok' : e.ok === false ? 'roll-bad' : ''}${
+                e.tone === 'crit-good' ? ' roll-crit-good' : e.tone === 'crit-bad' ? ' roll-crit-bad' : ''
+              }`}
+            >
               <strong>{e.label}</strong>
-              <span className="dice-detail">{e.detail}</span>
-              {e.kind === 'save' ? (
-                <span className="dice-verdict">{e.ok ? t('dice.success') : t('dice.fail')}</span>
-              ) : (
-                <span className="dice-verdict">{t('dice.rolled', { value: e.value })}</span>
-              )}
+              <span className="dice-verdict">{e.verdict}</span>
             </li>
-          ))
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

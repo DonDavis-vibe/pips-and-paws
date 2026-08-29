@@ -1,6 +1,7 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Users, ScrollText, Megaphone, Dices, Save, FolderOpen } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
+import { RollButton, DiceStage } from './DiceKit.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
 import SharedStash from './SharedStash.jsx';
 import GmTimeTracker from './GmTimeTracker.jsx';
@@ -41,33 +42,41 @@ function formatEntry(e, t) {
 
 function GmDiceBar({ onRoll }) {
   const { t } = useLang();
+  const [result, setResult] = useState(null);
+  const dieLabel = (sides) => `${t('dice.dieLetter')}${sides}`;
+  const stamp = () => `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+  const rollN = (sides) => {
+    const r = rollDice(1, sides);
+    setResult({ id: stamp(), label: dieLabel(sides), value: r.total, max: sides });
+    onRoll(dieLabel(sides), r.total);
+  };
+
+  const roll66 = () => {
+    const r = rollD66();
+    setResult({
+      id: stamp(),
+      label: t('dice.d66'),
+      value: r.value,
+      max: 66,
+      parts: [
+        { value: r.tens, label: t('dice.tens') },
+        { value: r.ones, label: t('dice.ones') },
+      ],
+    });
+    onRoll(t('dice.d66'), r.value);
+  };
+
   return (
     <div className="gm-dice-bar">
-      <Dices size={15} />
-      <span className="gm-save-label">{t('gm.roll')}:</span>
-      {[6, 8, 10, 12, 20].map((sides) => (
-        <button
-          key={sides}
-          type="button"
-          className="btn btn-sm btn-ghost"
-          onClick={() => {
-            const r = rollDice(1, sides);
-            onRoll(`W${sides}`, r.total);
-          }}
-        >
-          W{sides}
-        </button>
-      ))}
-      <button
-        type="button"
-        className="btn btn-sm btn-ghost"
-        onClick={() => {
-          const r = rollD66();
-          onRoll('W66', r.value);
-        }}
-      >
-        W66
-      </button>
+      <div className="gm-dice-btns">
+        <span className="gm-save-label">{t('gm.roll')}</span>
+        {[6, 8, 10, 12, 20].map((sides) => (
+          <RollButton key={sides} sides={sides} label={dieLabel(sides)} kind="gm" onRoll={() => rollN(sides)} />
+        ))}
+        <RollButton d66 label={t('dice.d66')} kind="gm" onRoll={roll66} />
+      </div>
+      <DiceStage result={result} compact idleIcon={<Dices size={16} />} />
     </div>
   );
 }
