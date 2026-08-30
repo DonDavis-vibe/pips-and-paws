@@ -31,10 +31,49 @@
   --shadow-lg: 0 5px 14px rgba(45, 30, 14, 0.16), 0 34px 60px -16px rgba(45, 30, 14, 0.36);
   --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 38%, transparent);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  --grain-opacity: 1;
+  --vignette: radial-gradient(120% 90% at 50% 40%, transparent 55%, color-mix(in srgb, var(--ink) 16%, transparent) 130%);
+  --brand-ring: inset 0 1px 0 var(--hi);
+  color-scheme: light;
+}
+
+/* Dunkel: per Systemeinstellung ODER manuell gewaehlt.
+   Ein Inline-Skript in index.html setzt data-theme vor dem ersten Paint. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #191410;
+  --bg-tint: #241d15ee;
+  --bg-panel: #2c251c;
+  --bg-raise: #362d21;
+  --bg-sunk: #14100c;
+  --ink: #f3e9d6;
+  --ink-dim: #b3a081;
+  --ink-faint: #8a7961;
+  --line: #4c3f2f;
+  --line-strong: #6b5942;
+  --accent: #e79a5c;
+  --accent-soft: #e08a44;
+  --accent-deep: #f0b083;
+  --accent-ink: #21160d;
+  --accent-2: #64b6a4;
+  --accent-2-soft: #7fc7b7;
+  --gold: #e0b160;
+  --gold-soft: #ecc887;
+  --ok: #79bd89;
+  --bad: #e98a84;
+  --warn: #e0aa63;
+  --hi: color-mix(in srgb, #fff 8%, transparent);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 12px 30px -8px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.55), 0 32px 64px -14px rgba(0, 0, 0, 0.7);
+  --grain-opacity: 0.92;
+  --vignette: radial-gradient(120% 90% at 50% 35%, transparent 45%, rgba(0, 0, 0, 0.5) 120%);
+  --brand-ring: 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
     --bg: #191410;
     --bg-tint: #241d15ee;
     --bg-panel: #2c251c;
@@ -60,6 +99,9 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
     --shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 12px 30px -8px rgba(0, 0, 0, 0.55);
     --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.55), 0 32px 64px -14px rgba(0, 0, 0, 0.7);
+    --grain-opacity: 0.92;
+    --vignette: radial-gradient(120% 90% at 50% 35%, transparent 45%, rgba(0, 0, 0, 0.5) 120%);
+    --brand-ring: 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent);
   }
 }
 
@@ -83,6 +125,7 @@ body::before {
     radial-gradient(1000px 900px at 50% 116%, color-mix(in srgb, var(--gold) 15%, transparent), transparent 62%),
     var(--grain);
   background-size: cover, cover, cover, 160px 160px;
+  opacity: var(--grain-opacity);
 }
 
 body::after {
@@ -91,17 +134,7 @@ body::after {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(120% 90% at 50% 40%, transparent 55%, color-mix(in srgb, var(--ink) 16%, transparent) 130%);
-}
-
-@media (prefers-color-scheme: dark) {
-  body::after {
-    background: radial-gradient(120% 90% at 50% 35%, transparent 45%, rgba(0, 0, 0, 0.5) 120%);
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  body::before { opacity: 0.92; }
+  background: var(--vignette);
 }
 
 ::selection {
@@ -213,7 +246,7 @@ summary,
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow), inset 0 0 0 1px var(--hi);
+  box-shadow: var(--shadow), var(--brand-ring);
 }
 
 .brand-mark img {
@@ -223,9 +256,6 @@ summary,
   display: block;
 }
 
-@media (prefers-color-scheme: dark) {
-  .brand-mark { box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent); }
-}
 
 .brand-title {
   font-family: var(--font-display);

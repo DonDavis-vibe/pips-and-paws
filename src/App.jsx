@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Upload, Sparkles, Languages, CircleHelp } from 'lucide-react';
+import {
+  Download, Upload, Sparkles, Languages, CircleHelp, Monitor, Sun, Moon,
+} from 'lucide-react';
 import { useLang, loc } from './i18n/index.jsx';
+import { useTheme } from './useTheme.js';
 import {
   blankCharacter, isBlank, normalizeCharacter, levelForXp, gritForLevel,
 } from './rules/character.js';
@@ -28,6 +31,7 @@ const STORAGE_KEY = 'pips-paws-character-v1';
 
 export default function App() {
   const { t, lang, setLang } = useLang();
+  const { theme, cycle: cycleTheme } = useTheme();
   const mp = useMultiplayer();
 
   const [character, setCharacter] = useState(() => {
@@ -216,6 +220,15 @@ export default function App() {
               />
             </>
           ) : null}
+          <button
+            type="button"
+            className="btn btn-ghost btn-icon-only"
+            onClick={cycleTheme}
+            aria-label={`${t('header.theme')}: ${t(`theme.${theme}`)}`}
+            title={`${t('header.theme')}: ${t(`theme.${theme}`)}`}
+          >
+            {theme === 'system' ? <Monitor size={16} /> : theme === 'light' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
           <button
             type="button"
             className="btn btn-ghost btn-icon-only"

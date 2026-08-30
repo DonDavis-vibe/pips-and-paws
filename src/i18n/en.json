@@ -267,6 +267,10 @@
   "player.gm.webhookShared": "The GM shared the Discord channel.",
 
   "header.help": "Help",
+  "header.theme": "Theme",
+  "theme.system": "System",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
   "footer.help": "Help & quick guide",
   "hint.save": "Save: roll d20. Equal to or under the current value is a success. Damage lowers that value, and with it your odds.",
   "hint.pips": "Pips are Mausritter's currency — pay, loot, purchases. Tracked separately from experience.",

@@ -267,6 +267,10 @@
   "player.gm.webhookShared": "Spielleiter hat den Discord-Kanal geteilt.",
 
   "header.help": "Hilfe",
+  "header.theme": "Design",
+  "theme.system": "System",
+  "theme.light": "Hell",
+  "theme.dark": "Dunkel",
   "footer.help": "Hilfe & Kurzanleitung",
   "hint.save": "Rettungswurf: W20 wuerfeln. Gleich oder kleiner als der aktuelle Wert ist ein Erfolg. Schaden senkt diesen Wert und damit deine Chance.",
   "hint.pips": "Pips sind die Waehrung von Mausritter — Sold, Beute, Einkauf. Getrennt von der Erfahrung.",
