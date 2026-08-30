@@ -5,3 +5,8 @@ dist
 
 # Persoenliche Referenzen (SRD-Markdown, PDFs, Notizen) — nur lokal, nicht ins Repo.
 reference/
+
+# img/ ist ein lokaler Arbeitsordner fuer Quell-/Referenzbilder.
+# Nur die eine Holzschnitt-Quelle, aus der die App-Assets abgeleitet sind, gehoert ins Repo.
+img/*
+!img/logo-source.jpeg

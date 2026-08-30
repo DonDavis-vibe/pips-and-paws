@@ -5,6 +5,7 @@ import { readJSON, writeJSON } from '../utils/storage.js';
 import { gritForLevel, ALL_SLOTS, PAW_SLOTS } from '../rules/character.js';
 import { CONDITION_CATALOG } from '../data/items.js';
 import AddItemMenu from './AddItemMenu.jsx';
+import Portrait from './Portrait.jsx';
 import {
   GM_DAMAGE, GM_HEAL, GM_PIPS, GM_XP, GM_SAVE, GM_GIVE, GM_CONDITION, GM_WHISPER,
 } from '../multiplayer/protocol.js';
@@ -48,16 +49,17 @@ export default function GmPlayerCard({ player, onCommand }) {
   return (
     <div className="gm-card">
       <div className="gm-card-head">
+        <Portrait src={c.portrait} size="sm" />
         <div className="gm-card-id">
           <strong>{c.name || '?'}</strong>
           <span className="gm-bg">
             {c.background || ''}
             {c.disposition ? ` · ${c.disposition}` : ''}
           </span>
+          <span className="gm-lvl">
+            {t('res.level')} {c.level || 1} · {t('res.grit')} {grit} · {t('res.xp')} {c.xp ?? 0}
+          </span>
         </div>
-        <span className="gm-lvl">
-          {t('res.level')} {c.level || 1} · {t('res.grit')} {grit} · {t('res.xp')} {c.xp ?? 0}
-        </span>
       </div>
 
       <div className="gm-hp">

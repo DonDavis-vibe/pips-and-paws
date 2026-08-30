@@ -14,6 +14,7 @@ import AddItemMenu from './AddItemMenu.jsx';
 import DiceRoller from './DiceRoller.jsx';
 import SharedStash from './SharedStash.jsx';
 import PartyLog from './PartyLog.jsx';
+import Portrait from './Portrait.jsx';
 import { tryMove, addItem, removeItem } from '../rules/inventory.js';
 import { rollSave } from '../rules/dice.js';
 import { shareSave } from '../utils/discord.js';
@@ -84,28 +85,35 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
             <User size={18} /> {t('sheet.identity')}
           </h2>
         </div>
-        <div className="identity-grid">
-          <Field label={t('sheet.name')} className="field-hero">
-            <TextInput value={character.name} onChange={(v) => patch({ name: v })} placeholder="…" />
-          </Field>
-          <Field label={t('sheet.player')}>
-            <TextInput value={character.playerName} onChange={(v) => patch({ playerName: v })} />
-          </Field>
-          <Field label={t('sheet.background')}>
-            <TextInput value={character.background} onChange={(v) => patch({ background: v })} />
-          </Field>
-          <Field label={t('sheet.birthsign')}>
-            <TextInput value={character.birthsign} onChange={(v) => patch({ birthsign: v })} />
-          </Field>
-          <Field label={t('sheet.disposition')}>
-            <TextInput value={character.disposition} onChange={(v) => patch({ disposition: v })} />
-          </Field>
-          <Field label={t('sheet.coat')}>
-            <TextInput value={character.coat} onChange={(v) => patch({ coat: v })} />
-          </Field>
-          <Field label={t('sheet.detail')}>
-            <TextInput value={character.detail} onChange={(v) => patch({ detail: v })} />
-          </Field>
+        <div className="identity-layout">
+          <Portrait
+            src={character.portrait}
+            onChange={(p) => patch({ portrait: p })}
+            notify={notify}
+          />
+          <div className="identity-grid">
+            <Field label={t('sheet.name')} className="field-hero">
+              <TextInput value={character.name} onChange={(v) => patch({ name: v })} placeholder="…" />
+            </Field>
+            <Field label={t('sheet.player')}>
+              <TextInput value={character.playerName} onChange={(v) => patch({ playerName: v })} />
+            </Field>
+            <Field label={t('sheet.background')}>
+              <TextInput value={character.background} onChange={(v) => patch({ background: v })} />
+            </Field>
+            <Field label={t('sheet.birthsign')}>
+              <TextInput value={character.birthsign} onChange={(v) => patch({ birthsign: v })} />
+            </Field>
+            <Field label={t('sheet.disposition')}>
+              <TextInput value={character.disposition} onChange={(v) => patch({ disposition: v })} />
+            </Field>
+            <Field label={t('sheet.coat')}>
+              <TextInput value={character.coat} onChange={(v) => patch({ coat: v })} />
+            </Field>
+            <Field label={t('sheet.detail')}>
+              <TextInput value={character.detail} onChange={(v) => patch({ detail: v })} />
+            </Field>
+          </div>
         </div>
       </section>
 

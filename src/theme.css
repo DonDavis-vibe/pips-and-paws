@@ -513,11 +513,91 @@ summary,
   box-shadow: var(--ring);
 }
 
+.identity-layout {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.identity-layout .identity-grid {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .identity-layout { flex-direction: column; align-items: center; }
+  .identity-layout .identity-grid { width: 100%; }
+}
+
 .identity-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px 14px;
 }
+
+/* ---- Portrait ---- */
+.portrait {
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-sunk);
+  box-shadow: var(--shadow), inset 0 0 0 1px var(--hi);
+}
+
+.portrait-md { width: 116px; height: 116px; }
+.portrait-sm { width: 52px; height: 52px; border-radius: 10px; }
+
+.portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portrait img.portrait-is-placeholder { opacity: 0.85; }
+
+.portrait-edit,
+.portrait-remove {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  backdrop-filter: blur(3px);
+  color: var(--ink);
+  border-radius: 8px;
+}
+
+.portrait-edit {
+  right: 5px;
+  bottom: 5px;
+  width: 26px;
+  height: 26px;
+  opacity: 0;
+}
+
+.portrait-sm .portrait-edit { width: 20px; height: 20px; right: 3px; bottom: 3px; border-radius: 6px; }
+
+.portrait-editable:hover .portrait-edit,
+.portrait-edit:focus-visible { opacity: 1; }
+
+.portrait-remove {
+  right: 5px;
+  top: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  opacity: 0;
+}
+
+.portrait-editable:hover .portrait-remove,
+.portrait-remove:focus-visible { opacity: 1; }
+
+.portrait-editable { cursor: default; }
+.portrait-editable .portrait-edit:hover { border-color: var(--accent); color: var(--accent); }
 
 .identity-grid .field-hero {
   grid-column: 1 / -1;
@@ -2151,9 +2231,20 @@ summary,
 
 .gm-card-head {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
+}
+
+.gm-card-id {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.gm-card-id > strong {
+  font-family: var(--font-display);
+  font-size: 14px;
 }
 
 .gm-bg {
@@ -2164,8 +2255,7 @@ summary,
 
 .gm-lvl {
   font-size: 11px;
-  color: var(--ink-dim);
-  white-space: nowrap;
+  color: var(--ink-faint);
 }
 
 .gm-hp-row {

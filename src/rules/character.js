@@ -38,6 +38,7 @@ export function blankCharacter() {
     schemaVersion: SCHEMA_VERSION,
     id: newId('c'),
     name: '',
+    portrait: '',
     playerName: '',
     background: '',
     birthsign: '',
@@ -76,6 +77,7 @@ export function normalizeCharacter(raw) {
   }
   merged.inventory = { ...base.inventory, ...raw.inventory };
   merged.items = raw.items && typeof raw.items === 'object' ? raw.items : {};
+  merged.portrait = typeof raw.portrait === 'string' ? raw.portrait : '';
   merged.schemaVersion = SCHEMA_VERSION;
   return merged;
 }
