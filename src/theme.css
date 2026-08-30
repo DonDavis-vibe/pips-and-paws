@@ -2093,6 +2093,27 @@ summary,
   color: var(--accent);
 }
 
+.footer-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 2px;
+}
+
+.footer-legal-links a {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--ink-dim);
+}
+
+.footer-legal-links a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 @media (max-width: 720px) {
   .footer-grid {
     grid-template-columns: 1fr;

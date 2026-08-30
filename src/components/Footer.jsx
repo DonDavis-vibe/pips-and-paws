@@ -70,6 +70,12 @@ export default function Footer({ onHelp }) {
             {d1post}
           </p>
           <p>{t('footer.disclaimer2')}</p>
+          {typeof window !== 'undefined' && window.location.protocol !== 'file:' ? (
+            <p className="footer-legal-links">
+              <a className="footer-link" href="impressum.html#impressum">{t('footer.impressum')}</a>
+              <a className="footer-link" href="impressum.html#datenschutz">{t('footer.privacy')}</a>
+            </p>
+          ) : null}
         </div>
       </div>
     </footer>

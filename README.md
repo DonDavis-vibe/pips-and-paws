@@ -57,6 +57,13 @@ Logo, Social-Card und Bild-Platzhalter sind aus einer eigenen KI-Generierung
 abgeleitet (`img/logo-source.jpeg`), kein offizielles Mausritter-Artwork und kein
 Verlagslogo. `img/` ist sonst ein lokaler Arbeitsordner (gitignored).
 
+## Rechtliches
+
+[Impressum &amp; Datenschutzerklärung](https://dondavis-vibe.github.io/pips-and-paws/impressum.html)
+(eine Seite, `public/impressum.html`, im Footer verlinkt). Der Datenschutz-Teil
+beschreibt den tatsächlichen technischen Aufbau — bei Änderungen an externen
+Diensten oder gespeicherten Schlüsseln anpassen.
+
 ## Lizenz
 
 Code: MIT (`LICENSE`).

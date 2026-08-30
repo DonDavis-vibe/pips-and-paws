@@ -10,3 +10,6 @@ reference/
 # Nur die eine Holzschnitt-Quelle, aus der die App-Assets abgeleitet sind, gehoert ins Repo.
 img/*
 !img/logo-source.jpeg
+
+# Rechtstexte-Quellen (die fertigen Seiten liegen in public/)
+imp/
