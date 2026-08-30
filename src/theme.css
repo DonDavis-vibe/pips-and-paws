@@ -1272,6 +1272,33 @@ summary,
 .dice-log li.roll-bad { border-left-color: var(--bad); }
 .dice-log li.roll-crit-good { border-left-color: var(--gold); }
 .dice-log li.roll-crit-bad { border-left-color: var(--bad); }
+.dice-log li.roll-say { border-left-color: var(--accent-2); font-style: italic; }
+
+/* ---- Shared party log ---- */
+.party-log-panel .panel-head { margin-bottom: 12px; }
+
+.party-log {
+  margin-top: 0;
+  max-height: 260px;
+}
+
+.gm-share-log {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+
+.gm-share-log input {
+  accent-color: var(--accent-2);
+  width: 15px;
+  height: 15px;
+}
 
 .dice-log strong { font-family: var(--font-display); font-weight: 600; }
 

@@ -13,11 +13,12 @@ import ItemCard from './ItemCard.jsx';
 import AddItemMenu from './AddItemMenu.jsx';
 import DiceRoller from './DiceRoller.jsx';
 import SharedStash from './SharedStash.jsx';
+import PartyLog from './PartyLog.jsx';
 import { tryMove, addItem, removeItem } from '../rules/inventory.js';
 import { rollSave } from '../rules/dice.js';
 import { shareSave } from '../utils/discord.js';
 
-export default function CharacterSheet({ character, setCharacter, notify, onEvent, stash }) {
+export default function CharacterSheet({ character, setCharacter, notify, onEvent, stash, partyLog }) {
   const { t } = useLang();
   const [activeId, setActiveId] = useState(null);
 
@@ -149,6 +150,8 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
       ) : null}
 
       <DiceRoller character={character} onEvent={onEvent} />
+
+      {partyLog ? <PartyLog entries={partyLog.entries} shared={partyLog.shared} /> : null}
 
       <section className="panel">
         <div className="panel-head">

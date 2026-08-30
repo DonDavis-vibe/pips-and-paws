@@ -14,6 +14,7 @@ import { rollDice, rollD66, rollReaction, rollTreasure } from '../rules/dice.js'
 import { CONDITION_CATALOG } from '../data/items.js';
 import { exportGmSession, importGmSession } from '../utils/gmSession.js';
 import { shareEvent } from '../utils/discord.js';
+import { formatLogEntry } from '../multiplayer/logFormat.js';
 
 const SHARE_KEYS = new Set([
   'gm.log.broadcast', 'gm.log.roll', 'combat.log.attack', 'combat.log.morale',
@@ -28,22 +29,7 @@ function cmdVars(cmd, name, lang) {
   return v;
 }
 
-function formatEntry(e, t) {
-  if (e.kind === 'system') return t(e.key, e.vars || {});
-  if (e.kind === 'say') return `${e.playerName}: ${e.text}`;
-  if (e.kind === 'gm') return t(e.key, e.vars || {});
-  if (e.kind === 'event' && e.ev) {
-    const ev = e.ev;
-    if (ev.kind === 'save') {
-      const tag = ev.reason === 'initiative' ? `${t('combat.initiative')} · ` : '';
-      return `${e.playerName} · ${tag}${t('dice.saveVs', { attr: t(`attr.${ev.attr}`) })} — d20 ${ev.roll} ≤ ${ev.target} · ${ev.ok ? t('dice.success') : t('dice.fail')}`;
-    }
-    if (ev.kind === 'roll') {
-      return `${e.playerName} · ${ev.label}: ${ev.value}`;
-    }
-  }
-  return JSON.stringify(e);
-}
+const formatEntry = formatLogEntry;
 
 function GmDiceBar({ onRoll }) {
   const { t } = useLang();
@@ -226,6 +212,14 @@ export default function GmDashboard({ mp, notify }) {
           <h2>
             <ScrollText size={18} /> {t('gm.liveLog')}
           </h2>
+          <label className="gm-share-log" title={t('gm.shareLog.hint')}>
+            <input
+              type="checkbox"
+              checked={mp.partyLog}
+              onChange={(e) => mp.setPartyLogShared(e.target.checked)}
+            />
+            {t('gm.shareLog')}
+          </label>
         </div>
         <ul className="dice-log">
           {mp.liveLog.length === 0 ? (

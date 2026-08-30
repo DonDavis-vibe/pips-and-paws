@@ -22,6 +22,8 @@ export const T_STASH_TAKE = 'stash/take'; // { itemId } Spieler will einen Gegen
 
 // Spielleiter -> Spieler
 export const T_STASH = 'stash'; // { items } vollstaendiger Stand der Tischmitte (Broadcast)
+export const T_LOG = 'log'; //     { entry } | { entries } geteilter Runden-Log (Host spiegelt)
+export const T_LOGCFG = 'logcfg'; // { shared } Host schaltet das geteilte Runden-Log an/aus
 export const T_GM = 'gmCommand'; // { cmd, ... }
 export const GM_SAVE = 'save'; //      { attr, reason }
 export const GM_DAMAGE = 'damage'; //  { amount, target: 'hp'|'str'|'dex'|'wil', source }

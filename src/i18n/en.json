@@ -134,6 +134,7 @@
   "mp.status.idTakenRetry": "Old room code not free yet. Wait a moment and host again.",
   "mp.log.started": "Session started — room code {code}",
   "mp.log.left": "{name} left the room.",
+  "mp.log.joined": "{name} joined.",
   "mp.log.serverLost": "Lost connection to the signalling server. Leave the dashboard and re-host.",
   "mp.log.serverBack": "Reconnected to the server.",
   "gm.dashboard": "GM dashboard",
@@ -324,5 +325,13 @@
   "rest.log.longAttr": "Long rest: +{n} to {attr}",
   "rest.log.longFull": "Long rest: already fully rested",
   "rest.log.full": "Full rest: HP and attributes restored",
-  "rest.noRation": "no ration in your pack"
+  "rest.noRation": "no ration in your pack",
+
+  "party.title": "Party log",
+  "party.show": "expand",
+  "party.hide": "collapse",
+  "party.empty": "Nothing yet.",
+  "party.off": "The GM isn't sharing the party log right now.",
+  "gm.shareLog": "Share the party log with players",
+  "gm.shareLog.hint": "Everyone's rolls and events show up in each player's party log."
 }

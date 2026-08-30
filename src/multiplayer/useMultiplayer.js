@@ -2,13 +2,21 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import {
   ROOM_PREFIX, JOIN_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
-  T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE,
+  T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG,
   GM_GIVE, GM_STASH_DENY,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
 import { readJSON, writeJSON, remove as removeStore } from '../utils/storage.js';
 
 const GM_STASH_KEY = 'pips-paws-gm-stash';
+const PARTY_LOG_KEY = 'pips-paws-party-log-on';
+
+// Welche Log-Eintraege der Host an die Spieler spiegelt (kein Fluestern, keine Rohdaten).
+const isShareable = (e) =>
+  e.kind === 'event'
+  || (e.kind === 'gm' && e.key !== 'gm.log.whisper')
+  || (e.kind === 'system'
+    && ['gm.log.stashDrop', 'gm.log.stashTake', 'mp.log.left', 'mp.log.joined'].includes(e.key));
 
 // Serverloses Multiplayer ueber WebRTC (PeerJS). Der Spielleiter ist Host & Autoritaet:
 // feste Peer-ID = Raum-Code, Spieler verbinden sich direkt. Muster aus dem
@@ -42,6 +50,8 @@ export function useMultiplayer() {
   const [liveLog, setLiveLog] = useState([]);
   const [gmCommand, setGmCommand] = useState(null); // Spieler: zuletzt empfangener SL-Befehl
   const [stash, setStash] = useState([]); // Tischmitte: beim SL kanonisch, bei Spielern eine Kopie
+  // Geteiltes Runden-Log: der SL schaltet es fuer die Runde an/aus, Spieler bekommen den Stand.
+  const [partyLog, setPartyLog] = useState(() => readJSON(PARTY_LOG_KEY, true) !== false);
 
   // Spiegel von `players` fuer synchrone Namens-Lookups ausserhalb von State-Updatern
   // (pushLog darf NIE in einem setState-Updater laufen — StrictMode ruft die doppelt auf).
@@ -51,6 +61,11 @@ export function useMultiplayer() {
   stashRef.current = stash;
   const roleRef = useRef(null);
   roleRef.current = role;
+  const partyLogRef = useRef(true);
+  partyLogRef.current = partyLog;
+  const knownPeersRef = useRef(new Set());
+  const liveLogRef = useRef([]);
+  liveLogRef.current = liveLog;
 
   const peerRef = useRef(null);
   const hostConnRef = useRef(null); // Spieler -> SL
@@ -65,8 +80,28 @@ export function useMultiplayer() {
   const seenEidsRef = useRef(new Set()); // Deduplizierung doppelt zugestellter Nachrichten
 
   const pushLog = useCallback((entry) => {
-    const id = uid();
-    setLiveLog((prev) => [{ id, time: Date.now(), ...entry }, ...prev].slice(0, 200));
+    const full = { id: uid(), time: Date.now(), ...entry };
+    setLiveLog((prev) => [full, ...prev].slice(0, 200));
+    if (roleRef.current === 'gm' && partyLogRef.current && isShareable(full)) {
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_LOG, eid: uid(), entry: full }); } catch { /* */ }
+        }
+      });
+    }
+  }, []);
+
+  // SL schaltet das geteilte Runden-Log fuer die Runde an/aus.
+  const setPartyLogShared = useCallback((on) => {
+    setPartyLog(on);
+    writeJSON(PARTY_LOG_KEY, on);
+    if (roleRef.current === 'gm') {
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_LOGCFG, eid: uid(), shared: on }); } catch { /* */ }
+        }
+      });
+    }
   }, []);
 
   // --- Tischmitte (SL ist Autoritaet, verteilt nach jeder Aenderung den kompletten Stand) ---
@@ -125,6 +160,7 @@ export function useMultiplayer() {
     setPlayers({});
     setLiveLog([]);
     setGmCommand(null);
+    knownPeersRef.current = new Set();
     stashRef.current = [];
     setStash([]);
   }, [cleanupPeer]);
@@ -187,6 +223,10 @@ export function useMultiplayer() {
         ...prev,
         [peerId]: { character: payload.character, items: payload.items || {}, lastSeen: Date.now() },
       }));
+      if (roleRef.current === 'gm' && !knownPeersRef.current.has(peerId) && payload.character?.name?.trim()) {
+        knownPeersRef.current.add(peerId);
+        pushLog({ kind: 'system', key: 'mp.log.joined', vars: { name: payload.character.name } });
+      }
     } else if (payload.t === T_EVENT) {
       pushLog({ kind: 'event', playerId: peerId, playerName: name, ev: payload.ev });
     } else if (payload.t === T_SAY) {
@@ -250,12 +290,21 @@ export function useMultiplayer() {
       }
       conn.on('open', () => {
         // Neu (wieder) verbundene Spieler bekommen den aktuellen Stand der Tischmitte
+        // und, wenn aktiv, das bisherige Runden-Log.
         try { conn.send({ t: T_STASH, items: stashRef.current }); } catch { /* */ }
+        try {
+          conn.send({ t: T_LOGCFG, eid: uid(), shared: partyLogRef.current });
+          if (partyLogRef.current) {
+            const backlog = liveLogRef.current.filter(isShareable).slice(0, 40);
+            if (backlog.length) conn.send({ t: T_LOG, eid: uid(), entries: backlog });
+          }
+        } catch { /* */ }
       });
       conn.on('data', (data) => handleIncoming(conn.peer, data));
       conn.on('close', () => {
         if (clientConnsRef.current[conn.peer] !== conn) return; // wurde bereits ersetzt
         delete clientConnsRef.current[conn.peer];
+        knownPeersRef.current.delete(conn.peer);
         const name = playersRef.current[conn.peer]?.character?.name;
         if (name) pushLog({ kind: 'system', key: 'mp.log.left', vars: { name } });
         setPlayers((prev) => {
@@ -323,6 +372,17 @@ export function useMultiplayer() {
       } else if (payload.t === T_GM) {
         // id vom Absender (eid) -> App entdedupliziert doppelt zugestellte Befehle
         setGmCommand({ ...payload, id: payload.eid ?? Date.now() + Math.random() });
+      } else if (payload.t === T_LOGCFG) {
+        setPartyLog(!!payload.shared);
+      } else if (payload.t === T_LOG) {
+        const incoming = payload.entries || (payload.entry ? [payload.entry] : []);
+        if (incoming.length) {
+          setLiveLog((prev) => {
+            const seen = new Set(prev.map((e) => e.id));
+            const add = incoming.filter((e) => e && e.id && !seen.has(e.id));
+            return add.length ? [...add, ...prev].sort((a, b) => b.time - a.time).slice(0, 200) : prev;
+          });
+        }
       }
     });
 
@@ -441,6 +501,8 @@ export function useMultiplayer() {
     statusMessage,
     players,
     liveLog,
+    partyLog,
+    setPartyLogShared,
     gmCommand,
     stash,
     hostSession,

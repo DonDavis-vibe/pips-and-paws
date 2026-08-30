@@ -134,6 +134,7 @@
   "mp.status.idTakenRetry": "Alter Raum-Code noch nicht frei. Kurz warten und erneut hosten.",
   "mp.log.started": "Sitzung gestartet — Raum-Code {code}",
   "mp.log.left": "{name} hat den Raum verlassen.",
+  "mp.log.joined": "{name} ist beigetreten.",
   "mp.log.serverLost": "Verbindung zum Signalling-Server verloren. Dashboard verlassen und neu hosten.",
   "mp.log.serverBack": "Verbindung zum Server wiederhergestellt.",
   "gm.dashboard": "Spielleiter-Dashboard",
@@ -324,5 +325,13 @@
   "rest.log.longAttr": "Lange Rast: +{n} auf {attr}",
   "rest.log.longFull": "Lange Rast: schon voll erholt",
   "rest.log.full": "Volle Rast: TP und Werte voll",
-  "rest.noRation": "keine Ration im Gepaeck"
+  "rest.noRation": "keine Ration im Gepaeck",
+
+  "party.title": "Runden-Log",
+  "party.show": "ausklappen",
+  "party.hide": "einklappen",
+  "party.empty": "Noch nichts passiert.",
+  "party.off": "Der Spielleiter teilt das Runden-Log gerade nicht.",
+  "gm.shareLog": "Runden-Log mit Spielern teilen",
+  "gm.shareLog.hint": "Wuerfe und Ereignisse aller am Tisch erscheinen bei jedem Spieler im Runden-Log."
 }

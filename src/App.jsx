@@ -243,6 +243,7 @@ export default function App() {
             notify={notify}
             onEvent={mp.role === 'player' ? sendEvent : null}
             stash={mp.role === 'player' ? { items: mp.stash, take: mp.stashTake, drop: mp.stashDrop } : null}
+            partyLog={mp.role === 'player' ? { entries: mp.liveLog, shared: mp.partyLog } : null}
           />
         )}
       </main>
