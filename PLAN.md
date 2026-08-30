@@ -1,6 +1,6 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-08-29
+Stand: 2026-08-30
 
 Arbeitstitel: **Pips & Paws** (siehe §15.4 — jederzeit änderbar).
 
@@ -18,6 +18,15 @@ Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kam
 **Discord-Webhook** (optional, wie in den anderen Tools): im Multiplayer-Menü einklappbar. Würfe und
 Ereignisse werden in einen Discord-Kanal gespiegelt (Maus-Name als Absender, farbcodierte Embeds).
 URL nur im localStorage, nicht in der Charakterdatei. SL kann den Webhook an die Runde verteilen.
+
+**Runde 2026-08-30:** eigenes Wappen-Logo aus KI-Holzschnitt (Ritter-Maus) + neue Social-Card;
+Charakterbilder (Upload, Platzhalter, Sync zum SL, im SL-Dashboard sichtbar); geteiltes Runden-Log
+im Multiplayer (SL schaltet frei, Host spiegelt an alle Spieler, Spieler-Panel einklappbar);
+einklappbare Panels auf Bogen + Dashboard (Zustand pro Panel gemerkt); Hell/Dunkel-Schalter
+(System/Hell/Dunkel, `data-theme`, Inline-Skript gegen Flackern); SL-Helfer: Vorteil/Nachteil beim
+Rettungswurf, Rast-Helfer, Reaktions-/Schatz-/Moralwurf; Würfeltool-Optik (SVG-Glyphen, Taumel-
+Animation, Ergebnis-Bühne); InfoHint per Portal (nicht mehr von Panels abgeschnitten); kleines
+Maus-Icon am Bogen-Kopf. `img/` nur lokal (bis auf die Holzschnitt-Quelle).
 
 **Hilfetexte:** [A] Hilfe-Modal (`?` in der Kopfzeile + Footer-Link) mit sieben Abschnitten (Was ist das,
 Speicherung & Datenschutz, Charakterbogen, Inventar, Multiplayer, SL-Werkzeuge, Regeln & Lizenz),
