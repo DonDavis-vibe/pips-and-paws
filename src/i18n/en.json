@@ -333,6 +333,8 @@
   "rest.log.full": "Full rest: HP and attributes restored",
   "rest.noRation": "no ration in your pack",
 
+  "panel.collapse": "Collapse",
+  "panel.expand": "Expand",
   "party.title": "Party log",
   "party.show": "expand",
   "party.hide": "collapse",

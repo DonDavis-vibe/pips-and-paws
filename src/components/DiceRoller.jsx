@@ -4,6 +4,7 @@ import { useLang } from '../i18n/index.jsx';
 import { rollDice, rollD66, rollSave } from '../rules/dice.js';
 import { shareRoll, shareSave } from '../utils/discord.js';
 import { RollButton, DiceStage } from './DiceKit.jsx';
+import Panel from './Panel.jsx';
 
 const SAVE_MODES = ['disadv', 'normal', 'adv'];
 
@@ -80,23 +81,22 @@ export default function DiceRoller({ character, onEvent }) {
   };
 
   return (
-    <section className="panel dice-panel">
-      <div className="panel-head">
-        <h2>
-          <Dices size={18} /> {t('dice.title')}
-        </h2>
-        {log.length ? (
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={() => { setLog([]); setResult(null); }}
-            aria-label={t('dice.clearLog')}
-          >
-            <Trash2 size={15} />
-          </button>
-        ) : null}
-      </div>
-
+    <Panel
+      id="dice"
+      icon={Dices}
+      title={t('dice.title')}
+      className="dice-panel"
+      right={log.length ? (
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => { setLog([]); setResult(null); }}
+          aria-label={t('dice.clearLog')}
+        >
+          <Trash2 size={15} />
+        </button>
+      ) : null}
+    >
       <DiceStage result={result} idleIcon={<Dices size={24} />} idleText={t('dice.stageIdle')} />
 
       <div className="dice-buttons">
@@ -146,6 +146,6 @@ export default function DiceRoller({ character, onEvent }) {
           ))}
         </ul>
       )}
-    </section>
+    </Panel>
   );
 }

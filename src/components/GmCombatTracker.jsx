@@ -5,6 +5,7 @@ import { readJSON, writeJSON } from '../utils/storage.js';
 import { rollDie, rollSave } from '../rules/dice.js';
 import { CREATURES, CREATURE_BY_KEY } from '../data/creatures.js';
 import { Field, TextInput, Stepper } from './ui.jsx';
+import Panel from './Panel.jsx';
 
 const KEY = 'pips-paws-gm-combat';
 const fresh = () => ({ round: 0, npcs: [] });
@@ -80,11 +81,12 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
   };
 
   return (
-    <section className="panel combat-panel">
-      <div className="panel-head">
-        <h2>
-          <Swords size={18} /> {t('combat.title')}
-        </h2>
+    <Panel
+      id="gm-combat"
+      icon={Swords}
+      title={t('combat.title')}
+      className="combat-panel"
+      right={(
         <div className="stash-head-actions">
           <button type="button" className="btn btn-sm btn-ghost" onClick={onInitiative}>
             <ListOrdered size={14} /> {t('combat.initiative')}
@@ -93,8 +95,8 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
             <RotateCcw size={15} />
           </button>
         </div>
-      </div>
-
+      )}
+    >
       <div className="time-row">
         <div className="time-clock">
           <span>{t('combat.round')}</span>
@@ -190,6 +192,6 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
           })}
         </div>
       )}
-    </section>
+    </Panel>
   );
 }

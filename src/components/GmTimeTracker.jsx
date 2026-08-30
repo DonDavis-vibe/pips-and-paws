@@ -3,6 +3,7 @@ import { Timer, Flame, Dice5, RotateCcw, Minus, Plus } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { rollDie } from '../rules/dice.js';
+import Panel from './Panel.jsx';
 
 const KEY = 'pips-paws-gm-tracker';
 const TURNS_PER_WATCH = 36;
@@ -83,16 +84,17 @@ export default function GmTimeTracker({ onLog }) {
   const inWatch = s.turn % TURNS_PER_WATCH;
 
   return (
-    <section className="panel time-panel">
-      <div className="panel-head">
-        <h2>
-          <Timer size={18} /> {t('time.title')}
-        </h2>
+    <Panel
+      id="gm-time"
+      icon={Timer}
+      title={t('time.title')}
+      className="time-panel"
+      right={(
         <button type="button" className="icon-btn" onClick={() => commit(fresh())} aria-label={t('time.reset')} title={t('time.reset')}>
           <RotateCcw size={15} />
         </button>
-      </div>
-
+      )}
+    >
       <div className="time-row">
         <div className="time-clock">
           <span>
@@ -142,6 +144,6 @@ export default function GmTimeTracker({ onLog }) {
           </button>
         ) : null}
       </div>
-    </section>
+    </Panel>
   );
 }

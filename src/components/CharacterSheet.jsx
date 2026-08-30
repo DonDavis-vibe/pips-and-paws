@@ -15,6 +15,7 @@ import DiceRoller from './DiceRoller.jsx';
 import SharedStash from './SharedStash.jsx';
 import PartyLog from './PartyLog.jsx';
 import Portrait from './Portrait.jsx';
+import Panel from './Panel.jsx';
 import { tryMove, addItem, removeItem } from '../rules/inventory.js';
 import { rollSave } from '../rules/dice.js';
 import { shareSave } from '../utils/discord.js';
@@ -79,12 +80,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
 
   return (
     <div className="sheet">
-      <section className="panel">
-        <div className="panel-head">
-          <h2>
-            <User size={18} /> {t('sheet.identity')}
-          </h2>
-        </div>
+      <Panel id="identity" icon={User} title={t('sheet.identity')}>
         <div className="identity-layout">
           <Portrait
             src={character.portrait}
@@ -115,7 +111,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
             </Field>
           </div>
         </div>
-      </section>
+      </Panel>
 
       <section className="panel">
         <div className="attr-grid">
@@ -130,13 +126,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
         <RestControls character={character} setCharacter={setCharacter} notify={notify} />
       </section>
 
-      <section className="panel">
-        <div className="panel-head">
-          <h2>
-            <Backpack size={18} /> {t('inv.title')}
-          </h2>
-          <AddItemMenu onAdd={onAdd} />
-        </div>
+      <Panel id="inventory" icon={Backpack} title={t('inv.title')} right={<AddItemMenu onAdd={onAdd} />}>
         <DndContext
           sensors={sensors}
           onDragStart={({ active }) => setActiveId(active.id)}
@@ -151,7 +141,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
           />
           <DragOverlay>{activeItem ? <ItemCard item={activeItem} overlay /> : null}</DragOverlay>
         </DndContext>
-      </section>
+      </Panel>
 
       {stash ? (
         <SharedStash mode="player" items={stash.items} onTake={(id) => stash.take(id)} />
@@ -161,10 +151,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
 
       {partyLog ? <PartyLog entries={partyLog.entries} shared={partyLog.shared} /> : null}
 
-      <section className="panel">
-        <div className="panel-head">
-          <h2>{t('sheet.notes')}</h2>
-        </div>
+      <Panel id="notes" title={t('sheet.notes')}>
         <textarea
           className="notes"
           rows={4}
@@ -172,7 +159,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
           value={character.notes}
           onChange={(e) => patch({ notes: e.target.value })}
         />
-      </section>
+      </Panel>
     </div>
   );
 }

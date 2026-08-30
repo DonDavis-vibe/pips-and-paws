@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { RollButton, DiceStage } from './DiceKit.jsx';
+import Panel from './Panel.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
 import SharedStash from './SharedStash.jsx';
 import GmTimeTracker from './GmTimeTracker.jsx';
@@ -207,11 +208,11 @@ export default function GmDashboard({ mp, notify }) {
 
       <GmNotes />
 
-      <section className="panel">
-        <div className="panel-head">
-          <h2>
-            <ScrollText size={18} /> {t('gm.liveLog')}
-          </h2>
+      <Panel
+        id="gm-livelog"
+        icon={ScrollText}
+        title={t('gm.liveLog')}
+        right={(
           <label className="gm-share-log" title={t('gm.shareLog.hint')}>
             <input
               type="checkbox"
@@ -220,7 +221,8 @@ export default function GmDashboard({ mp, notify }) {
             />
             {t('gm.shareLog')}
           </label>
-        </div>
+        )}
+      >
         <ul className="dice-log">
           {mp.liveLog.length === 0 ? (
             <li className="dice-empty">{t('dice.emptyLog')}</li>
@@ -235,7 +237,7 @@ export default function GmDashboard({ mp, notify }) {
             ))
           )}
         </ul>
-      </section>
+      </Panel>
     </div>
   );
 }

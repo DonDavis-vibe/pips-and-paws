@@ -333,6 +333,8 @@
   "rest.log.full": "Volle Rast: TP und Werte voll",
   "rest.noRation": "keine Ration im Gepaeck",
 
+  "panel.collapse": "Einklappen",
+  "panel.expand": "Ausklappen",
   "party.title": "Runden-Log",
   "party.show": "ausklappen",
   "party.hide": "einklappen",
