@@ -15,6 +15,7 @@ import {
   GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK,
 } from './multiplayer/protocol.js';
 import { useMultiplayer } from './multiplayer/useMultiplayer.js';
+import brandMark from './assets/brand-mark.jpg';
 import CharacterSheet from './components/CharacterSheet.jsx';
 import CharacterWizard from './components/CharacterWizard.jsx';
 import ConnectionBadge from './components/ConnectionBadge.jsx';
@@ -176,7 +177,9 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true">🐭</span>
+          <span className="brand-mark" aria-hidden="true">
+            <img src={brandMark} alt="" width="56" height="56" />
+          </span>
           <div>
             <h1 className="brand-title">{t('app.title')}</h1>
             <p className="brand-sub">{t('app.tagline')}</p>

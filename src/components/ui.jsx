@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { X, Info } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 
-export function Field({ label, children, hint }) {
+export function Field({ label, children, hint, className = '' }) {
   return (
-    <label className="field">
+    <label className={`field ${className}`.trim()}>
       <span className="field-label">{label}</span>
       {children}
       {hint ? <span className="field-hint">{hint}</span> : null}

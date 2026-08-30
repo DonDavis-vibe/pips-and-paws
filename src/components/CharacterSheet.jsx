@@ -85,8 +85,8 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
           </h2>
         </div>
         <div className="identity-grid">
-          <Field label={t('sheet.name')}>
-            <TextInput value={character.name} onChange={(v) => patch({ name: v })} />
+          <Field label={t('sheet.name')} className="field-hero">
+            <TextInput value={character.name} onChange={(v) => patch({ name: v })} placeholder="…" />
           </Field>
           <Field label={t('sheet.player')}>
             <TextInput value={character.playerName} onChange={(v) => patch({ playerName: v })} />
