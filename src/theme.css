@@ -1734,20 +1734,14 @@ summary,
 }
 
 .info-hint-btn:hover,
-.info-hint-open .info-hint-btn {
+.info-hint-btn.is-open {
   border-color: var(--accent);
   color: var(--accent);
 }
 
 .info-hint-pop {
-  position: absolute;
-  z-index: 40;
-  top: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: min(260px, 72vw);
-  padding: 9px 11px;
+  z-index: 80;
+  padding: 10px 12px;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   background: var(--bg-panel);
@@ -1763,14 +1757,26 @@ summary,
   animation: rise-in 0.14s ease both;
 }
 
+.info-hint-pop-above {
+  transform: translateY(-100%);
+}
+
 .info-hint-pop::before {
   content: '';
   position: absolute;
-  bottom: 100%;
-  left: 50%;
+  left: clamp(10px, var(--arrow-x, 50%), calc(100% - 10px));
   transform: translateX(-50%);
   border: 6px solid transparent;
+}
+
+.info-hint-pop:not(.info-hint-pop-above)::before {
+  bottom: 100%;
   border-bottom-color: var(--line-strong);
+}
+
+.info-hint-pop-above::before {
+  top: 100%;
+  border-top-color: var(--line-strong);
 }
 
 .usage-row {

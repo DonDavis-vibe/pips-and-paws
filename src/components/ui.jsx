@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Info } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 
@@ -12,25 +13,73 @@ export function Field({ label, children, hint, className = '' }) {
   );
 }
 
+// Kleiner (i)-Aufklapper. Die Sprechblase liegt position:fixed und wird an den
+// Knopf gerechnet — so kann sie nicht von Panels/Kaerten abgeschnitten werden.
 export function InfoHint({ text }) {
   const { t } = useLang();
-  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null); // null = zu
+  const btnRef = useRef(null);
+
+  const toggle = (e) => {
+    e.stopPropagation();
+    setPos((p) => {
+      if (p) return null;
+      const b = btnRef.current?.getBoundingClientRect();
+      if (!b) return null;
+      const width = Math.min(260, window.innerWidth - 24);
+      let left = b.left + b.width / 2 - width / 2;
+      left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
+      const below = b.bottom + 150 < window.innerHeight;
+      return { left, width, top: below ? b.bottom + 8 : b.top - 8, below, arrow: b.left + b.width / 2 - left };
+    });
+  };
+
+  useEffect(() => {
+    if (!pos) return undefined;
+    const close = () => setPos(null);
+    const onKey = (e) => e.key === 'Escape' && setPos(null);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+      document.removeEventListener('click', close);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [pos]);
+
   return (
-    <span className={`info-hint${open ? ' info-hint-open' : ''}`}>
+    <span className="info-hint">
       <button
+        ref={btnRef}
         type="button"
-        className="info-hint-btn"
+        className={`info-hint-btn${pos ? ' is-open' : ''}`}
         aria-label={t('header.help')}
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        aria-expanded={!!pos}
+        onClick={toggle}
       >
         <Info size={13} />
       </button>
-      {open ? (
-        <span className="info-hint-pop" role="tooltip">
-          {text}
-        </span>
-      ) : null}
+      {pos
+        ? createPortal(
+          <span
+            className={`info-hint-pop${pos.below ? '' : ' info-hint-pop-above'}`}
+            role="tooltip"
+            style={{
+              position: 'fixed',
+              top: pos.top,
+              left: pos.left,
+              width: pos.width,
+              '--arrow-x': `${pos.arrow}px`,
+            }}
+          >
+            {text}
+          </span>,
+          document.body,
+        )
+        : null}
     </span>
   );
 }
