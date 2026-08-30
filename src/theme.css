@@ -434,6 +434,7 @@ summary,
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: 0;
+  border-image: none;
 }
 
 .panel-closed > .panel-head h2 {
@@ -455,34 +456,46 @@ summary,
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px 12px;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--accent) 45%, transparent),
+    color-mix(in srgb, var(--line) 80%, transparent) 30%,
+    transparent 88%) 1;
 }
 
 .panel-head h2 {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.12em;
   color: var(--ink);
 }
 
 .panel-head h2 > svg {
   color: var(--accent);
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   padding: 6px;
-  border-radius: 9px;
+  border-radius: 10px;
   background:
-    linear-gradient(150deg, color-mix(in srgb, var(--accent) 20%, transparent), color-mix(in srgb, var(--accent) 8%, transparent));
+    linear-gradient(145deg, color-mix(in srgb, var(--accent) 26%, transparent), color-mix(in srgb, var(--accent) 7%, transparent));
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent),
-    inset 0 1px 0 var(--hi);
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+    inset 0 1px 0 var(--hi),
+    0 0 14px -4px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.panel:hover > .panel-head h2 > svg {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+    inset 0 1px 0 var(--hi),
+    0 0 18px -3px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .sub-h {

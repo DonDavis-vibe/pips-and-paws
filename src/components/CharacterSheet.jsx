@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors,
 } from '@dnd-kit/core';
-import { User, Backpack } from 'lucide-react';
+import { Backpack } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { Field, TextInput } from './ui.jsx';
 import AttributeBox from './AttributeBox.jsx';
@@ -16,6 +16,7 @@ import SharedStash from './SharedStash.jsx';
 import PartyLog from './PartyLog.jsx';
 import Portrait from './Portrait.jsx';
 import Panel from './Panel.jsx';
+import MouseIcon from './MouseIcon.jsx';
 import { tryMove, addItem, removeItem } from '../rules/inventory.js';
 import { rollSave } from '../rules/dice.js';
 import { shareSave } from '../utils/discord.js';
@@ -80,7 +81,7 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
 
   return (
     <div className="sheet">
-      <Panel id="identity" icon={User} title={t('sheet.identity')}>
+      <Panel id="identity" icon={MouseIcon} title={t('sheet.identity')}>
         <div className="identity-layout">
           <Portrait
             src={character.portrait}
