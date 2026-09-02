@@ -41,6 +41,13 @@ npm run lint        # oxlint
 
 Push auf `main` deployt via GitHub Actions auf GitHub Pages.
 
+## Mitmachen
+
+PRs willkommen — vor allem Übersetzungen. Details in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+`src/i18n/es.json` (Spanisch) ist als Kopie von `en.json` schon angelegt und
+wartet auf Übersetzung; die UI-Sprache wird über eine Zeile in `src/i18n/index.jsx`
+freigeschaltet.
+
 ## Stack
 
 Vite + React 19 (plain JS), `@dnd-kit` fuers Inventar-Raster, `peerjs` fuer den

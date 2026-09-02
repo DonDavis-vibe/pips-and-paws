@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Download, Upload, Sparkles, Languages, CircleHelp, Monitor, Sun, Moon,
 } from 'lucide-react';
-import { useLang, loc } from './i18n/index.jsx';
+import { useLang, loc, LANGS } from './i18n/index.jsx';
 import { useTheme } from './useTheme.js';
 import {
   blankCharacter, isBlank, normalizeCharacter, levelForXp, gritForLevel,
@@ -240,9 +240,14 @@ export default function App() {
           </button>
           <div className="lang-switch" role="group" aria-label={t('header.language')}>
             <Languages size={15} />
-            {['de', 'en'].map((l) => (
-              <button key={l} type="button" className={l === lang ? 'active' : ''} onClick={() => setLang(l)}>
-                {l.toUpperCase()}
+            {LANGS.map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                className={l.code === lang ? 'active' : ''}
+                onClick={() => setLang(l.code)}
+              >
+                {l.label}
               </button>
             ))}
           </div>
