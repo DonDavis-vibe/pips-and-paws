@@ -126,8 +126,8 @@
             <p>[Ort entfernt]</p>
             <p>Deutschland</p>
             <h3>Kontakt</h3>
-            <p>Telefon: [Telefon entfernt]</p>
-            <p>E-Mail: <a href="[E-Mail entfernt]</a></p>
+            <p>Telefon: <span class="cx-tel">[Telefon entfernt]</span></p>
+            <p>E-Mail: <span class="cx-mail">[E-Mail entfernt]</span></p>
         </div>
         <p class="subtitle">Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG).</p>
 
@@ -142,8 +142,8 @@
             [Anschrift entfernt]<br>
             [Ort entfernt]<br>
             Deutschland</p>
-            <p>Telefon: [Telefon entfernt]<br>
-            E-Mail: <a href="[E-Mail entfernt]</a></p>
+            <p>Telefon: <span class="cx-tel">[Telefon entfernt]</span><br>
+            E-Mail: <span class="cx-mail">[E-Mail entfernt]</span></p>
         </div>
 
         <h2>2. Grundsätzliches</h2>
@@ -205,5 +205,36 @@
             <p>Diese Erklärung beschreibt den tatsächlichen technischen Aufbau von Pips &amp; Paws zum oben genannten Stand. Ändert sich die eingesetzte Technik, wird sie entsprechend angepasst.</p>
         </footer>
     </div>
+
+    <!--
+        Kontaktdaten werden erst im Browser zusammengesetzt, damit E-Mail- und
+        Telefonnummer-Harvester im HTML-Quelltext (Seite + GitHub-Repo) nichts
+        Verwertbares finden. Ohne JavaScript bleibt die menschenlesbare
+        Fassung "kontakt [at] gmx [dot] biz" bzw. die Ziffernfolge stehen —
+        das genuegt der Anforderung nach unmittelbarer Erreichbarkeit (Paragraf 5 DDG).
+    -->
+    <script>
+      (function () {
+        var user = ['x', 'x'].join('_');
+        var host = ['x', 'x'].join('.');
+        var mail = user + String.fromCharCode(64) + host;
+        var tLocal = '0' + '231';
+        var tRest = '0000' + '0000';
+        var tel = tLocal + tRest;
+
+        document.querySelectorAll('.cx-mail').forEach(function (el) {
+          var a = document.createElement('a');
+          a.href = 'mailto:' + mail;
+          a.textContent = mail;
+          el.replaceChildren(a);
+        });
+        document.querySelectorAll('.cx-tel').forEach(function (el) {
+          var a = document.createElement('a');
+          a.href = 'tel:+49231' + tRest;
+          a.textContent = tLocal + ' ' + tRest;
+          el.replaceChildren(a);
+        });
+      })();
+    </script>
 </body>
 </html>
