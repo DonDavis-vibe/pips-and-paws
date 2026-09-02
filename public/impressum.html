@@ -218,21 +218,22 @@
         var user = ['x', 'x'].join('_');
         var host = ['x', 'x'].join('.');
         var mail = user + String.fromCharCode(64) + host;
-        var tLocal = '0' + '231';
         var tRest = '0000' + '0000';
-        var tel = tLocal + tRest;
 
+        // Sichtbarer Text bleibt die verschleierte Fassung ("kontakt [at] gmx
+        // [dot] biz"); nur der Klick-Ziel-Link (mailto:/tel:) wird ergaenzt.
         document.querySelectorAll('.cx-mail').forEach(function (el) {
           var a = document.createElement('a');
           a.href = 'mailto:' + mail;
-          a.textContent = mail;
-          el.replaceChildren(a);
+          a.setAttribute('aria-label', 'E-Mail an ' + mail);
+          while (el.firstChild) a.appendChild(el.firstChild);
+          el.appendChild(a);
         });
         document.querySelectorAll('.cx-tel').forEach(function (el) {
           var a = document.createElement('a');
           a.href = 'tel:+49231' + tRest;
-          a.textContent = tLocal + ' ' + tRest;
-          el.replaceChildren(a);
+          while (el.firstChild) a.appendChild(el.firstChild);
+          el.appendChild(a);
         });
       })();
     </script>
