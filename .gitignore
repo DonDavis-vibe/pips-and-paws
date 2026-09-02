@@ -13,3 +13,6 @@ img/*
 
 # Rechtstexte-Quellen (die fertigen Seiten liegen in public/)
 imp/
+
+# Einmal-Werkzeug zum Bereinigen der History (enthaelt PII im Klartext) — nach Gebrauch loeschen
+/.scrub/

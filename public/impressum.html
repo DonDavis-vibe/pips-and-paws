@@ -12,14 +12,15 @@
     ================================================================
     WICHTIG FUER FORKS / EIGENE DEPLOYMENTS
     ================================================================
-    Diese Seite enthaelt die Betreiberdaten von DonDavis / [Name entfernt]
-    fuer die Original-Instanz auf dondavis-vibe.github.io/pips-and-paws.
+    Der Kontaktblock des Impressums (Name, Anschrift, Telefon, E-Mail)
+    steht NICHT im Quelltext. Er wird beim GitHub-Pages-Deployment aus
+    dem Repo-Secret IMPRESSUM_KONTAKT zwischen die KONTAKT-Marker
+    eingesetzt (siehe .github/workflows/deploy.yml).
 
-    Wer diesen Code forkt und selbst irgendwo veroeffentlicht, MUSS
-    diese Datei durch die EIGENEN Angaben ersetzen. Fuer eine aus
-    Deutschland betriebene Website sind Impressum (Paragraf 5 DDG) und
-    eine zutreffende Datenschutzerklaerung Pflicht — die Angaben unten
-    gelten nicht fuer fremde Deployments.
+    Wer diesen Code forkt und selbst irgendwo veroeffentlicht, MUSS die
+    eigenen Angaben als Secret hinterlegen. Fuer eine aus Deutschland
+    betriebene Website sind Impressum (Paragraf 5 DDG) und eine
+    zutreffende Datenschutzerklaerung Pflicht.
 
     Der Datenschutz-Teil beschreibt ausserdem den TATSAECHLICHEN
     technischen Aufbau von Pips & Paws (Abschnitte 3-8). Wer zusaetzliche
@@ -121,13 +122,11 @@
         <h2 class="section-title" id="impressum">Impressum</h2>
 
         <div class="box">
-            <p><strong>[Name entfernt]</strong></p>
-            <p>[Anschrift entfernt]</p>
-            <p>[Ort entfernt]</p>
-            <p>Deutschland</p>
-            <h3>Kontakt</h3>
-            <p>Telefon: <span class="cx-tel">[Telefon entfernt]</span></p>
-            <p>E-Mail: <span class="cx-mail">[E-Mail entfernt]</span></p>
+            <!--KONTAKT:START-->
+            <p class="subtitle">Die Pflichtangaben nach &sect;&nbsp;5 DDG (Name, Anschrift, Kontakt)
+            werden beim Ver&ouml;ffentlichen dieser Seite eingesetzt und sind in der Live-Fassung
+            unter dieser Adresse abrufbar.</p>
+            <!--KONTAKT:END-->
         </div>
         <p class="subtitle">Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG).</p>
 
@@ -138,12 +137,10 @@
 
         <h2>1. Verantwortlicher</h2>
         <div class="box">
-            <p>[Name entfernt]<br>
-            [Anschrift entfernt]<br>
-            [Ort entfernt]<br>
-            Deutschland</p>
-            <p>Telefon: <span class="cx-tel">[Telefon entfernt]</span><br>
-            E-Mail: <span class="cx-mail">[E-Mail entfernt]</span></p>
+            <!--KONTAKT:START-->
+            <p>Name, Anschrift und Kontakt des Verantwortlichen stehen im
+            <a href="#impressum">Impressum</a> &mdash; in der Live-Fassung dieser Seite.</p>
+            <!--KONTAKT:END-->
         </div>
 
         <h2>2. Grundsätzliches</h2>
@@ -207,33 +204,32 @@
     </div>
 
     <!--
-        Kontaktdaten werden erst im Browser zusammengesetzt, damit E-Mail- und
-        Telefonnummer-Harvester im HTML-Quelltext (Seite + GitHub-Repo) nichts
-        Verwertbares finden. Ohne JavaScript bleibt die menschenlesbare
-        Fassung "kontakt [at] gmx [dot] biz" bzw. die Ziffernfolge stehen —
-        das genuegt der Anforderung nach unmittelbarer Erreichbarkeit (Paragraf 5 DDG).
+        Der Kontaktblock steht NICHT im Quelltext (siehe oben). Das Skript baut
+        nur um, was zwischen die KONTAKT-Marker injiziert wurde: " [at] " / " [dot] "
+        werden zu @ / . und die getrennten Ziffern zur Rufnummer. Es enthaelt
+        selbst keine Kontaktdaten. Ohne JavaScript bleibt die menschenlesbare
+        Fassung stehen (genuegt Paragraf 5 DDG).
     -->
     <script>
       (function () {
-        var user = ['x', 'x'].join('_');
-        var host = ['x', 'x'].join('.');
-        var mail = user + String.fromCharCode(64) + host;
-        var tRest = '0000' + '0000';
-
-        // Sichtbarer Text bleibt die verschleierte Fassung ("kontakt [at] gmx
-        // [dot] biz"); nur der Klick-Ziel-Link (mailto:/tel:) wird ergaenzt.
-        document.querySelectorAll('.cx-mail').forEach(function (el) {
+        function alsLink(el, href, text) {
           var a = document.createElement('a');
-          a.href = 'mailto:' + mail;
-          a.setAttribute('aria-label', 'E-Mail an ' + mail);
-          while (el.firstChild) a.appendChild(el.firstChild);
-          el.appendChild(a);
+          a.href = href;
+          a.textContent = text;
+          el.replaceChildren(a);
+        }
+        document.querySelectorAll('.cx-mail').forEach(function (el) {
+          var adr = el.textContent
+            .replace(/\s*\[\s*at\s*\]\s*/i, '@')
+            .replace(/\s*\[\s*dot\s*\]\s*/i, '.')
+            .replace(/\s+/g, '')
+            .trim();
+          if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(adr)) alsLink(el, 'mailto:' + adr, adr);
         });
         document.querySelectorAll('.cx-tel').forEach(function (el) {
-          var a = document.createElement('a');
-          a.href = 'tel:+49231' + tRest;
-          while (el.firstChild) a.appendChild(el.firstChild);
-          el.appendChild(a);
+          var ziffern = (el.textContent.match(/\d/g) || []).join('');
+          if (ziffern.length < 6) return;
+          alsLink(el, 'tel:+49' + ziffern.replace(/^0/, ''), ziffern.replace(/^(\d{4})(\d+)$/, '$1 $2'));
         });
       })();
     </script>

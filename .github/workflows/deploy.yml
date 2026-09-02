@@ -25,6 +25,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      # Kontaktblock des Impressums aus dem Secret einsetzen — steht bewusst
+      # nicht im Repo. Einmalige Einrichtung: Secret IMPRESSUM_KONTAKT anlegen
+      # (Vorlage public/KONTAKT.beispiel.html).
+      - name: Kontaktdaten ins Impressum einsetzen
+        env:
+          IMPRESSUM_KONTAKT: ${{ secrets.IMPRESSUM_KONTAKT }}
+        run: python3 .github/inject-kontakt.py
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

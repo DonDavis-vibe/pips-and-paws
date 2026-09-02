@@ -1,0 +1,26 @@
+<!--
+    VORLAGE fuer das Repo-Secret IMPRESSUM_KONTAKT.
+
+    Diese Datei enthaelt bewusst nur Platzhalter. Die echten Angaben werden NICHT
+    committet, sondern einmalig als Secret hinterlegt:
+        Settings > Secrets and variables > Actions > New repository secret
+        Name:  IMPRESSUM_KONTAKT
+        Wert:  der fertige Block unten, mit echten Daten (Markup unveraendert lassen)
+
+    Der Deploy-Workflow (.github/workflows/deploy.yml) setzt den Secret-Inhalt an
+    die beiden Kontakt-Stellen in imp/impressum.html (Impressum und Datenschutz
+    Ziffer 1).
+
+    Verfremdung fuers Live-HTML:
+      - Telefon: Ziffern paarweise mit schmalem geschuetztem Leerzeichen (&#8239;)
+        trennen, Vorwahl mit &#160; abtrennen.
+      - E-Mail: "@" wird zu <span aria-hidden="true">[at]</span>, "." zu [dot].
+    Das Skript in impressum.html macht daraus im Browser wieder anklickbare Links;
+    ohne JavaScript bleibt die lesbare Fassung stehen (genuegt Paragraf 5 DDG).
+-->
+<p><strong>Vorname Nachname</strong><br>
+Musterstra&szlig;e 1<br>
+12345 Musterstadt<br>
+Deutschland</p>
+<p>Telefon: <span class="cx-tel">01234&#160;/&#160;56&#8239;78&#8239;90</span><br>
+E-Mail: <span class="cx-mail">alias <span aria-hidden="true">[at]</span> anbieter <span aria-hidden="true">[dot]</span> de</span></p>
