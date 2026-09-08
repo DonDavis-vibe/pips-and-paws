@@ -49,6 +49,21 @@ const REACTION_BY_TOTAL = {
   12: 'helpful',
 };
 
+// Schadenswuerfel einer Waffe aus ihrem Anzeigetext ableiten ("W6", "W6 / W8",
+// "W10"). Bewusst aus dem String, damit auch alte Spielstaende und Gegenstaende
+// von aelteren Mitspielern funktionieren.
+//   1 Zahl  -> eine Option (Hand egal)
+//   2 Zahlen-> einhaendig / zweihaendig (Mausritter: mittlere Waffe W6 / W8)
+export function weaponDamageOptions(item) {
+  const nums = (String(item?.damage || '').match(/\d+/g) || []).map(Number).filter((n) => n > 0);
+  if (nums.length === 0) return [];
+  if (nums.length === 1) return [{ sides: nums[0], hands: null }];
+  return [
+    { sides: nums[0], hands: 'one' },
+    { sides: nums[1], hands: 'two' },
+  ];
+}
+
 export function rollReaction() {
   const a = rollDie(6);
   const b = rollDie(6);

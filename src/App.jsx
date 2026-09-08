@@ -7,15 +7,16 @@ import { useTheme } from './useTheme.js';
 import {
   blankCharacter, isBlank, normalizeCharacter, levelForXp, gritForLevel,
 } from './rules/character.js';
-import { addItem, firstFreeFit } from './rules/inventory.js';
+import { addItem, addItemAt, firstFreeFit } from './rules/inventory.js';
 import { makeCondition } from './data/items.js';
 import { readJSON, writeJSON } from './utils/storage.js';
 import { downloadCharacter, readCharacterFile } from './utils/exportImport.js';
 import { rollSave } from './rules/dice.js';
+import { applyRest } from './rules/rest.js';
 import { shareEvent, setWebhook } from './utils/discord.js';
 import {
   GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER, GM_BROADCAST,
-  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK,
+  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK, GM_REST,
 } from './multiplayer/protocol.js';
 import { useMultiplayer } from './multiplayer/useMultiplayer.js';
 import brandMark from './assets/brand-mark.jpg';
@@ -45,6 +46,16 @@ export default function App() {
   const toastTimer = useRef(null);
   const fileInput = useRef(null);
   const lastCmdRef = useRef(null);
+  // Wunschplatz beim Ziehen aus der Tischmitte: der SL gewaehrt den Gegenstand
+  // erst per GM_GIVE zurueck, bis dahin merken wir uns das Ziel lokal.
+  const wantSlotRef = useRef({});
+
+  // Nehmen aus der Tischmitte; slot ist der Wunschplatz beim Ziehen (optional).
+  const { stashTake } = mp;
+  const takeFromStash = useCallback((itemId, slot) => {
+    if (slot) wantSlotRef.current[itemId] = slot;
+    stashTake(itemId);
+  }, [stashTake]);
 
   const notify = useCallback((message, kind = 'info') => {
     setToast({ message, kind });
@@ -55,6 +66,14 @@ export default function App() {
   useEffect(() => {
     writeJSON(STORAGE_KEY, character);
   }, [character]);
+
+  // Titel + Meta-Beschreibung an die aktuelle Sprache anpassen. Suchmaschinen
+  // rendern das JS und indexieren die uebersetzte Fassung (z. B. bei ?lang=fr).
+  useEffect(() => {
+    document.title = t('meta.title');
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute('content', t('meta.description'));
+  }, [t, lang]);
   useEffect(() => () => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
   }, []);
@@ -71,12 +90,13 @@ export default function App() {
   }, [character, mp.role]);
 
   // Spieler: eigenen Bogen (debounced) an den Spielleiter pushen
-  const { role: mpRole, sendState } = mp;
+  const { role: mpRole, sendState, resyncNonce } = mp;
   useEffect(() => {
     if (mpRole !== 'player') return undefined;
     const id = setTimeout(() => sendState(character), 300);
     return () => clearTimeout(id);
-  }, [character, mpRole, sendState]);
+    // resyncNonce: nach jedem (Wieder-)Verbinden den Bogen erneut schicken
+  }, [character, mpRole, sendState, resyncNonce]);
 
   // Spieler: Befehle des Spielleiters anwenden
   const { gmCommand, clearGmCommand, sendEvent, stashDrop } = mp;
@@ -119,6 +139,13 @@ export default function App() {
       );
       sendEvent({ kind: 'save', attr: gmCommand.attr, roll: r.d, target: r.target, ok: r.ok, reason: gmCommand.reason });
       shareEvent(cn, `${prefix}🎲 ${t('dice.saveVs', { attr: t(`attr.${gmCommand.attr}`) })} — W20 ${r.d} ≤ ${r.target} · ${r.ok ? '✅' : '❌'}`, r.ok ? 'ok' : 'bad');
+    } else if (cmd === GM_REST) {
+      const { character: next, msg, noRation } = applyRest(character, gmCommand.kind);
+      setCharacter(next);
+      const vars = msg.vars.attrKey ? { ...msg.vars, attr: t(`attr.${msg.vars.attrKey}`) } : msg.vars;
+      const text = t(msg.key, vars) + (noRation && gmCommand.kind === 'long' ? ` — ${t('rest.noRation')}` : '');
+      notify(`${t(`rest.${gmCommand.kind}`)}: ${text}`, 'ok');
+      shareEvent(cn, `🌙 ${t(`rest.${gmCommand.kind}`)} — ${text}`, 'ok');
     } else if (cmd === GM_XP) {
       const before = levelForXp(character.xp || 0);
       const after = levelForXp(Math.max(0, (character.xp || 0) + gmCommand.amount));
@@ -133,8 +160,10 @@ export default function App() {
     } else if (cmd === GM_GIVE && gmCommand.item) {
       const item = gmCommand.item;
       const label = loc(item.name, lang);
+      const wantSlot = wantSlotRef.current[item.itemId];
+      delete wantSlotRef.current[item.itemId];
       if (firstFreeFit(character.inventory, item.size === 2 ? 2 : 1)) {
-        setCharacter((c) => addItem(c, item).character || c);
+        setCharacter((c) => (wantSlot ? addItemAt(c, item, wantSlot) : addItem(c, item)).character || c);
         notify(t('player.gm.give', { item: label }), 'ok');
       } else {
         stashDrop(item);
@@ -263,8 +292,11 @@ export default function App() {
             setCharacter={setCharacter}
             notify={notify}
             onEvent={mp.role === 'player' ? sendEvent : null}
-            stash={mp.role === 'player' ? { items: mp.stash, take: mp.stashTake, drop: mp.stashDrop } : null}
+            stash={mp.role === 'player' ? { items: mp.stash, take: takeFromStash, drop: mp.stashDrop } : null}
             partyLog={mp.role === 'player' ? { entries: mp.liveLog, shared: mp.partyLog } : null}
+            partyTime={mp.role === 'player' ? mp.partyTime : null}
+            restLocked={mp.role === 'player' && mp.restLocked}
+            partyNpcs={mp.role === 'player' ? mp.partyNpcs : null}
           />
         )}
       </main>

@@ -115,6 +115,24 @@ export function addItem(character, item) {
   };
 }
 
+// Legt einen neuen Gegenstand auf einen BESTIMMTEN Platz (Ziehen aus der
+// Tischmitte). Faellt auf den ersten freien Platz zurueck, wenn das Ziel belegt
+// ist — der Gegenstand darf auf keinen Fall verloren gehen.
+export function addItemAt(character, item, slot) {
+  const size = item.size === 2 ? 2 : 1;
+  const cells = cellsFor(slot, size);
+  const fits = cells.length === size && cells.every((c) => character.inventory[c] == null);
+  if (!fits) return addItem(character, item);
+  return {
+    ok: true,
+    character: {
+      ...character,
+      items: { ...character.items, [item.itemId]: item },
+      inventory: withItemPlaced(character.inventory, item.itemId, slot, size),
+    },
+  };
+}
+
 export function removeItem(character, itemId) {
   const items = { ...character.items };
   delete items[itemId];

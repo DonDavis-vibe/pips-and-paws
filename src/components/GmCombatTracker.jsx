@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
-import { Swords, Plus, Minus, RotateCcw, X, Skull, ListOrdered, HeartCrack } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Swords, Plus, Minus, RotateCcw, X, Skull, ListOrdered, HeartCrack, Eye, EyeOff } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { rollDie, rollSave } from '../rules/dice.js';
@@ -12,7 +12,7 @@ const fresh = () => ({ round: 0, npcs: [] });
 const nid = () => `n_${Math.random().toString(36).slice(2, 8)}`;
 
 // NSC-/Kampf-Tracker fuer den Spielleiter. Rein lokal, ueberlebt einen Reload.
-export default function GmCombatTracker({ onLog, onInitiative }) {
+export default function GmCombatTracker({ onLog, onInitiative, shareNpcs }) {
   const { t, lang } = useLang();
   const [s, setS] = useState(() => ({ ...fresh(), ...readJSON(KEY) }));
   const [addOpen, setAddOpen] = useState(false);
@@ -29,6 +29,13 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
     setS(next);
     writeJSON(KEY, next);
   }, []);
+
+  // Nur die sichtbar geschalteten NSC an die Spieler spiegeln.
+  const shownKey = s.npcs.filter((n) => n.shown).map((n) => `${n.id}:${n.name}:${n.note || ''}`).join('|');
+  useEffect(() => {
+    if (!shareNpcs) return;
+    shareNpcs(sRef.current.npcs.filter((n) => n.shown));
+  }, [shareNpcs, shownKey]);
 
   const nameWithNumber = (base) => {
     const same = sRef.current.npcs.filter((n) => n.base === base);
@@ -160,11 +167,20 @@ export default function GmCombatTracker({ onLog, onInitiative }) {
           {s.npcs.map((n) => {
             const dead = n.hp.current <= 0;
             return (
-              <div key={n.id} className={`combat-npc${dead ? ' npc-dead' : ''}`}>
+              <div key={n.id} className={`combat-npc${dead ? ' npc-dead' : ''}${n.shown ? ' npc-shown' : ''}`}>
                 <div className="combat-npc-top">
                   <strong>
                     {dead ? <Skull size={13} /> : null} {n.name}
                   </strong>
+                  <button
+                    type="button"
+                    className={`icon-btn${n.shown ? ' icon-btn-on' : ''}`}
+                    onClick={() => patchNpc(n.id, { shown: !n.shown })}
+                    aria-label={n.shown ? t('combat.hideNpc') : t('combat.showNpc')}
+                    title={n.shown ? t('combat.hideNpc') : t('combat.showNpc')}
+                  >
+                    {n.shown ? <Eye size={14} /> : <EyeOff size={14} />}
+                  </button>
                   <button type="button" className="icon-btn" onClick={() => removeNpc(n.id)} aria-label={t('item.remove')}>
                     <X size={14} />
                   </button>

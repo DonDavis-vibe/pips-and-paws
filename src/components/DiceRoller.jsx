@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dices, Trash2 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { rollDice, rollD66, rollSave } from '../rules/dice.js';
@@ -8,17 +8,28 @@ import Panel from './Panel.jsx';
 
 const SAVE_MODES = ['disadv', 'normal', 'adv'];
 
-export default function DiceRoller({ character, onEvent }) {
+// external: ein Wurf, der woanders auf dem Bogen ausgeloest wurde (Waffenschaden,
+// Rettungswurf ueber die Attributs-Box). Er soll hier erscheinen und nicht nur
+// kurz als Meldung aufblitzen.
+export default function DiceRoller({ character, onEvent, external }) {
   const { t } = useLang();
   const [log, setLog] = useState([]);
   const [result, setResult] = useState(null);
   const [saveMode, setSaveMode] = useState('normal');
+  const lastExternalRef = useRef(null);
 
   const record = (logEntry, stage) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setResult({ id, ...stage });
     setLog((prev) => [{ id, ...logEntry }, ...prev].slice(0, 20));
   };
+
+  useEffect(() => {
+    if (!external || external.id === lastExternalRef.current) return;
+    lastExternalRef.current = external.id;
+    setResult({ ...external.stage, id: external.id });
+    setLog((prev) => [{ id: external.id, ...external.logEntry }, ...prev].slice(0, 20));
+  }, [external]);
 
   const who = character.name || t('app.title');
 

@@ -1,21 +1,35 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import de from './de.json';
 import en from './en.json';
+import fr from './fr.json';
+import it from './it.json';
+import ja from './ja.json';
 
 // Neue Sprache hinzufuegen (Details in CONTRIBUTING.md):
-//   1. <code>.json anlegen (Kopie von en.json, Werte uebersetzen) — es.json ist schon da
+//   1. <code>.json anlegen (Kopie von en.json, Werte uebersetzen)
+//      — Geruest fuer Spanisch liegt bereit: es.json
 //   2. hier importieren + in DICTS eintragen
 //   3. in LANGS freischalten, sobald genug uebersetzt ist
 // Fehlende Schluessel fallen automatisch auf Englisch zurueck.
-const DICTS = { de, en };
+const DICTS = { de, en, fr, it, ja };
 export const LANGS = [
   { code: 'de', label: 'DE' },
   { code: 'en', label: 'EN' },
+  { code: 'fr', label: 'FR' },
+  { code: 'it', label: 'IT' },
+  { code: 'ja', label: 'JA' },
 ];
 const CODES = LANGS.map((l) => l.code);
 const LS_KEY = 'pips-paws-lang';
 
 function detectLang() {
+  // ?lang=xx im Link hat Vorrang (geteilte Links, hreflang, Suchmaschinen).
+  try {
+    const q = new URLSearchParams(window.location.search).get('lang')?.toLowerCase();
+    if (CODES.includes(q)) return q;
+  } catch {
+    /* ignorieren */
+  }
   try {
     const saved = localStorage.getItem(LS_KEY);
     if (CODES.includes(saved)) return saved;
@@ -30,6 +44,24 @@ const LangContext = createContext({ lang: 'en', setLang: () => {}, t: (k) => k }
 
 export function LangProvider({ children }) {
   const [lang, setLangState] = useState(detectLang);
+
+  // <html lang> von Anfang an passend setzen (Screenreader, Suchmaschinen).
+  useEffect(() => {
+    try { document.documentElement.lang = lang; } catch { /* ignorieren */ }
+  }, [lang]);
+
+  // ?lang=xx ist ein Einmal-Schalter: die erkannte Sprache wird als Praeferenz
+  // gespeichert und der Parameter aus der URL entfernt, damit ein spaeterer
+  // manueller Wechsel nicht bei jedem Reload ueberschrieben wird.
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has('lang')) return;
+      try { localStorage.setItem(LS_KEY, lang); } catch { /* ignorieren */ }
+      url.searchParams.delete('lang');
+      window.history.replaceState({}, '', url);
+    } catch { /* ignorieren */ }
+  }, [lang]);
 
   const setLang = useCallback((next) => {
     setLangState(next);

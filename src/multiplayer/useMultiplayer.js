@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import {
   ROOM_PREFIX, JOIN_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
-  T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG,
+  T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG, T_TIME, T_RESTCFG, T_NPCS,
   GM_GIVE, GM_STASH_DENY,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
@@ -10,6 +10,7 @@ import { readJSON, writeJSON, remove as removeStore } from '../utils/storage.js'
 
 const GM_STASH_KEY = 'pips-paws-gm-stash';
 const PARTY_LOG_KEY = 'pips-paws-party-log-on';
+const REST_LOCK_KEY = 'pips-paws-rest-locked';
 
 // Welche Log-Eintraege der Host an die Spieler spiegelt (kein Fluestern, keine Rohdaten).
 const isShareable = (e) =>
@@ -52,6 +53,16 @@ export function useMultiplayer() {
   const [stash, setStash] = useState([]); // Tischmitte: beim SL kanonisch, bei Spielern eine Kopie
   // Geteiltes Runden-Log: der SL schaltet es fuer die Runde an/aus, Spieler bekommen den Stand.
   const [partyLog, setPartyLog] = useState(() => readJSON(PARTY_LOG_KEY, true) !== false);
+  // Geteilte Tageszeit: null = der SL zeigt sie den Spielern gerade nicht.
+  const [partyTime, setPartyTime] = useState(null); // { day, watch, turn, inWatch, turnsPerWatch }
+  // Rast-Sperre: der SL loest Rasten selbst aus, Spieler sehen nur einen Hinweis.
+  const [restLocked, setRestLocked] = useState(() => readJSON(REST_LOCK_KEY, false) === true);
+  // Sichtbar geschaltete NSC (beim Spieler eine Kopie, beim SL der gesendete Stand).
+  const [partyNpcs, setPartyNpcs] = useState([]);
+  // Zaehlt bei jedem (Wieder-)Verbinden hoch. Der Spieler muss seinen Bogen dann
+  // erneut schicken — sonst kennt ein neu gestarteter Host ihn gar nicht und
+  // zeigt "0 verbunden", obwohl Wuerfe ankommen.
+  const [resyncNonce, setResyncNonce] = useState(0);
 
   // Spiegel von `players` fuer synchrone Namens-Lookups ausserhalb von State-Updatern
   // (pushLog darf NIE in einem setState-Updater laufen — StrictMode ruft die doppelt auf).
@@ -66,6 +77,12 @@ export function useMultiplayer() {
   const knownPeersRef = useRef(new Set());
   const liveLogRef = useRef([]);
   liveLogRef.current = liveLog;
+  const partyTimeRef = useRef(null);
+  partyTimeRef.current = partyTime;
+  const restLockedRef = useRef(false);
+  restLockedRef.current = restLocked;
+  const partyNpcsRef = useRef([]);
+  partyNpcsRef.current = partyNpcs;
 
   const peerRef = useRef(null);
   const hostConnRef = useRef(null); // Spieler -> SL
@@ -104,14 +121,58 @@ export function useMultiplayer() {
     }
   }, []);
 
+  // SL zieht die Rast an sich (oder gibt sie wieder frei).
+  const setRestLockedShared = useCallback((on) => {
+    setRestLocked(on);
+    writeJSON(REST_LOCK_KEY, on);
+    if (roleRef.current === 'gm') {
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_RESTCFG, eid: uid(), locked: on }); } catch { /* */ }
+        }
+      });
+    }
+  }, []);
+
+  // SL schaltet NSC fuer die Spieler sichtbar (leere Liste = niemand zu sehen).
+  const shareNpcs = useCallback((list) => {
+    // Bewusst NUR der Name: der Hinweistext aus dem Katalog ist der Statblock
+    // (STR/DEX/WIL) und gehoert nicht auf den Spielertisch.
+    const safe = (list || []).map((n) => ({ id: n.id, name: n.name }));
+    setPartyNpcs(safe);
+    partyNpcsRef.current = safe;
+    if (roleRef.current === 'gm') {
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_NPCS, eid: uid(), npcs: safe }); } catch { /* */ }
+        }
+      });
+    }
+  }, []);
+
+  // SL teilt die Tageszeit (oder blendet sie mit clock=null wieder aus).
+  const shareTime = useCallback((clock) => {
+    setPartyTime(clock);
+    partyTimeRef.current = clock;
+    if (roleRef.current === 'gm') {
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_TIME, eid: uid(), clock }); } catch { /* */ }
+        }
+      });
+    }
+  }, []);
+
   // --- Tischmitte (SL ist Autoritaet, verteilt nach jeder Aenderung den kompletten Stand) ---
   const commitStash = useCallback((next) => {
     stashRef.current = next;
     setStash(next);
     if (roleRef.current === 'gm') {
       writeJSON(GM_STASH_KEY, next);
+      // Versteckte Gegenstaende verlassen den SL-Rechner nicht.
+      const visible = next.filter((i) => !i.hidden);
       Object.values(clientConnsRef.current).forEach((conn) => {
-        if (conn && conn.open) conn.send({ t: T_STASH, items: next });
+        if (conn && conn.open) conn.send({ t: T_STASH, items: visible });
       });
     }
   }, []);
@@ -122,6 +183,16 @@ export function useMultiplayer() {
 
   const stashRemoveItem = useCallback((itemId) => {
     commitStash(stashRef.current.filter((i) => i.itemId !== itemId));
+  }, [commitStash]);
+
+  // SL aendert einen Gegenstand in der Mitte (z.B. sein Symbol).
+  const stashUpdateItem = useCallback((next) => {
+    commitStash(stashRef.current.map((i) => (i.itemId === next.itemId ? next : i)));
+  }, [commitStash]);
+
+  // SL blendet einen vorbereiteten Gegenstand fuer die Spieler ein/aus.
+  const stashToggleHidden = useCallback((itemId) => {
+    commitStash(stashRef.current.map((i) => (i.itemId === itemId ? { ...i, hidden: !i.hidden } : i)));
   }, [commitStash]);
 
   // Spieler: Gegenstand in die Mitte legen bzw. einen herausnehmen wollen
@@ -235,7 +306,8 @@ export function useMultiplayer() {
       commitStash([{ ...payload.item, origin: 'stash' }, ...stashRef.current]);
       pushLog({ kind: 'system', key: 'gm.log.stashDrop', vars: { name, item: itemLabel(payload.item) } });
     } else if (payload.t === T_STASH_TAKE) {
-      const found = stashRef.current.find((i) => i.itemId === payload.itemId);
+      // Versteckte Gegenstaende gelten als nicht vorhanden — sie wurden nie ausgeliefert.
+      const found = stashRef.current.find((i) => i.itemId === payload.itemId && !i.hidden);
       if (found) {
         commitStash(stashRef.current.filter((i) => i.itemId !== payload.itemId));
         sendTo(peerId, { t: T_GM, cmd: GM_GIVE, item: found });
@@ -291,13 +363,17 @@ export function useMultiplayer() {
       conn.on('open', () => {
         // Neu (wieder) verbundene Spieler bekommen den aktuellen Stand der Tischmitte
         // und, wenn aktiv, das bisherige Runden-Log.
-        try { conn.send({ t: T_STASH, items: stashRef.current }); } catch { /* */ }
+        try { conn.send({ t: T_STASH, items: stashRef.current.filter((i) => !i.hidden) }); } catch { /* */ }
         try {
           conn.send({ t: T_LOGCFG, eid: uid(), shared: partyLogRef.current });
           if (partyLogRef.current) {
             const backlog = liveLogRef.current.filter(isShareable).slice(0, 40);
             if (backlog.length) conn.send({ t: T_LOG, eid: uid(), entries: backlog });
           }
+          // Tageszeit nur, wenn der SL sie gerade teilt
+          if (partyTimeRef.current) conn.send({ t: T_TIME, eid: uid(), clock: partyTimeRef.current });
+          conn.send({ t: T_RESTCFG, eid: uid(), locked: restLockedRef.current });
+          if (partyNpcsRef.current.length) conn.send({ t: T_NPCS, eid: uid(), npcs: partyNpcsRef.current });
         } catch { /* */ }
       });
       conn.on('data', (data) => handleIncoming(conn.peer, data));
@@ -363,6 +439,7 @@ export function useMultiplayer() {
       setConnectionState('connected');
       setStatusMessage('');
       saveSession('player', code);
+      setResyncNonce((n) => n + 1);
     });
 
     conn.on('data', (payload) => {
@@ -374,6 +451,12 @@ export function useMultiplayer() {
         setGmCommand({ ...payload, id: payload.eid ?? Date.now() + Math.random() });
       } else if (payload.t === T_LOGCFG) {
         setPartyLog(!!payload.shared);
+      } else if (payload.t === T_TIME) {
+        setPartyTime(payload.clock || null);
+      } else if (payload.t === T_RESTCFG) {
+        setRestLocked(!!payload.locked);
+      } else if (payload.t === T_NPCS) {
+        setPartyNpcs(Array.isArray(payload.npcs) ? payload.npcs : []);
       } else if (payload.t === T_LOG) {
         const incoming = payload.entries || (payload.entry ? [payload.entry] : []);
         if (incoming.length) {
@@ -503,6 +586,13 @@ export function useMultiplayer() {
     liveLog,
     partyLog,
     setPartyLogShared,
+    partyTime,
+    shareTime,
+    restLocked,
+    setRestLockedShared,
+    partyNpcs,
+    shareNpcs,
+    resyncNonce,
     gmCommand,
     stash,
     hostSession,
@@ -516,6 +606,8 @@ export function useMultiplayer() {
     clearGmCommand,
     stashAddItem,
     stashRemoveItem,
+    stashToggleHidden,
+    stashUpdateItem,
     stashDrop,
     stashTake,
     clearStash,

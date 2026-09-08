@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
-import { Timer, Flame, Dice5, RotateCcw, Minus, Plus } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Timer, Flame, Dice5, RotateCcw, Minus, Plus, AlertTriangle, X } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { rollDie } from '../rules/dice.js';
@@ -15,13 +15,28 @@ const fresh = () => ({
   lightLeft: 6,
   encMode: 'dungeon', // dungeon | wild | off
   encLeft: 3,
+  share: false, // Tageszeit fuer die Spieler sichtbar?
 });
+
+export function clockFromTurn(turn) {
+  const watch = Math.floor(turn / TURNS_PER_WATCH);
+  return {
+    day: Math.floor(watch / WATCHES_PER_DAY) + 1,
+    watch: (watch % WATCHES_PER_DAY) + 1,
+    turn,
+    inWatch: turn % TURNS_PER_WATCH,
+    turnsPerWatch: TURNS_PER_WATCH,
+  };
+}
 
 // Zeit-, Licht- und Begegnungs-Tracker fuer den Spielleiter (SRD S. "Time" / SL-Bogen).
 // Rein lokal beim SL, ueberlebt einen Reload; Meldungen laufen ins Live-Log.
-export default function GmTimeTracker({ onLog }) {
+export default function GmTimeTracker({ onLog, shareTime }) {
   const { t } = useLang();
   const [s, setS] = useState(() => ({ ...fresh(), ...readJSON(KEY) }));
+  // Begegnung/Vorzeichen sollen dem SL nicht nur im Log auffallen, sondern als
+  // Banner stehen bleiben, bis er sie wegklickt (Discord-Feedback).
+  const [alarm, setAlarm] = useState(null); // { kind, roll, hour } | null
   const sRef = useRef(s);
   sRef.current = s;
 
@@ -36,9 +51,12 @@ export default function GmTimeTracker({ onLog }) {
       const r = rollDie(6);
       const kind = r === 1 ? 'encounter' : r === 2 ? 'omen' : 'nothing';
       onLog('time.log.encounter', { roll: r, result: t(`time.enc.${kind}`) });
+      let hour = null;
       if (withHour && kind !== 'nothing') {
-        onLog('time.log.encHour', { hour: rollDie(12) });
+        hour = rollDie(12);
+        onLog('time.log.encHour', { hour });
       }
+      setAlarm(kind === 'nothing' ? null : { kind, roll: r, hour });
     },
     [onLog, t],
   );
@@ -83,6 +101,12 @@ export default function GmTimeTracker({ onLog }) {
   const watchNo = (watch % WATCHES_PER_DAY) + 1;
   const inWatch = s.turn % TURNS_PER_WATCH;
 
+  // Zeit an die Spieler spiegeln, sobald sie sich aendert (oder der Schalter kippt).
+  useEffect(() => {
+    if (!shareTime) return;
+    shareTime(s.share ? clockFromTurn(s.turn) : null);
+  }, [shareTime, s.share, s.turn]);
+
   return (
     <Panel
       id="gm-time"
@@ -95,6 +119,22 @@ export default function GmTimeTracker({ onLog }) {
         </button>
       )}
     >
+      {alarm ? (
+        <div className={`time-alarm time-alarm-${alarm.kind}`} role="alert">
+          <AlertTriangle size={18} className="time-alarm-icon" />
+          <div className="time-alarm-text">
+            <strong>{t(`time.alarm.${alarm.kind}`)}</strong>
+            <span className="time-dim">
+              {t('time.alarm.roll', { roll: alarm.roll })}
+              {alarm.hour ? ` · ${t('time.alarm.hour', { hour: alarm.hour })}` : ''}
+            </span>
+          </div>
+          <button type="button" className="icon-btn" onClick={() => setAlarm(null)} aria-label={t('time.alarm.dismiss')} title={t('time.alarm.dismiss')}>
+            <X size={15} />
+          </button>
+        </div>
+      ) : null}
+
       <div className="time-row">
         <div className="time-clock">
           <span>
@@ -128,6 +168,13 @@ export default function GmTimeTracker({ onLog }) {
         {s.lightOn ? (
           <span className="time-dim">{t('time.lightLeft', { n: s.lightLeft })}</span>
         ) : null}
+      </div>
+
+      <div className="time-row">
+        <label className="gm-share-log" title={t('time.share.hint')}>
+          <input type="checkbox" checked={!!s.share} onChange={(e) => commit({ ...s, share: e.target.checked })} />
+          <span>{t('time.share')}</span>
+        </label>
       </div>
 
       <div className="time-row">

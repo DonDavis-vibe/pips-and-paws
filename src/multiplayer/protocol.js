@@ -24,6 +24,11 @@ export const T_STASH_TAKE = 'stash/take'; // { itemId } Spieler will einen Gegen
 export const T_STASH = 'stash'; // { items } vollstaendiger Stand der Tischmitte (Broadcast)
 export const T_LOG = 'log'; //     { entry } | { entries } geteilter Runden-Log (Host spiegelt)
 export const T_LOGCFG = 'logcfg'; // { shared } Host schaltet das geteilte Runden-Log an/aus
+export const T_TIME = 'time'; //   { clock } Tageszeit fuer die Spieler; clock=null blendet sie aus
+export const T_RESTCFG = 'restcfg'; // { locked } SL zieht die Rast an sich
+// { npcs: [{ id, name }] } NSC, die der SL sichtbar geschaltet hat.
+// Bewusst ohne Werte und Trefferpunkte — die Spieler sollen nur wissen, WER da ist.
+export const T_NPCS = 'npcs';
 export const T_GM = 'gmCommand'; // { cmd, ... }
 export const GM_SAVE = 'save'; //      { attr, reason }
 export const GM_DAMAGE = 'damage'; //  { amount, target: 'hp'|'str'|'dex'|'wil', source }
@@ -32,6 +37,7 @@ export const GM_PIPS = 'pips'; //      { amount }
 export const GM_XP = 'xp'; //          { amount }
 export const GM_GIVE = 'give'; //      { item } Gegenstand ins Inventar (Katalog oder Tischmitte)
 export const GM_CONDITION = 'condition'; // { key } Zustand zuweisen
+export const GM_REST = 'rest'; //      { kind: 'short'|'long'|'full' } SL loest eine Rast aus
 export const GM_STASH_DENY = 'stashDeny'; // { itemId } Nehmen abgelehnt (schon weg)
 export const GM_WEBHOOK = 'webhook'; // { url } SL teilt den Discord-Webhook mit der Runde
 export const GM_WHISPER = 'whisper'; // { text }

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Heart, Coins, Shield, Swords, Backpack, Sparkles, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
+import { REST_KINDS } from '../rules/rest.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { gritForLevel, ALL_SLOTS, PAW_SLOTS } from '../rules/character.js';
 import { CONDITION_CATALOG } from '../data/items.js';
 import AddItemMenu from './AddItemMenu.jsx';
 import Portrait from './Portrait.jsx';
 import {
-  GM_DAMAGE, GM_HEAL, GM_PIPS, GM_XP, GM_SAVE, GM_GIVE, GM_CONDITION, GM_WHISPER,
+  GM_DAMAGE, GM_HEAL, GM_PIPS, GM_XP, GM_SAVE, GM_GIVE, GM_CONDITION, GM_WHISPER, GM_REST,
 } from '../multiplayer/protocol.js';
 
 const NOTE_KEY = (id) => `pips-paws-gmnote-${id}`;
@@ -136,6 +137,18 @@ export default function GmPlayerCard({ player, onCommand }) {
         {['str', 'dex', 'wil'].map((k) => (
           <button key={k} type="button" className="btn btn-sm btn-ghost" onClick={() => onCommand({ cmd: GM_SAVE, attr: k })}>
             {k.toUpperCase()}
+          </button>
+        ))}
+        <span className="gm-save-label">{t('rest.title')}:</span>
+        {REST_KINDS.map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            className="btn btn-sm btn-ghost"
+            title={t(`rest.${kind}Hint`)}
+            onClick={() => onCommand({ cmd: GM_REST, kind })}
+          >
+            {t(`rest.${kind}`)}
           </button>
         ))}
         <AddItemMenu

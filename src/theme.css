@@ -35,6 +35,12 @@
   --vignette: radial-gradient(120% 90% at 50% 40%, transparent 55%, color-mix(in srgb, var(--ink) 16%, transparent) 130%);
   --brand-ring: inset 0 1px 0 var(--hi);
   color-scheme: light;
+  /* Hintergrund: warmer Holztisch mit Pergament statt Papierkorn (das Foto
+     bringt die Papiertextur schon mit). Das Scrim haelt die Panels klar. */
+  --bg-texture: url('./assets/bg-table.jpg');
+  --bg-texture-size: cover;
+  --bg-texture-repeat: no-repeat;
+  --bg-scrim: linear-gradient(180deg, color-mix(in srgb, var(--bg) 62%, transparent), color-mix(in srgb, var(--bg) 80%, transparent));
 }
 
 /* Dunkel: per Systemeinstellung ODER manuell gewaehlt.
@@ -69,6 +75,10 @@
   --grain-opacity: 0.92;
   --vignette: radial-gradient(120% 90% at 50% 35%, transparent 45%, rgba(0, 0, 0, 0.5) 120%);
   --brand-ring: 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent);
+  --bg-texture: url('./assets/bg-dungeon.jpg');
+  --bg-texture-size: cover;
+  --bg-texture-repeat: no-repeat;
+  --bg-scrim: linear-gradient(180deg, rgba(20, 16, 12, 0.5), rgba(20, 16, 12, 0.66));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -102,6 +112,10 @@
     --grain-opacity: 0.92;
     --vignette: radial-gradient(120% 90% at 50% 35%, transparent 45%, rgba(0, 0, 0, 0.5) 120%);
     --brand-ring: 0 0 0 1px color-mix(in srgb, var(--gold) 30%, transparent);
+    --bg-texture: url('./assets/bg-dungeon.jpg');
+    --bg-texture-size: cover;
+    --bg-texture-repeat: no-repeat;
+    --bg-scrim: linear-gradient(180deg, rgba(20, 16, 12, 0.5), rgba(20, 16, 12, 0.66));
   }
 }
 
@@ -119,12 +133,18 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-color: var(--bg);
+  /* Unterste Ebene: im Hellmodus das Papierkorn, im Dunkelmodus der
+     Verlies-Boden (--bg-texture). Darueber ein Scrim (--bg-scrim), der das
+     Foto abdunkelt; im Hellmodus faellt er als `none` weg. */
   background-image:
     radial-gradient(1200px 640px at 10% -10%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 62%),
     radial-gradient(1100px 660px at 94% -4%, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 56%),
     radial-gradient(1000px 900px at 50% 116%, color-mix(in srgb, var(--gold) 15%, transparent), transparent 62%),
-    var(--grain);
-  background-size: cover, cover, cover, 160px 160px;
+    var(--bg-scrim, none),
+    var(--bg-texture, var(--grain));
+  background-size: cover, cover, cover, cover, var(--bg-texture-size, 160px 160px);
+  background-position: center, center, center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, var(--bg-texture-repeat, repeat);
   opacity: var(--grain-opacity);
 }
 
@@ -255,7 +275,6 @@ summary,
   object-fit: cover;
   display: block;
 }
-
 
 .brand-title {
   font-family: var(--font-display);
@@ -409,6 +428,7 @@ summary,
   gap: 16px;
 }
 
+
 .panel {
   position: relative;
   background:
@@ -542,6 +562,58 @@ summary,
   font-size: 13px;
   color: var(--ink-dim);
   margin-bottom: 10px;
+}
+
+/* ---- Leerzustaende mit Holzschnitt-Vignette ---- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 12px 8px;
+  text-align: center;
+}
+
+.empty-state-art {
+  width: 156px;
+  height: 156px;
+  object-fit: contain;
+  border-radius: 16px;
+  /* Der Cremegrund der Vignette bekommt im Dunkelmodus eine ruhige Karte. */
+  background: var(--empty-art-bg, transparent);
+  box-shadow: var(--empty-art-shadow, none);
+}
+
+.empty-state-text {
+  font-size: 13px;
+  color: var(--ink-dim);
+  max-width: 34ch;
+  margin: 0;
+}
+
+/* Im Dunkelmodus eine gerahmte Karte hinter der Vignette, damit der helle
+   Cremegrund nicht als Klotz wirkt. */
+:root[data-theme='dark'] {
+  --empty-art-bg: color-mix(in srgb, var(--gold) 12%, var(--bg-panel));
+  --empty-art-shadow: var(--shadow-sm), 0 0 0 1px var(--line);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --empty-art-bg: color-mix(in srgb, var(--gold) 12%, var(--bg-panel));
+    --empty-art-shadow: var(--shadow-sm), 0 0 0 1px var(--line);
+  }
+}
+
+.wizard-art {
+  display: block;
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  margin: 2px auto 6px;
+  border-radius: 14px;
+  background: var(--empty-art-bg, transparent);
+  box-shadow: var(--empty-art-shadow, none);
 }
 
 /* ---- Fields ---- */
@@ -799,7 +871,7 @@ summary,
 
 .attr-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: stretch;
 }
 
@@ -808,6 +880,7 @@ summary,
   flex-direction: column;
   gap: 4px;
   align-items: center;
+  min-width: 0; /* darf im engen Raster schrumpfen, statt aus der Karte zu ragen */
 }
 
 .attr-cap {
@@ -834,11 +907,13 @@ summary,
   background: transparent;
   box-shadow: none;
   align-items: center;
+  max-width: 100%;
 }
 
 .attr-cell:first-child .stepper input {
-  width: 52px;
-  font-size: 33px;
+  width: 46px;
+  flex: none;
+  font-size: 30px;
   line-height: 1;
   color: var(--ink);
   text-shadow: 0 1px 0 var(--hi);
@@ -846,8 +921,9 @@ summary,
 
 .attr-cell:first-child .stepper button {
   background: transparent;
-  font-size: 17px;
-  padding: 4px 7px;
+  font-size: 16px;
+  padding: 4px 5px;
+  flex: none;
   color: var(--ink-faint);
 }
 
@@ -860,11 +936,21 @@ summary,
 
 /* MAX — klein, sekundaer */
 .attr-cell:last-child {
-  flex: 1;
+  flex: 0 1 auto;
   justify-content: center;
 }
 
-.attr-cell:last-child .stepper { transform: scale(0.92); }
+/* Kompakt genug, dass AKTUELL + MAX auch im engen Zwei-Spalten-Layout
+   nebeneinander in die Karte passen (transform aendert die Box nicht). */
+.attr-cell:last-child .stepper button {
+  padding: 4px 7px;
+  font-size: 13px;
+}
+
+.attr-cell:last-child .stepper input {
+  width: 30px;
+  font-size: 15px;
+}
 
 .attr-save {
   align-self: stretch;
@@ -1080,9 +1166,31 @@ summary,
 .item-card.type-light { --tone: var(--gold); }
 .item-card.type-ration { --tone: var(--accent-2); }
 
+/* Zustaende sollen im Raster sofort ins Auge springen (Discord-Feedback):
+   kraeftigerer Grund, roter Rahmen, breitere Kante, farbiger Name. */
 .item-card.type-condition {
   --tone: var(--bad);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bad) 12%, var(--bg-panel)), color-mix(in srgb, var(--bad) 5%, var(--bg-panel)));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bad) 30%, var(--bg-panel)), color-mix(in srgb, var(--bad) 18%, var(--bg-panel)));
+  border-color: color-mix(in srgb, var(--bad) 55%, var(--line));
+  box-shadow: var(--shadow-sm), inset 0 1px 0 var(--hi), 0 0 0 1px color-mix(in srgb, var(--bad) 22%, transparent);
+}
+
+.item-card.type-condition::before {
+  width: 6px;
+  background: var(--bad);
+}
+
+.item-card.type-condition .item-name {
+  color: color-mix(in srgb, var(--bad) 78%, var(--text));
+  font-weight: 700;
+}
+
+.item-card.type-condition .item-type-icon {
+  color: var(--bad);
+}
+
+.inv-slot .item-card.type-condition:hover {
+  border-color: var(--bad);
 }
 
 .item-card.item-cleared {
@@ -1090,7 +1198,13 @@ summary,
   text-decoration: line-through;
 }
 
+/* Statische Karte (Tischmitte): nur nicht bedienbar, sonst normal ausgerichtet. */
 .item-card.item-overlay {
+  cursor: default;
+}
+
+/* Nur die Karte am Mauszeiger wird gekippt und hervorgehoben. */
+.item-card.item-dragging {
   box-shadow: var(--shadow-lg);
   cursor: grabbing;
   transform: rotate(-2.5deg) scale(1.03);
@@ -1147,6 +1261,128 @@ summary,
   color: var(--ink-dim);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* ---- Symbolauswahl fuer Gegenstaende ---- */
+.item-icon-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--tone);
+  transition: transform 90ms ease, opacity 120ms ease;
+}
+
+.item-icon-btn:hover { transform: scale(1.25); }
+.item-icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.icon-picker {
+  position: fixed;
+  z-index: 300;
+  width: 268px;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.icon-picker-head,
+.icon-picker-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: var(--bg-sunk);
+}
+
+.icon-picker-head { border-bottom: 1px solid var(--line); }
+.icon-picker-foot { border-top: 1px solid var(--line); justify-content: flex-start; gap: 6px; }
+.icon-picker-foot svg { color: var(--accent); }
+
+.icon-picker-body {
+  overflow-y: auto;
+  padding: 8px 10px 10px;
+}
+
+.icon-group + .icon-group { margin-top: 10px; }
+
+.icon-group-title {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+}
+
+.icon-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: var(--bg-sunk);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 100ms ease, border-color 100ms ease, transform 80ms ease;
+}
+
+.icon-choice:hover {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-sunk));
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.icon-choice-on {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.stash-icon-btn { flex: 0 0 auto; }
+
+/* Schadens-Chip als Knopf: ein Klick wuerfelt den Waffenschaden. */
+.tag-roll {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-sunk));
+  transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+
+.tag-roll:hover {
+  background: color-mix(in srgb, var(--accent) 24%, var(--bg-sunk));
+  border-color: var(--accent);
+}
+
+.tag-roll:active { transform: scale(0.95); }
+
+.tag-hands {
+  opacity: 0.7;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .usage-dots {
@@ -1294,6 +1530,25 @@ summary,
 }
 
 .rest-label > svg { color: var(--accent-2); }
+
+/* Der SL hat die Rast an sich gezogen — Spieler sehen nur den Hinweis. */
+.rest-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.rest-locked > svg { color: var(--text-muted); }
+
+.gm-log-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
 
 /* ---- Roll buttons ---- */
 .roll-btn {
@@ -1549,6 +1804,13 @@ summary,
   gap: 5px;
   max-height: 200px;
   overflow-y: auto;
+}
+
+/* Wuerfe der Spieler im SL-Protokoll: abgesetzte Kante, damit der SL sie von
+   seinen eigenen unterscheidet. */
+.dice-log li.roll-from-player {
+  border-left: 2px solid var(--accent-2);
+  padding-left: 8px;
 }
 
 .dice-log li {
@@ -2546,7 +2808,106 @@ summary,
   color: var(--accent);
 }
 
+/* NSC, die der SL sichtbar geschaltet hat (Spielerseite). */
+.party-npc-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.party-npc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--bg-raise), var(--bg-panel));
+  box-shadow: inset 0 1px 0 var(--hi);
+}
+
+.party-npc strong { font-size: 13px; }
+.party-npc-note { font-size: 11.5px; color: var(--text-muted); }
+
+/* SL-Seite: sichtbar geschalteter NSC bekommt eine Markierung. */
+.combat-npc.npc-shown {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.icon-btn.icon-btn-on { color: var(--accent); }
+
+/* Tageszeit beim Spieler — schmaler Streifen ueber dem Bogen, nur wenn der SL teilt. */
+.party-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--bg-raise), var(--bg-panel));
+  box-shadow: var(--shadow-sm), inset 0 1px 0 var(--hi);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.party-time svg { color: var(--accent); flex: none; }
+.party-time strong { color: var(--text); font-size: 13px; }
+.party-time-dim { opacity: 0.65; }
+
 /* ---- Zeit-Tracker ---- */
+/* Alarmbanner bei Begegnung/Vorzeichen — bleibt stehen, bis der SL es wegklickt. */
+.time-alarm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px 9px 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--tone) 55%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) 26%, var(--bg-panel)), color-mix(in srgb, var(--tone) 14%, var(--bg-panel)));
+  animation: alarm-in 260ms ease-out both;
+}
+
+.time-alarm-encounter { --tone: var(--bad); }
+.time-alarm-omen { --tone: var(--gold); }
+
+.time-alarm-icon {
+  color: var(--tone);
+  flex: none;
+  animation: alarm-pulse 1.4s ease-in-out 3;
+}
+
+.time-alarm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.time-alarm-text strong {
+  font-size: 13px;
+  color: color-mix(in srgb, var(--tone) 80%, var(--text));
+}
+
+@keyframes alarm-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes alarm-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.18); opacity: 0.75; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .time-alarm { animation: none; }
+  .time-alarm-icon { animation: none; }
+}
+
 .time-row {
   display: flex;
   flex-wrap: wrap;
@@ -2675,10 +3036,41 @@ summary,
   display: flex;
   flex-direction: column;
   gap: 6px;
+  height: 100%;
 }
 
+/* Karten sind unterschiedlich hoch (Waffen haben eine Schadenszeile mehr).
+   Die Karte fuellt die Zeilenhoehe, damit die Knopfreihen buendig sitzen. */
 .stash-item .item-card {
   cursor: default;
+  flex: 1;
+}
+
+/* Versteckte Vorbereitung: gedaempft und gestrichelt, damit der SL sie sofort
+   von dem unterscheidet, was am Tisch wirklich liegt. */
+.stash-item-hidden .item-card {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.stash-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.stash-item-actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.stash-count-hidden {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-sunk);
+  color: var(--text-muted);
+  border: 1px solid var(--line);
+  margin-left: 6px;
 }
 
 @media (max-width: 640px) {
@@ -2686,4 +3078,46 @@ summary,
   .resource-bar {
     grid-template-columns: 1fr;
   }
+}
+
+/* ---- Klebende Wuerfelspalte ----------------------------------------------
+   Steht bewusst am Dateiende: .sheet und .gm-dash setzen weiter oben
+   display:flex. Media Queries erhoehen die Spezifitaet nicht, die spaetere
+   Regel gewinnt — dieser Block muss also nach beiden stehen. */
+/* Ab genug Breite wandert der Wuerfelbereich in eine zweite Spalte und bleibt
+   beim Scrollen stehen — man sieht ihn also, waehrend man am Bogen bzw. am
+   Dashboard arbeitet. Darunter (Tablet/Handy) bleibt alles einspaltig.
+   Gilt fuer Spielerbogen UND SL-Dashboard: der SL soll fuer einen Wurf oder
+   einen Blick ins Wurf-Protokoll nirgendwohin scrollen muessen. */
+@media (min-width: 1200px) {
+  .sheet,
+  .gm-dash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 324px;
+    align-items: start;
+  }
+
+  /* Alles ausser dem Wuerfel-Panel bleibt in Spalte 1 ... */
+  .sheet > *,
+  .gm-dash > * { grid-column: 1; }
+
+  /* ... das Wuerfel-Panel bekommt die ganze zweite Spalte und klebt darin. */
+  .sheet > .dice-panel,
+  .gm-dash > .dice-panel {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    position: sticky;
+    top: 16px;
+    align-self: start;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+}
+
+/* Solange die zweite Spalte die erste einengt, stapeln die Attributskarten
+   AKTUELL ueber MAX — nebeneinander wuerde MAX sonst aus der Karte gedraengt. */
+@media (min-width: 1200px) and (max-width: 1420px) {
+  .attr-row { flex-direction: column; align-items: stretch; }
+  .attr-cell:last-child { flex: 0 0 auto; }
+  .attr-cell:last-child .stepper { align-self: center; }
 }

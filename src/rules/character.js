@@ -74,6 +74,8 @@ export function normalizeCharacter(raw) {
   merged.id = raw.id || base.id;
   for (const k of ['str', 'dex', 'wil', 'hp']) {
     merged[k] = { ...base[k], ...raw[k] };
+    // Aktueller Wert kann nie ueber dem Maximum liegen (repariert alte Staende).
+    merged[k].current = Math.min(merged[k].current, merged[k].max);
   }
   merged.inventory = { ...base.inventory, ...raw.inventory };
   merged.items = raw.items && typeof raw.items === 'object' ? raw.items : {};

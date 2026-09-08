@@ -1,6 +1,6 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-08-30
+Stand: 2026-09-08
 
 Arbeitstitel: **Pips & Paws** (siehe §15.4 — jederzeit änderbar).
 
@@ -18,6 +18,28 @@ Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kam
 **Discord-Webhook** (optional, wie in den anderen Tools): im Multiplayer-Menü einklappbar. Würfe und
 Ereignisse werden in einen Discord-Kanal gespiegelt (Maus-Name als Absender, farbcodierte Embeds).
 URL nur im localStorage, nicht in der Charakterdatei. SL kann den Webhook an die Runde verteilen.
+
+**Runde 2026-09-08 (Sprachen + SEO + README):** UI-Übersetzungen FR/IT/JA komplett (je 387 Keys,
+maschinell unterstützt), in `LANGS`/`DICTS` freigeschaltet — App jetzt DE/EN/FR/IT/JA, nur `es.json`
+noch Gerüst. `?lang=xx` als Einmal-Schalter (Vorrang bei detectLang, danach aus der URL entfernt +
+als Präferenz gespeichert). `<html lang>` und `<title>`/`<meta description>` wechseln per JS mit der
+Sprache (`meta.title`/`meta.description` je Sprache). SEO: hreflang-Alternates + `og:locale:alternate`
+für fr/it/ja, JSON-LD `inLanguage` erweitert, mehrsprachiger `<noscript>`-Block, Keywords um FR/IT/JA-
+Begriffe ergänzt, `sitemap.xml` mit hreflang. README auf Englisch (`README.md`), deutsche Fassung als
+`README.de.md`, echte Screenshots (`docs/screenshots/`, headless über Edge gerendert). Attributskarte:
+zweistellige AKTUELL-Zahl überlappt nicht mehr das Plus.
+
+**Runde 2026-09-06 (Discord-Feedback + Feinschliff):** Attributwert kann nicht mehr übers Maximum;
+Zustände im Raster deutlich auffälliger; SL-Alarmbanner bei Begegnung/Vorzeichen; Tageszeit optional
+für Spieler sichtbar; Gegenstände in der Tischmitte verstecken (verlassen den SL-Rechner nicht);
+Rast per SL auslösbar + „Rast nur durch mich"; Karten aus der Tischmitte auf Wunschplatz ins Raster
+ziehen; Klick auf Schadens-Chip würfelt (ein-/zweihändig getrennt); NSC für Spieler sichtbar schalten
+(nur Name); Symbol-Auswahl für Gegenstände (88 Lucide-Icons, ~60 Katalog-Standards); SL bekommt ein
+vollwertiges Würfel-Panel mit Wurf-Protokoll inkl. Spieler-Würfen; Würfelbereich ab 1180px klebende
+zweite Spalte (Bogen + Dashboard); Reconnect-Fix (Spieler schickt Bogen nach Host-Neustart erneut);
+neues Wappen (Gold-Holzschnitt, W20-Schild) als Marke/Icon/Social-Card; Verlies-Foto als
+Dunkelmodus-Hintergrund, Holztisch-Foto als Hellmodus-Hintergrund (statt Papierkorn); Holzschnitt-
+Vignetten in den Leerzuständen (keine Maus verbunden, leere Tischmitte, Wizard-Start).
 
 **Runde 2026-08-30:** eigenes Wappen-Logo aus KI-Holzschnitt (Ritter-Maus) + neue Social-Card;
 Charakterbilder (Upload, Platzhalter, Sync zum SL, im SL-Dashboard sichtbar); geteiltes Runden-Log

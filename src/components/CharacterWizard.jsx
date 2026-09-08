@@ -8,6 +8,7 @@ import { addItem } from '../rules/inventory.js';
 import { makeItem } from '../data/items.js';
 import { backgroundAt } from '../data/backgrounds.js';
 import { BIRTHSIGNS, COAT_COLORS, COAT_PATTERNS, DETAILS, NAMES, pick, rollDetailIndex } from '../data/tables.js';
+import wizardArt from '../assets/empty-wizard.jpg';
 
 const STEPS = 5;
 const WEAPON_KEYS = ['w_light', 'w_medium', 'w_heavy', 'w_light_ranged', 'w_heavy_ranged', 'w_improvised'];
@@ -129,6 +130,7 @@ export default function CharacterWizard({ onDone, onCancel }) {
 
       {step === 1 ? (
         <div className="wizard-pane">
+          <img className="wizard-art" src={wizardArt} alt="" width="120" height="120" />
           <h3 className="sub-h">{t('wizard.attributes')}</h3>
           <p className="hint">{t('wizard.attributesHint')}</p>
           <div className="roll-row">

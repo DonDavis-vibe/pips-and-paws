@@ -1,25 +1,24 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import {
-  GripVertical, Trash2, Swords, Shield, Sparkles, Flame, Apple, Package, AlertTriangle, Info, PackagePlus,
+  GripVertical, Trash2, Swords, Info, PackagePlus,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { InfoHint } from './ui.jsx';
+import { weaponDamageOptions } from '../rules/dice.js';
+import { iconForItem } from '../data/icons.js';
+import IconPicker from './IconPicker.jsx';
 
-const TYPE_ICON = {
-  weapon: Swords,
-  armour: Shield,
-  spell: Sparkles,
-  light: Flame,
-  ration: Apple,
-  condition: AlertTriangle,
-  standard: Package,
-};
-
-export default function ItemCard({ item, onChange, onRemove, onStash, dragId, overlay }) {
+// overlay  = statische, nicht bedienbare Karte (z.B. in der Tischmitte)
+// dragging = die Karte, die gerade am Mauszeiger haengt (bekommt die Schraeglage)
+export default function ItemCard({ item, onChange, onRemove, onStash, onRollDamage, dragId, overlay, dragging }) {
   const { t, lang } = useLang();
   const [showEffect, setShowEffect] = useState(false);
-  const Icon = TYPE_ICON[item.type] || Package;
+  const [pickerAnchor, setPickerAnchor] = useState(null);
+  const Icon = iconForItem(item);
+  const dmgOptions = weaponDamageOptions(item);
+  // Symbol wechseln darf, wer die Karte auch sonst aendern darf.
+  const canPickIcon = !overlay && !!onChange;
 
   const drag = useDraggable({ id: dragId ?? item.itemId, disabled: overlay });
   // Bei aktivem Ziehen uebernimmt das DragOverlay die Bewegung — die Quelle
@@ -32,7 +31,7 @@ export default function ItemCard({ item, onChange, onRemove, onStash, dragId, ov
     <div
       ref={overlay ? undefined : drag.setNodeRef}
       style={style}
-      className={`item-card type-${item.type}${item.cleared ? ' item-cleared' : ''}${item.size === 2 ? ' item-wide' : ''}${overlay ? ' item-overlay' : ''}`}
+      className={`item-card type-${item.type}${item.cleared ? ' item-cleared' : ''}${item.size === 2 ? ' item-wide' : ''}${overlay ? ' item-overlay' : ''}${dragging ? ' item-dragging' : ''}`}
     >
       <div className="item-top">
         {overlay ? null : (
@@ -47,7 +46,24 @@ export default function ItemCard({ item, onChange, onRemove, onStash, dragId, ov
             <GripVertical size={14} />
           </button>
         )}
-        <Icon size={14} className="item-type-icon" />
+        {canPickIcon ? (
+          <button
+            type="button"
+            className="item-type-icon item-icon-btn"
+            // currentTarget ist im State-Updater bereits zurueckgesetzt —
+            // den Knoten daher synchron festhalten.
+            onClick={(e) => {
+              const node = e.currentTarget;
+              setPickerAnchor((a) => (a ? null : node));
+            }}
+            aria-label={t('icon.pick')}
+            title={t('icon.pick')}
+          >
+            <Icon size={14} />
+          </button>
+        ) : (
+          <Icon size={14} className="item-type-icon" />
+        )}
         <span className="item-name">{loc(item.name, lang)}</span>
         {!overlay && onStash && item.type !== 'condition' ? (
           <button type="button" className="icon-btn" onClick={() => onStash(item)} aria-label={t('stash.send')} title={t('stash.send')}>
@@ -63,9 +79,24 @@ export default function ItemCard({ item, onChange, onRemove, onStash, dragId, ov
 
       <div className="item-meta">
         {item.damage ? (
-          <span className="tag">
-            {t('item.damage')} {item.damage}
-          </span>
+          onRollDamage && !overlay && dmgOptions.length ? (
+            dmgOptions.map((o) => (
+              <button
+                key={o.hands || 'x'}
+                type="button"
+                className="tag tag-roll"
+                onClick={() => onRollDamage(item, o)}
+                title={t(o.hands ? `item.rollDamage.${o.hands}` : 'item.rollDamage')}
+              >
+                <Swords size={11} /> {t('dice.dieLetter')}{o.sides}
+                {o.hands ? <span className="tag-hands">{t(`item.hands.${o.hands}`)}</span> : null}
+              </button>
+            ))
+          ) : (
+            <span className="tag">
+              {t('item.damage')} {item.damage}
+            </span>
+          )
         ) : null}
         {item.defense ? (
           <span className="tag">
@@ -83,7 +114,7 @@ export default function ItemCard({ item, onChange, onRemove, onStash, dragId, ov
                 key={i}
                 type="button"
                 className={`dot${i < item.usage.current ? ' dot-on' : ''}`}
-                disabled={overlay}
+                disabled={overlay || !onChange}
                 onClick={() => onChange({ ...item, usage: { ...item.usage, current: i < item.usage.current ? i : i + 1 } })}
                 aria-label={`${t('item.uses')} ${i + 1}`}
               />
@@ -100,6 +131,15 @@ export default function ItemCard({ item, onChange, onRemove, onStash, dragId, ov
           </button>
           {showEffect ? <p>{effectText}</p> : null}
         </div>
+      ) : null}
+
+      {pickerAnchor ? (
+        <IconPicker
+          item={item}
+          anchor={pickerAnchor}
+          onPick={(key) => onChange({ ...item, icon: key || undefined })}
+          onClose={() => setPickerAnchor(null)}
+        />
       ) : null}
 
       {item.type === 'condition' && !overlay ? (

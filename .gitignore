@@ -7,9 +7,15 @@ dist
 reference/
 
 # img/ ist ein lokaler Arbeitsordner fuer Quell-/Referenzbilder.
-# Nur die eine Holzschnitt-Quelle, aus der die App-Assets abgeleitet sind, gehoert ins Repo.
+# Nur die Quellbilder, aus denen die App-Assets abgeleitet sind, gehoeren ins Repo.
 img/*
 !img/logo-source.jpeg
+!img/logo_new.jpeg
+!img/background.jpeg
+!img/heller-hintergrund.jpeg
+!img/neue-maus.jpeg
+!img/keine-maus.jpeg
+!img/tisch-leer.jpeg
 
 # Rechtstexte-Quellen (die fertigen Seiten liegen in public/)
 imp/
