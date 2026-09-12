@@ -29,6 +29,17 @@ export const T_RESTCFG = 'restcfg'; // { locked } SL zieht die Rast an sich
 // { npcs: [{ id, name }] } NSC, die der SL sichtbar geschaltet hat.
 // Bewusst ohne Werte und Trefferpunkte — die Spieler sollen nur wissen, WER da ist.
 export const T_NPCS = 'npcs';
+// { members: [{ peerId, name, hp:{current,max}, conditions:[{key,name}] }] }
+// Kompakte Gruppenuebersicht fuer die Spieler untereinander — nur was am Tisch
+// eh sichtbar waere. Bewusst ohne Attribute/Inventar/Pips.
+export const T_GROUP = 'group';
+// Soundboard: der SL loest Sounds fuer alle aus, die Spieler mischen nur noch
+// ihre eigene Gesamtlautstaerke drueber (siehe utils/sound.js).
+export const T_SOUND_FX = 'soundFx'; //     { kind, volume } eingebauter, im Browser erzeugter Effekt
+export const T_SOUND_CUSTOM = 'soundCustom'; // { name, volume, blob } vom SL hochgeladener Sound
+export const T_SOUND_VOL = 'soundVol'; //   { volume } SL schiebt die laufende Mischung
+export const T_SOUND_STOP = 'soundStop'; // {} harter Stop
+export const T_SOUND_FADE = 'soundFade'; // {} weiches Ausblenden (3.5s)
 export const T_GM = 'gmCommand'; // { cmd, ... }
 export const GM_SAVE = 'save'; //      { attr, reason }
 export const GM_DAMAGE = 'damage'; //  { amount, target: 'hp'|'str'|'dex'|'wil', source }

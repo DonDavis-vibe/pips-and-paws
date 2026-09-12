@@ -7,7 +7,12 @@ export const BODY_SLOTS = ['body_1', 'body_2'];
 export const PACK_SLOTS = ['pack_1', 'pack_2', 'pack_3', 'pack_4', 'pack_5', 'pack_6'];
 export const ALL_SLOTS = [...PAW_SLOTS, ...BODY_SLOTS, ...PACK_SLOTS];
 
-// Ein 2-Platz-Gegenstand belegt immer ein festes Paar; das erste Feld ist der "Anker".
+// Ein 2-Platz-Gegenstand belegt immer ein festes Paar derselben Art (zwei
+// Pfoten, zwei Koerper oder zwei Rucksack); das erste Feld ist der "Anker".
+// Bewusste Vereinfachung: die SRD gibt Leichter Ruestung eigentlich ein
+// echtes Pfote+Koerper-Paar — das haette ein item-abhaengiges Paar-Modell
+// gebraucht (jeder Slot muesste wissen, WAS gerade draufgezogen wird), statt
+// des rein slot-basierten Modells hier. Siehe PLAN.md §11.7.
 export const SLOT_PAIR_FIRST = {
   paw_left: 'paw_left',
   paw_right: 'paw_left',
@@ -55,6 +60,12 @@ export function blankCharacter() {
     inventory: Object.fromEntries(ALL_SLOTS.map((s) => [s, null])),
     items: {}, // itemId -> Item
     notes: '',
+    hirelings: [], // siehe rules/hirelings.js — kein eigenes Inventarraster
+    // Kritischer Schaden (SRD: misslungener STR-Rettungswurf nach STR-Schaden)
+    // macht kampfunfaehig, bis versorgt + gerastet wird. Kein Zustands-Item
+    // (die SRD kennt dafuer keine Zustandskarte, die einen Platz belegt) —
+    // eigenes Flag, siehe rules/gmActions.js#applyDamage + rules/rest.js.
+    incapacitated: false,
   };
 }
 
@@ -79,6 +90,8 @@ export function normalizeCharacter(raw) {
   }
   merged.inventory = { ...base.inventory, ...raw.inventory };
   merged.items = raw.items && typeof raw.items === 'object' ? raw.items : {};
+  merged.hirelings = Array.isArray(raw.hirelings) ? raw.hirelings : [];
+  merged.incapacitated = !!raw.incapacitated;
   merged.portrait = typeof raw.portrait === 'string' ? raw.portrait : '';
   merged.schemaVersion = SCHEMA_VERSION;
   return merged;

@@ -1,3 +1,6 @@
+/* Das urspruengliche App-Design ("Classic"). Liegt in der Ebene `classic`,
+   damit src/print.css es ohne Spezifitaets-Gerangel ueberschreiben kann. */
+@layer classic {
 :root {
   --bg: #ebdfc3;
   --bg-tint: #f6eeddee;
@@ -332,6 +335,24 @@ summary,
   background: var(--accent);
   color: var(--accent-ink);
   box-shadow: var(--shadow-sm);
+}
+
+/* ---- Eigene Lautstaerke (Kopfzeile) ---- */
+.volume-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-panel);
+  color: var(--ink-dim);
+  box-shadow: var(--shadow-sm);
+}
+
+.volume-switch input[type='range'] {
+  width: 64px;
+  accent-color: var(--accent);
 }
 
 /* ---- Buttons ---- */
@@ -967,6 +988,14 @@ summary,
   margin-top: 12px;
 }
 
+.incap-banner {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .res-block {
   border: 1px solid var(--line);
   border-radius: 13px;
@@ -1006,12 +1035,15 @@ summary,
 
 .res-level {
   flex-basis: 100%;
+  min-width: 0; /* sonst schrumpft das Flex-Item nie unter die ungebrochene Textbreite — laeuft dann ueber den Rand statt umzubrechen (auffaellig bei der groesseren Druckbogen-Handschrift) */
   margin-left: 0;
   margin-top: 1px;
   font-size: 10px;
   line-height: 1.2;
   color: var(--gold);
   white-space: normal;
+  display: flex;
+  flex-direction: column;
 }
 
 .hp-track {
@@ -1689,6 +1721,64 @@ summary,
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   animation: roll-punch 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Wenn ein 3D-Wuerfel die Buehne fuehrt, ist die Zahl nur noch Bestaetigung.
+   Compound-Selektor (statt nur .dice-stage-value--sub), weil print.css fuer
+   .dice-stage-value unlayered eine eigene, groessere font-size setzt, die sonst
+   gewinnen wuerde — siehe gleiche Regel dort. */
+.dice-stage-value.dice-stage-value--sub {
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+/* ---- 3D-Wuerfel (echter CSS-Transform-Wuerfel, W6) ---- */
+.die3d-scene {
+  display: inline-block;
+  perspective: 280px;
+  /* Der Schatten sitzt bewusst hier und nicht auf .die3d-cube: ein `filter`
+     auf einem Element mit `transform-style: preserve-3d` zwingt Chromium/
+     Firefox, es (samt Kindern) auf eine flache 2D-Bitmap zu rendern — der
+     Wuerfel waere dann bei jeder Rotation ausser der Ruhestellung unsichtbar. */
+  filter: drop-shadow(0 4px 6px color-mix(in srgb, var(--ink) 25%, transparent));
+}
+
+.die3d-cube {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.22, 0.85, 0.3, 1);
+}
+
+.die3d-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, var(--bg-panel), var(--bg-sunk));
+  border: 1.5px solid var(--line-strong);
+  border-radius: 15%;
+  color: var(--ink);
+  /* Ohne das wuerde die gegenueberliegende (nach hinten zeigende) Seite bei
+     manchen Rotationswinkeln ueber der sichtbaren Seite gemalt werden, weil
+     beide exakt dieselbe Bildschirm-Flaeche projizieren (nur mit anderer
+     Z-Tiefe) — Standard-Fix fuer CSS-3D-Wuerfel. */
+  backface-visibility: hidden;
+}
+
+.die3d-pips { width: 66%; height: 66%; overflow: visible; }
+
+.die3d-pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.die3d-labeled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 .dice-stage-value.is-rolling {
@@ -2547,6 +2637,248 @@ summary,
   gap: 5px;
 }
 
+/* ---- SL-Soundboard ---- */
+.gm-sound-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.gm-sound-fx {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 4px 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-sunk);
+}
+
+.gm-sound-fx-label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.gm-sound-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.gm-sound-vol {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--ink-dim);
+}
+
+.gm-sound-vol input[type='range'] {
+  width: 110px;
+  accent-color: var(--accent);
+}
+
+.gm-sound-custom-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gm-sound-custom-list li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-sunk);
+}
+
+.gm-sound-custom-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---- Miethelfer ---- */
+.hireling-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hireling-add select {
+  width: auto;
+  max-width: 180px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.hirelings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hireling-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px 12px;
+  background: linear-gradient(180deg, var(--bg-raise), var(--bg-panel));
+  box-shadow: var(--shadow-sm), inset 0 1px 0 var(--hi);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hireling-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hireling-name {
+  flex: 1.4;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.hireling-kind {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 8px;
+  font-size: 12px;
+}
+
+.hireling-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.hireling-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.hireling-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hireling-stat .stepper input {
+  width: 34px;
+}
+
+.hireling-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.hireling-wage {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.hireling-wage input {
+  width: 56px;
+  padding: 5px 6px;
+  text-align: center;
+}
+
+/* ---- Gruppenuebersicht (Spieler untereinander) ---- */
+.party-group-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.party-group-member {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, var(--bg-raise), var(--bg-panel));
+  box-shadow: var(--shadow-sm), inset 0 1px 0 var(--hi);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.party-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.party-group-hp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.party-group-track {
+  height: 8px;
+}
+
+.party-group-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ---- Lokaler Bogen im Vollbild (SL-Geraet zum Herumreichen) ---- */
+.local-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.local-sheet-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 2px;
+}
+
+.local-sheet-bar strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+
 /* ---- GM dashboard ---- */
 .gm-dash {
   display: flex;
@@ -3111,6 +3443,30 @@ summary,
     align-self: start;
     max-height: calc(100vh - 32px);
     overflow-y: auto;
+    /* overflow-y ungleich visible zwingt Browser dazu, auch overflow-x auf
+       auto zu setzen (CSS-Spec: eine Achse kann nicht visible bleiben, wenn
+       die andere scrollt) — ohne dieses Netz bekaeme die enge 324px-Spalte
+       bei zu breitem Inhalt (z. B. "DISADVANTAGE/ADVANTAGE" laenger als
+       "Nachteil/Vorteil") eine eigene seitliche Scrollleiste. */
+    overflow-x: hidden;
+  }
+
+  /* Der Vorteil/Nachteil-Umschalter ist eine runde Pille mit Inhalts-Breite —
+     in der 324px-Spalte reicht das bei langen Sprachen nicht (siehe oben).
+     Hier darf er die volle Spaltenbreite nutzen und noetigenfalls umbrechen,
+     statt seitlich abgeschnitten zu werden. */
+  .dice-panel .save-mode {
+    display: flex;
+    width: 100%;
+  }
+
+  .dice-panel .save-mode-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+    white-space: normal;
+    text-align: center;
   }
 }
 
@@ -3120,4 +3476,5 @@ summary,
   .attr-row { flex-direction: column; align-items: stretch; }
   .attr-cell:last-child { flex: 0 0 auto; }
   .attr-cell:last-child .stepper { align-self: center; }
+}
 }

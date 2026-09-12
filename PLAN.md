@@ -1,6 +1,6 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-09-08
+Stand: 2026-09-12 (Abend)
 
 Arbeitstitel: **Pips & Paws** (siehe §15.4 — jederzeit änderbar).
 
@@ -18,6 +18,165 @@ Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kam
 **Discord-Webhook** (optional, wie in den anderen Tools): im Multiplayer-Menü einklappbar. Würfe und
 Ereignisse werden in einen Discord-Kanal gespiegelt (Maus-Name als Absender, farbcodierte Embeds).
 URL nur im localStorage, nicht in der Charakterdatei. SL kann den Webhook an die Runde verteilen.
+
+**Runde 2026-09-12i (Pre-Push-Test: echter Multiplayer-Bug gefunden + gefixt):** Vor dem ersten Push
+seit Langem einen echten Zwei-Tab-Multiplayer-Test gemacht (SL + Fern-Spieler ueber WebRTC, nicht nur
+lokal), plus Rueckwaertskompatibilitaet mit einem alten Spielstand (vor Mietlinge/`incapacitated`)
+und den Spanisch-Fallback fuer alle neuen Keys geprueft. Dabei einen echten Bug in der
+Schadenskette gefunden: in `App.jsx`s `GM_DAMAGE`-Handler wurden `strHit`/`saveRoll`/`dead` aus der
+`setCharacter`-Updater-Funktion heraus gelesen — deren Rueckgabewert wird von React aber erst beim
+naechsten Commit ausgewertet, also NACH dem synchronen Code direkt danach. Ergebnis: der Rettungswurf
+lief korrekt und landete korrekt im Charakter-State (STR-Abzug, "Verletzt", `incapacitated` — alles
+sichtbar richtig), aber die Zusatzmeldungen (automatischer Rettungswurf im SL-Log, "kritischer
+Schaden", Sterbe-Meldung) wurden nie verschickt, weil sie `saveRoll`/`dead` noch auf ihren
+Anfangswerten (`null`/`false`) lasen. Fix: `applyDamage()` wird jetzt einmal direkt aufgerufen
+(Ergebnis synchron verfuegbar) statt in der Updater-Funktion versteckt — genau das Muster, das
+`GM_REST`/`GM_GIVE`/`GM_CONDITION` im selben Handler schon die ganze Zeit richtig gemacht haben.
+Der lokale Spieler-Pfad (`GmLocalPlayers.jsx`) hatte diesen Bug nicht (nutzte bereits das sichere
+Muster) — deshalb ist er beim fruehen Testen mit "Pelham" nicht aufgefallen. Sonst nichts
+Kritisches gefunden: alte Spielstaende laden sauber (fehlende Felder werden normalisiert), Spanisch
+faellt fuer alle neuen Begriffe (Mietlinge, `incap.*`) korrekt auf Englisch zurueck, Soundboard-
+Broadcast wirft auf keiner Seite einen Fehler.
+
+**Runde 2026-09-12h (Echter 3D-Wuerfel):** Letzter offener Post-MVP-Punkt (Wuerfel-„3D") umgesetzt —
+Entscheidung mit dem Nutzer vorab geklaert: echter CSS-3D-Wuerfel statt Physik-Engine (keine neue
+Abhaengigkeit, passt zum schlanken Stack) oder nur ausgebauter 2D-Optik. `DiceKit.jsx#Die3D`: ein
+CSS-Transform-Wuerfel mit 6 Seiten (Pips wiederverwendet aus den bestehenden `PIP_FACES`), der sich
+beim Wurf dreht und auf der gewuerfelten Seite landet — Drehung geht **immer vorwaerts** vom
+aktuellen Winkel aus (nie ein Sprung zurueck) plus ein paar Zufalls-Extra-Umdrehungen furs
+Taumel-Gefuehl. Eingebaut in `DiceStage`: ein echter Wuerfel fuer W6, zwei nebeneinander fuer W66
+(Zehner/Einer) — andere Seitenzahlen (W8/W10/W12/W20) bleiben bei der Zahlen-Anzeige, ein
+20-seitiger Pip-Wuerfel waere ein eigenes, viel groesseres Modell gewesen. Zentral in `DiceKit.jsx`
+gebaut heisst: Spieler-Wuerfelleiste, SL-Wuerfelpanel und Waffenschaden-Wuerfe (alle nutzen
+dieselbe `DiceStage`) profitieren automatisch, ohne Aenderung an drei Stellen.
+**Zwei echte Bugs beim Bauen gefunden und gefixt** (beide beim Testen mit gezieltem Wuerfeln auf
+bestimmte Werte aufgefallen, nicht beim ersten Blick): (1) `filter: drop-shadow(...)` auf demselben
+Element wie `transform-style: preserve-3d` zwingt Chromium, das Element (inkl. Kinder) auf eine
+flache 2D-Bitmap zu rendern — der Wuerfel war bei jeder Drehung ausser der Ruhestellung komplett
+unsichtbar (0-Hoehe-Bounding-Box bei Diagnose). Fix: der Schatten sitzt jetzt auf dem aeusseren
+`.die3d-scene`-Wrapper statt auf dem rotierenden `.die3d-cube`. (2) Fehlendes
+`backface-visibility: hidden` auf den Wuerfelseiten liess in der Ruhestellung gelegentlich die
+gegenueberliegende (nach hinten zeigende) Seite ueber der sichtbaren gemalt werden, weil beide
+exakt dieselbe Bildschirmflaeche projizieren. Getestet: automatisiert per Konsole wiederholt
+gewuerfelt, bis gezielt jede der sechs Seiten (inkl. der beiden zuvor kaputten
+X-Achsen-Drehungen 2 und 5) getroffen wurde, Pip-Anzahl per DOM-Abfrage gegen den Wurfwert
+verifiziert — sowie visuell in Classic/Druckbogen × Hell/Dunkel geprueft.
+
+**Runde 2026-09-12g (Automatische Schadenskette):** Letzter Post-MVP-Punkt aus §12 umgesetzt.
+`rules/gmActions.js#applyDamage` macht jetzt die volle SRD-Kette selbst: Schaden zuerst auf TP,
+Ueberschuss auf STR (wie bisher) — neu ist, dass STR-Schaden sofort einen automatischen
+STR-Rettungswurf ausloest (`rollSave` auf den bereits reduzierten Wert). Misslingt er, gibt's
+kritischen Schaden: Zustand "Verletzt" wird automatisch ins Inventar gelegt und die Maus als
+"kampfunfaehig" markiert (`character.incapacitated`, neues Feld — kein Zustands-Item, weil die
+SRD dafuer keine eigene, platzbelegende Zustandskarte kennt). Sinkt STR auf 0, liefert
+`applyDamage` `dead: true` zurueck; die App loescht dabei nichts und sperrt nichts automatisch,
+sondern zeigt SL und Spieler:in eine unmissverstaendliche Meldung (Toast + Log + geteiltes
+Event) — die eigentliche narrative Entscheidung bleibt am Tisch. "Kampfunfaehig" wird durch jede
+Rast (kurz reicht) wieder aufgehoben (`rules/rest.js`), passend zur SRD ("bis versorgt + kurze
+Rast"); zusaetzlich gibt's einen manuellen "Als versorgt markieren"-Knopf auf dem eigenen Bogen
+(`ResourceBar.jsx`) fuer den Fall, dass die Gruppe das Versorgen anders abhandelt. Sichtbar als
+Chip neben den Zustaenden im SL-Dashboard (`GmPlayerCard.jsx`) und als kleines Banner auf dem
+Spielerbogen. Bewusst NICHT gebaut: der 6-Zug-/1-Stunde-Totzaehler fuer unversorgt
+kampfunfaehige Wesen — dafuer muesste ein kampfunfaehiges Wesen an den globalen Zug-Zaehler des
+SL (`GmTimeTracker`) gekoppelt werden, den nicht jede Runde nutzt; das waere ein automatischer
+Tod ohne Bestaetigung, den niemand explizit wollte. Getestet ueber die lokale SL-Spielerkarte
+(Schaden bis knapp unter Todesschwelle → Verletzt+Kampfunfaehig, dann kurze Rast → nur
+Kampfunfaehig faellt weg, Verletzt bleibt; dann toedlicher Treffer → STR 0, Sterbe-Meldung in
+Toast, Log und geteiltem Event, nichts gesperrt). Neue i18n-Keys in DE/EN/FR/IT/JA (nicht ES,
+siehe Policy oben).
+
+**Runde 2026-09-12f (Item-/Zauber-Namen an offizielle Uebersetzung angeglichen):** §15.7 geklaert.
+Drei System-Matters-PDFs direkt von system-matters.de geladen und per `pdftotext` ausgelesen
+(Schnellstarter, Referenzbogen, Spielrundenbogen) — daraus liessen sich einige Begriffe konkret
+belegen, die von unseren eigenen Uebersetzungen abwichen: Waffenklasse "Mittelschwere Waffe" statt
+"Mittlere Waffe", "Leichte/Schwere Fernkampfwaffe" statt "...Fernwaffe" (`data/items.js`,
+Kommentar in `rules/dice.js` mitgezogen), Zauber "Genesung" statt "Heilung" fuer Heal (inkl.
+Fundort in `data/backgrounds.js`). Bei der Gelegenheit auch die drei abweichenden Zustandsnamen
+korrigiert, die in denselben Quellen auftauchten (nicht Teil der urspruenglichen Frage, aber
+eindeutig belegt): "Aengstlich" statt "Veraengstigt" (Frightened), "Entkraeftet" statt
+"Ausgelaugt" (Drained), "Belastet" statt "Ueberladen" (Encumbered) — inkl. der Zauber-Wirkungstexte,
+die den alten Zustandsnamen als Text zitierten (Furcht, Wiederherstellen). Fuer die restlichen
+Zauber ohne belegte offizielle Entsprechung (Feuerball, Magisches Geschoss, Finsternis, Licht,
+Unsichtbarer Ring, Oeffnen, Schmiere, Wachsen, Unsichtbarkeit, Katzenminze, Verstanden werden)
+blieb die eigene Uebersetzung stehen — nichts geraten, nur belegte Begriffe uebernommen. Fund am
+Rande, bewusst NICHT umgesetzt: die offizielle Waehrung heisst auf Deutsch "Kerne", nicht "Pips" —
+eine Aenderung dort wuerde quer durchs UI (Ressourcen-Label, Hinweistexte) und in den App-Namen
+selbst hineinreichen ("Pips & Paws"-Wortspiel), das ist eine groessere Entscheidung als eine
+Item-Namens-Angleichung und bleibt offen, bis das explizit gewuenscht wird. Ebenso nicht angefasst:
+"Trefferschutzpunkte (TP)" als offizieller Vollbegriff fuer HP statt unserem "Trefferpunkte" —
+gleiche Kategorie groesserer, UI-weiter Umbenennung.
+
+**Runde 2026-09-12e (Mietlinge + Ruestungs-Text-Fix):** Die zwei letzten offenen Discord-Punkte
+abgearbeitet. **Miethelfer** (`rules/hirelings.js`, `HirelingsPanel.jsx`): eigenes Panel auf dem
+Spielerbogen, SRD-Katalog mit 9 Typen + Tageslohn als Vorschlag, TP (W6) und STR/DEX/WIL (je 2W6)
+werden beim Anheuern sofort ausgewuerfelt und bleiben danach frei editierbar (Stepper wie ueberall
+sonst), Moral-Rettungswurf (WIL-Save, SRD: bei Misserfolg flieht der Mietling) landet lokal im
+Wuerfel-Panel — bewusst nicht an GM/Discord gemeldet, das ist Sache der Spielerin. Kein eigenes
+Inventarraster (die SRD gaebe ihnen 6 Plaetze wie einer Maus, das haette den Bogen gesprengt) —
+Ausruestung kommt in die Notiz. **Ruestungs-Platzmodell** (§11.7): beim genaueren Hinsehen war die
+"saubere" Lösung (echtes Pfote+Koerper-Paar fuer Leichte Ruestung) ein groesserer Eingriff in den
+Kern von Drag & Drop, nicht der erhoffte Fuenf-Minuten-Fix — stattdessen den Effekt-Text beider
+Ruestungen ehrlich an das angepasst, was das Platzmodell tatsaechlich zulaesst (irgendein
+gleichartiges Paar), Abweichung von der SRD in §11.7 dokumentiert.
+
+**Runde 2026-09-12d (Post-MVP-Bestandsaufnahme + Mehrere Maeuse):** Nachgefragt, was aus der
+"Post-MVP"-Liste (§12) noch fehlt: **Party-Uebersicht** ✔ und **Discord-Webhook** ✔ waren
+laengst erledigt (nur hier nicht abgehakt). Neu gebaut: **Mehrere Maeuse pro Browser**
+(`useCharacterRoster.js`, `RosterModal.jsx`) — jede je aktive Maus wird automatisch in eine
+Liste gespiegelt (kein manuelles Sichern noetig), ein Knopf "Meine Maeuse" (erscheint erst ab
+der zweiten Maus) zeigt die jeweils ANDEREN mit Laden/Entfernen. Bewusst nicht angefasst:
+**automatische Schadenskette** (SRD: nach STR-Schaden ist ein STR-Save faellig, bei Fehlschlag
+gibt's die Injured-Condition + Incapacitated-Status + 6-Turn-Totzaehler bis zum Tod ohne
+Versorgung) — das ist ein groesserer Zustandsautomat, kein "schnelles" Feature, bleibt offen.
+Ebenso offen und bewusst NICHT "mal eben": Wuerfel-„3D" und ein Karten-/Battlemap-Modul —
+beides eigene groessere Bausteine. Supabase/echte DB bleibt aus Prinzip aussen vor (§1).
+
+**Runde 2026-09-12c (i18n-Policy: ES bleibt offen):** Version auf 0.2.0 hochgezaehlt
+(`src/config.js`, `package.json`) — laengst faellig nach all den Runden seit 0.1.0. Beim
+Nachfragen zum Stand der spanischen Uebersetzung stellte sich heraus: die 38 Schluessel, die seit
+Salgraphics' PR #1 (lokale Spieler, Soundboard, Gruppenuebersicht, Skin-Umschalter) dazukamen,
+hatte ich selbst maschinell ins Spanische nachgezogen, obwohl @Salgraphics eigentlich weiter
+mituebersetzen wollte. `es.json` ist jetzt wieder exakt auf Salgraphics' PR-Stand (390 Schluessel,
+0 veraendert) — neuere Schluessel fallen bewusst auf Englisch zurueck (`t()` kann das eh schon),
+statt vorschnell maschinell aufgefuellt zu werden. Policy ab jetzt: bei neuen Features DE/EN/FR/
+IT/JA wie bisher pflegen, ES aber NICHT automatisch mitziehen — die Luecke bleibt fuer eine
+muttersprachliche Uebersetzung offen. READMEs + CONTRIBUTING.md entsprechend klargestellt.
+
+**Runde 2026-09-12b (Offline-Tisch, Soundboard, Gruppenuebersicht):** Drei Ergaenzungen
+fuers gemeinsame Spielen am Tisch. **Lokale Spieler** (`src/useLocalPlayers.js`,
+`GmLocalPlayers.jsx`): der SL legt im Dashboard eigene Boegen an oder laedt sie (fuer
+Mitspieler ohne eigenes Geraet), wendet Schaden/Heilen/Rast/Item/Zustand direkt darauf an
+(`rules/gmActions.js` — dieselben reinen Funktionen wie beim Fern-Spieler-Pfad in App.jsx)
+und kann den vollen Bogen zum Herumreichen im Vollbild oeffnen ("Bogen oeffnen" ersetzt
+das ganze Dashboard, "Zurueck zum SL-Dashboard"-Leiste). **Soundboard** (`GmSoundboard.jsx`,
+`utils/sound.js`, `utils/customSounds.js`): eingebaute Kurz-Effekte (Erfolg/Fehlschlag/
+Krit/Patzer/Glocke) sind kurze CC0-Sounds von Kenney (kenney.nl, gemeinfrei —
+siehe `src/assets/sfx/CREDITS.txt`); ursprünglich als Web-Audio-Synthese gebaut,
+dann auf Nutzerfeedback ("klingen nicht gut") durch generische UI-Sounds
+("Interface Sounds") ersetzt, dann nochmal auf Feedback ("passen nicht zur
+Spielrunde") durch gezupfte Saiten aus "Music Jingles" — auf-/absteigende
+Notenfolgen fuer Erfolg/Krit/Fehlschlag/Patzer, thematisch naeher an
+Mausritters Ton als Software-Pieptoene. Die Glocke bleibt ein echter
+Gong-Anschlag aus "Interface Sounds". Fuer Ambient-/Musikdateien bleibt
+es bei "SL laedt eigene hoch" (IndexedDB, lokal, geht beim Abspielen nur direkt per
+WebRTC an aktuell Verbundene — wie der Discord-Webhook) — deren Lizenzen sind so gut
+wie nie wirklich frei (siehe z. B. htbah-tool), die will ich nicht ins Repo legen. Lautstaerke: SL-Pegel pro Sound x eigener Geraete-Pegel (neuer Regler in
+der Kopfzeile, `VolumeControl.jsx`). **Gruppenuebersicht** (`PartyGroup.jsx`, Protokoll
+`T_GROUP`): der SL teilt optional ("Gruppenuebersicht mit Spielern teilen") eine kompakte
+Sicht der Spieler aufeinander — Name, TP-Balken, Zustaende, keine Attribute/Inventar.
+Broadcast bei jeder Bogen-Aenderung (debounced), analog zu NSC-Sichtbarkeit/Runden-Log.
+
+**Runde 2026-09-12 (Druckbogen-Design):** Reaktion auf die Kritik „sieht aus wie jedes KI-Produkt".
+Neues Standard-Design **Druckbogen** (`src/print.css`): Tusche auf Papier, 3px-Linien mit Tusche-Filter
+(SVG `feTurbulence`+`feDisplacementMap` auf Pseudo-Elementen, Inhalt bleibt scharf), asymmetrische
+„handgezeichnete" Radien, flache Schmuckfarben (Rosé/Oliv/Schiefer/Senf) als Kopfleisten, harte
+Versatzschatten statt Weichzeichner, Schriften Eczar/Newsreader/Archivo/Caveat (Handschrift für
+Randnotizen), liniertes Notizpapier, Dunkelmodus als Negativdruck. Gezeichnete SVG-Vignetten
+(`src/components/Art.jsx`: Maus, Ritter-Platzhalter, Truhe, Laterne, Würfel+Feder) ersetzen im
+Druckbogen Wappen-Foto, Platzhalter und KI-Vignetten; Favicon = gezeichnete Maus. Das alte Design bleibt
+als **Classic** (`theme.css` in `@layer classic`, trägt weiter das ganze Layout), Umschalter (Pinsel) in
+der Kopfzeile, `data-skin` auf `<html>`, gemerkt unter `pips-paws-skin`. Nebenbei: `de.json` und die
+deutschen Regeldaten tragen jetzt echte Umlaute statt ae/oe/ue.
 
 **Runde 2026-09-08 (Sprachen + SEO + README):** UI-Übersetzungen FR/IT/JA komplett (je 387 Keys,
 maschinell unterstützt), in `LANGS`/`DICTS` freigeschaltet — App jetzt DE/EN/FR/IT/JA, nur `es.json`
@@ -433,8 +592,8 @@ Entscheidung: **so nah am Mausritter-SRD wie möglich, keine Hausregeln.**
 
 2. **Rucksack: alle 6 Pack-Slots immer nutzbar** (geklärt — keine `str`-Sperre). Belastung entsteht regelkonform dadurch, dass Zustände Slots belegen.
 
-3. **Attribut-Schaden / Tod.**
-   SRD: Schaden trifft erst HP, Überschuss trifft STR, dann STR-Save gegen Tod; DEX/WIL-Schaden aus speziellen Quellen. → **MVP: manuell** (GM-Knopf „Schaden auf STR"). Automatische Kette (HP→STR→Save) ist Post-MVP.
+3. **Attribut-Schaden / Tod.** ✔ Automatisiert, siehe Runde 2026-09-12g.
+   SRD: Schaden trifft erst HP, Überschuss trifft STR, dann STR-Save gegen Tod; DEX/WIL-Schaden aus speziellen Quellen. `applyDamage` (`rules/gmActions.js`) macht HP→STR→automatischer Save→Verletzt+Kampfunfähig bei Fehlschlag→`dead`-Flag bei STR 0 komplett selbst. Nicht automatisiert (bewusst): der 6-Zug-Totzähler für unversorgt Kampfunfähige — der Tod selbst bleibt eine von SL/Gruppe bestätigte Entscheidung, nichts wird automatisch gelöscht oder gesperrt. DEX/WIL-Schaden aus Spezialquellen bleibt manuell wie bisher (kein generischer Trigger dafür in der SRD).
 
 4. **Attribut-Erzeugung im Wizard: 3W6 der Reihe nach** (geklärt — Point-Buy passt nicht zu Mausritters OSR-Design). Der Wizard würfelt sichtbar STR, DEX, WIL (je 3W6), dann HP (1W6) und Pips; „neu würfeln" als Ganzes ist erlaubt, einzelne Werte nicht frei schiebbar. Save = **W20 ≤ Attribut-Current**.
 
@@ -444,6 +603,18 @@ Entscheidung: **so nah am Mausritter-SRD wie möglich, keine Hausregeln.**
    indiziert als `TABLE[TP-Wurf][Pips-Wurf]`. Attribute = 3W6, zwei höchste behalten (Wert 2–12), danach ein Tausch.
    Startausrüstung: Fackeln + Rationen + 2 Hintergrund-Items + Waffe; schwache Maus (höchstes Attribut ≤9 / ≤7)
    bekommt Extra-Items. XP-Schwellen 0/1000/3000/6000/+5000, Grit nach Stufe.
+
+7. **Rüstungs-Platzmodell vereinfacht** (bewusste Abweichung, 2026-09-12). SRD: Leichte Rüstung belegt
+   „Nebenpfote + ein Körperplatz" (ein echtes Pfote+Körper-Paar), Schwere Rüstung „zwei Körperplätze".
+   Das Platzmodell hier (`SLOT_PAIR_FIRST`/`SLOT_PAIR_SECOND` in `rules/character.js`) ist rein
+   slot-basiert und kennt nur Paare *derselben* Art (zwei Pfoten, zwei Körper, zwei Rucksack) — für
+   jeden 2-Platz-Gegenstand im Spiel, nicht nur Rüstung. Ein echtes Pfote+Körper-Paar bräuchte ein
+   item-abhängiges Modell (jeder Slot müsste wissen, WAS gerade draufgezogen wird) und würde
+   `cellsFor`/`anchorFor`/`firstFreeFit`/`tryMove` in `rules/inventory.js` anfassen — den Kern von
+   Drag & Drop, schon mehrfach die fummeligste Ecke der App. Für den MVP bewusst nicht angetastet;
+   `data/items.js` beschreibt bei beiden Rüstungen jetzt ehrlich, was die App tatsächlich zulässt
+   (irgendein gleichartiges Paar), statt eine Kombination zu versprechen, die sich nicht draufziehen
+   lässt. Ein echtes Pfote+Körper-Paar bleibt ein möglicher, aber größerer Post-MVP-Umbau.
 
 ---
 
@@ -487,7 +658,7 @@ Entscheidung: **so nah am Mausritter-SRD wie möglich, keine Hausregeln.**
 - `beforeunload`-Schutz, Fehlerdiagnose bei gescheiterter Verbindung (ICE-Auswertung wie `demonslayer`).
 - Übersetzungen `de.json`/`en.json` vollständig durchziehen, `data/*` beide Sprachen füllen, README mit Screenshots (DE + EN).
 
-**Post-MVP:** Party-Übersicht für Spieler, Würfel-„3D", Discord-Webhook (Modul aus den Referenzen fast unverändert übernehmbar), Karten-/Battlemap-Modul (`battlemap.js` aus `demonslayer` ist bewusst systemunabhängig), automatische Schadenskette, mehrere Charaktere pro Browser, Verbindung über echte DB (Supabase) hinter dem `useMultiplayer`-Interface.
+**Post-MVP:** ~~Party-Übersicht für Spieler~~ ✔, ~~Discord-Webhook~~ ✔, ~~mehrere Charaktere pro Browser~~ ✔, ~~automatische Schadenskette~~ ✔ (Runde 2026-09-12g), ~~Würfel-„3D"~~ ✔ (Runde 2026-09-12h) — offen bleiben ein Karten-/Battlemap-Modul (`battlemap.js` aus `demonslayer` ist bewusst systemunabhängig) und eine Verbindung über echte DB (Supabase) hinter dem `useMultiplayer`-Interface.
 
 ---
 
@@ -530,4 +701,4 @@ Wie in den Referenzprojekten: **kein Test-Framework im MVP.** Verifikation =
 
 **Noch offen (spätestens vor M4 / Deploy):**
 6. Repo-Ziel: eigenes GitHub-Repo unter welchem Owner? Bestimmt die `?join`-Basis-URL und das GitHub-Pages-Ziel.
-7. Deutsche Item-/Zauber-Namen: an die offizielle System-Matters-Übersetzung anlehnen oder eigene Begriffe? (Namen sind nicht schützbar, aber Konsistenz mit dem gedruckten deutschen Buch ist für Spieler angenehm.)
+7. ~~Deutsche Item-/Zauber-Namen: an die offizielle System-Matters-Übersetzung anlehnen~~ ✔ erledigt, siehe Runde 2026-09-12f.

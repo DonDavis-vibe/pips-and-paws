@@ -37,11 +37,20 @@ Betreibers laufen.
 - **Inventar per Drag & Drop** — zwei Pfoten, zwei Körper, sechs Rucksack; 1- und
   2-Platz-Gegenstände, Tausch, Nutzungspunkte, Zustände als Kärtchen. Jeder
   Gegenstand hat ein Symbol, das sich austauschen lässt.
-- **Würfeln** — W6, W66 und Rettungswurf (W20 ≤ Attribut) mit Vorteil / Nachteil.
-  Ein Klick auf den Schadenswert einer Waffe würfelt den Schaden (ein- und
-  zweihändig getrennt). Jeder Wurf landet sichtbar im Würfel-Panel.
+- **Würfeln** — W6 und W66 als echte, taumelnde 3D-Würfel; Rettungswurf (W20 ≤
+  Attribut) mit Vorteil / Nachteil. Ein Klick auf den Schadenswert einer Waffe
+  würfelt den Schaden (ein- und zweihändig getrennt). Jeder Wurf landet sichtbar
+  im Würfel-Panel.
+- **Automatische Schadenskette nach SRD** — STR-Schaden löst sofort einen
+  STR-Rettungswurf aus; misslingt er, ist die Maus verletzt und kampfunfähig, bis
+  sie rastet. Bei 0 STR stirbt sie — die App löscht oder sperrt dabei nichts von
+  selbst, sie sagt es nur unmissverständlich.
 - **Rast-Helfer** — kurz / lang / voll, mit Rationsverbrauch und Attributs-Heilung
-  nach den Regeln.
+  nach den Regeln; jede Rast hebt auch „kampfunfähig" wieder auf.
+- **Miethelfer** — aus dem SRD-Katalog anheuern (Fackelträger, Söldner, Gelehrte, …),
+  Werte würfeln sich beim Anheuern selbst, Moralwürfe bleiben lokal auf dem Bogen.
+- **Mehrere Mäuse pro Browser** — jede gespielte Maus landet in einer Liste, zu der
+  du jederzeit zurückwechseln kannst, ganz ohne manuelles Sichern.
 
 ## Für Spielleiter:innen
 
@@ -58,6 +67,13 @@ Betreibers laufen.
 - **NSC- & Kampf-Tracker** — Kreaturen aus dem SRD oder eigene, Angriff und
   Moralprobe per Klick, einzelne NSC für die Spieler sichtbar schalten.
 - **Sitzung sichern & laden** und allgemeine Notizen.
+- **Am Tisch spielen, ohne dass alle ein Gerät brauchen** — Boegen direkt im
+  Dashboard anlegen oder laden, Schaden/Heilen/Rast/Gegenstände/Zustände direkt
+  darauf anwenden, und den vollen Bogen im Vollbild zum Herumreichen öffnen.
+- **Soundboard** — eingebaute Kurz-Effekte (Erfolg/Fehlschlag/Krit/Patzer/Glocke —
+  freie CC0-Sounds von [Kenney.nl](https://kenney.nl/assets/interface-sounds),
+  siehe `src/assets/sfx/CREDITS.txt`) plus eigene hochgeladene Ambient-/
+  Musikdateien (bleiben auf dem Gerät, gehen live an die Verbundenen).
 
 ## Zusammen spielen
 
@@ -69,17 +85,30 @@ Betreibers laufen.
   Spieler erreichen die Spielleitung in jedem Fall.
 - **Optionaler Discord-Webhook** — spiegelt Würfe und Ereignisse in einen Kanal.
   Die URL liegt nur im `localStorage`, nie in der Charakterdatei.
+- **Gruppenübersicht** — der SL kann eine kompakte Sicht der Gruppe teilen (Name,
+  TP, Zustände), damit Spieler sich auch untereinander sehen, nicht nur ihren
+  eigenen Bogen.
+
+## Gestaltung
+
+Standard ist der **Druckbogen**: Tusche auf Papier, dicke handgezogene Linien,
+flache Schmuckfarben, handschriftliche Randnotizen und ein Dunkelmodus als
+„Negativdruck". Alle Zeichnungen (Maus, Bild-Platzhalter, Leerzustände) sind
+eingebettete SVGs, keine Stock-Icons für die Marke. Das frühere App-Design bleibt
+als **Klassisch** erhalten — der Pinsel-Knopf in der Kopfzeile schaltet um, die
+Wahl wird gemerkt.
 
 ## Außerdem
 
-Einklappbare Panels (Zustand gemerkt) · Hell-/Dunkel-Schalter mit eigenem
-Hintergrundbild je Modus · klebender Würfelbereich auf breiten Bildschirmen ·
-JSON-Export / -Import des Bogens · funktioniert offline aus einer einzigen Datei.
+Einklappbare Panels (Zustand gemerkt) · Hell-/Dunkel-Schalter (Klassisch mit
+eigenem Hintergrundbild je Modus) · klebender Würfelbereich auf breiten
+Bildschirmen · JSON-Export / -Import des Bogens · funktioniert offline aus einer
+einzigen Datei.
 
 <details>
-<summary>Hellmodus</summary>
+<summary>Dunkelmodus</summary>
 
-<img src="docs/screenshots/character-sheet-light.jpg" alt="Charakterbogen, Hellmodus" width="70%" />
+<img src="docs/screenshots/character-sheet-dark.jpg" alt="Charakterbogen, Dunkelmodus" width="70%" />
 
 </details>
 
@@ -99,13 +128,25 @@ Push auf `main` baut und deployt über GitHub Actions auf GitHub Pages.
 Inventar-Raster, `peerjs` für den Multiplayer, `lucide-react` für Icons.
 Kein Backend, kein Konto.
 
+**Styling:** `src/theme.css` ist das klassische Design und trägt das komplette
+Layout; es liegt in `@layer classic`. `src/print.css` ist der Druckbogen (Standard)
+— außerhalb der Ebenen, gebunden an `html[data-skin="print"]`, und überschreibt
+damit nur Farben, Ränder, Schrift und Schatten, nie den Grid-/Flex-Aufbau. Die
+Strichzeichnungen liegen in `src/components/Art.jsx`.
+
 ## Mitmachen
 
 Pull Requests sind willkommen — besonders Übersetzungen. Die Oberfläche gibt es
 auf Deutsch, Englisch, Spanisch, Französisch, Italienisch und Japanisch. Spanisch
 stammt von [@Salgraphics](https://github.com/Salgraphics); FR/IT/JA sind
 maschinell unterstützt, Korrekturen von Muttersprachler:innen sehr willkommen.
-Ablauf und Schritte für eine neue Sprache: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Schlüssel, die erst nach dem Spanisch-PR dazukamen (Offline-Tisch-Modus,
+Soundboard, Gruppenübersicht, der Druckbogen-Skin, Miethelfer, die Maus-Liste,
+die automatische Schadenskette), bleiben in `es.json` absichtlich unübersetzt
+und fallen auf Englisch zurück — die Lücke ist Absicht,
+damit sie für eine muttersprachliche Übersetzung offen bleibt statt von einer
+Maschine vorbelegt zu werden. Ablauf und Schritte für eine neue Sprache:
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Regeldaten & Bilder
 
@@ -117,6 +158,12 @@ freien PDFs unter `reference/` liegen nur lokal (Artwork nicht CC BY, per
 Wappen, Hintergrundbilder, Vignetten und Bild-Platzhalter sind aus eigenen
 KI-Generierungen abgeleitet (Quellen in `img/`), **kein** offizielles
 Mausritter-Artwork und **kein** Verlagslogo.
+
+Die eingebauten Kurz-Effekte des SL-Soundboards (`src/assets/sfx/`) stammen aus
+Kenneys ["Music Jingles"](https://kenney.nl/assets/music-jingles)- und
+["Interface Sounds"](https://kenney.nl/assets/interface-sounds)-Paketen,
+Lizenz [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.de) — siehe
+`src/assets/sfx/CREDITS.txt`.
 
 ## Rechtliches
 

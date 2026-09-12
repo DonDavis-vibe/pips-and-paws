@@ -6,12 +6,17 @@ import { useLang, loc } from '../i18n/index.jsx';
 import { RollButton, DiceStage } from './DiceKit.jsx';
 import Panel from './Panel.jsx';
 import GmPlayerCard from './GmPlayerCard.jsx';
+import GmLocalPlayers from './GmLocalPlayers.jsx';
+import GmSoundboard from './GmSoundboard.jsx';
+import CharacterSheet from './CharacterSheet.jsx';
+import { useLocalPlayers } from '../useLocalPlayers.js';
 import SharedStash from './SharedStash.jsx';
 import GmTimeTracker from './GmTimeTracker.jsx';
 import GmCombatTracker from './GmCombatTracker.jsx';
 import GmNotes from './GmNotes.jsx';
 import EmptyState from './EmptyState.jsx';
 import emptyLobby from '../assets/empty-lobby.jpg';
+import { ArtLantern } from './Art.jsx';
 import { GM_BROADCAST, GM_SAVE } from '../multiplayer/protocol.js';
 import { rollDice, rollD66, rollReaction, rollTreasure } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
@@ -24,8 +29,9 @@ const SHARE_KEYS = new Set([
   'gm.log.reaction', 'gm.log.treasure',
 ]);
 
-// Menschenlesbares Label fuer eine SL-Aktion im Live-Log.
-function cmdVars(cmd, name, lang, t) {
+// Menschenlesbares Label fuer eine SL-Aktion im Live-Log. Auch von
+// GmLocalPlayers genutzt, damit lokale und verbundene Eingriffe gleich klingen.
+export function cmdVars(cmd, name, lang, t) {
   const v = { name, ...cmd };
   if (cmd.item?.name) v.item = loc(cmd.item.name, lang);
   if (cmd.key && CONDITION_CATALOG[cmd.key]) v.cond = loc(CONDITION_CATALOG[cmd.key].name, lang);
@@ -145,6 +151,9 @@ export default function GmDashboard({ mp, notify }) {
   const { t, lang } = useLang();
   const entries = Object.entries(mp.players);
   const fileInput = useRef(null);
+  const localApi = useLocalPlayers();
+  const [openLocalId, setOpenLocalId] = useState(null);
+  const openLocal = localApi.players.find((p) => p.id === openLocalId);
 
   // SL-Log + optional an Discord (nur die fuer die Runde relevanten Meldungen).
   const gmLog = (key, vars) => {
@@ -164,6 +173,29 @@ export default function GmDashboard({ mp, notify }) {
       notify?.(t('gm.session.loadFailed'), 'bad');
     }
   };
+
+  // Ein lokaler Bogen ist "geoeffnet": das Geraet zeigt statt des Dashboards
+  // den vollen, normalen Charakterbogen — zum Herumreichen am Tisch. Ersetzt
+  // bewusst das ganze Dashboard (nicht nur den Lokale-Spieler-Block), damit
+  // der Bogen den vollen Bildschirm bekommt.
+  if (openLocal) {
+    return (
+      <div className="local-sheet">
+        <div className="local-sheet-bar">
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpenLocalId(null)}>
+            ← {t('gm.local.backToDashboard')}
+          </button>
+          <strong>{openLocal.name || '?'}</strong>
+        </div>
+        <CharacterSheet
+          character={openLocal}
+          setCharacter={(updater) => localApi.updatePlayer(openLocal.id, updater)}
+          notify={notify}
+          restLocked={false}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="gm-dash">
@@ -205,8 +237,13 @@ export default function GmDashboard({ mp, notify }) {
           </div>
         </div>
 
+        <label className="gm-share-log" title={t('group.shareHint')}>
+          <input type="checkbox" checked={mp.groupShared} onChange={(e) => mp.setGroupShared(e.target.checked)} />
+          {t('group.share')}
+        </label>
+
         {entries.length === 0 ? (
-          <EmptyState img={emptyLobby} alt="">{t('gm.noPlayers')}</EmptyState>
+          <EmptyState img={emptyLobby} art={ArtLantern} alt="">{t('gm.noPlayers')}</EmptyState>
         ) : (
           <div className="gm-grid">
             {entries.map(([peerId, player]) => (
@@ -223,7 +260,20 @@ export default function GmDashboard({ mp, notify }) {
         )}
       </section>
 
+      <GmLocalPlayers
+        players={localApi.players}
+        addPlayer={localApi.addPlayer}
+        updatePlayer={localApi.updatePlayer}
+        removePlayer={localApi.removePlayer}
+        onOpen={setOpenLocalId}
+        notify={notify}
+        gmLog={gmLog}
+        cmdVars={cmdVars}
+      />
+
       <GmDicePanel onLog={gmLog} log={mp.liveLog} />
+
+      <GmSoundboard mp={mp} notify={notify} />
 
       <GmTimeTracker onLog={gmLog} shareTime={mp.shareTime} />
 

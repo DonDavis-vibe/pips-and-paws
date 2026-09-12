@@ -3,6 +3,7 @@ import { Camera, X } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import placeholder from '../assets/portrait-placeholder.jpg';
 import { readPortrait } from '../utils/portrait.js';
+import { ArtKnight } from './Art.jsx';
 
 // Charakterbild. Mit onChange = bearbeitbar (Spieler), ohne = nur Anzeige (SL).
 export default function Portrait({ src, onChange, notify, size = 'md' }) {
@@ -24,9 +25,14 @@ export default function Portrait({ src, onChange, notify, size = 'md' }) {
       <img
         src={src || placeholder}
         alt={src ? t('portrait.alt') : t('portrait.placeholderAlt')}
-        className={src ? '' : 'portrait-is-placeholder'}
+        className={src ? '' : 'portrait-is-placeholder skin-classic-only'}
         draggable="false"
       />
+      {src ? null : (
+        <span className="portrait-line skin-print-only" role="img" aria-label={t('portrait.placeholderAlt')}>
+          <ArtKnight />
+        </span>
+      )}
       {editable ? (
         <>
           <button

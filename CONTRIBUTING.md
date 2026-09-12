@@ -15,10 +15,13 @@ unter dieselbe Lizenz. Ein CLA gibt es nicht.
 
 ## Eine Sprache hinzufügen
 
-Die Oberfläche liegt in `src/i18n/`. `de.json`, `en.json`, `es.json`, `fr.json`,
-`it.json` und `ja.json` sind vollständig und freigeschaltet (ES von @Salgraphics;
-FR/IT/JA maschinell unterstützt — Korrekturen willkommen). Für eine neue Sprache
-legst du eine `<code>.json` als Kopie von `en.json` an.
+Die Oberfläche liegt in `src/i18n/`. `de.json`, `en.json`, `fr.json`, `it.json`
+und `ja.json` sind vollständig; `es.json` traegt den ursprünglichen PR von
+@Salgraphics (390 Schlüssel, unverändert) und ist bewusst NICHT mit maschinellen
+Übersetzungen für neuere Schlüssel aufgefüllt — die fehlenden fallen automatisch
+auf Englisch zurück (siehe unten) und bleiben offen, falls @Salgraphics oder
+eine andere Person mit Spanisch als Muttersprache weitermachen möchte. Wer eine
+neue Sprache ergänzt, legt eine `<code>.json` als Kopie von `en.json` an.
 
 1. **`src/i18n/<code>.json`** — die Werte übersetzen (Schlüssel unverändert lassen).
    Mit `de.json`/`en.json` abgleichen, damit keine Schlüssel fehlen. Fehlende
@@ -62,6 +65,17 @@ größerer Schritt und keine Voraussetzung dafür, die UI-Sprache freizuschalten
   Analytics, Fehler-Tracking …), bitte im PR ausdrücklich erwähnen. Die
   Datenschutzerklärung muss den tatsächlichen Aufbau abbilden und wird dann
   vor dem Merge ergänzt.
+
+## Gestaltung ändern
+
+Zwei Stylesheets, klare Rollen: `src/theme.css` (Classic) trägt das komplette
+Layout und liegt in `@layer classic`. `src/print.css` (Druckbogen, Standard) ist
+unlayered und an `html[data-skin="print"]` gebunden — es gewinnt damit für alles
+Sichtbare, ohne Spezifitäts-Tricks. Regel: Layout (Grid/Flex, Abstände, Breiten)
+gehört nach `theme.css`, reine Optik des Druckbogens nach `print.css`. Wer in
+`theme.css` eine neue Klasse mit Verlauf, Schatten oder Radius anlegt, ergänzt in
+`print.css` das flache Gegenstück. Deutsche Texte in `src/i18n/de.json` und in
+`src/data/*` tragen echte Umlaute (ä/ö/ü/ß), keine Umschreibungen.
 
 ## Was gut reinpasst
 

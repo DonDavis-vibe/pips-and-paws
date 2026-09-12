@@ -15,6 +15,8 @@ import DiceRoller from './DiceRoller.jsx';
 import SharedStash, { STASH_DRAG_PREFIX } from './SharedStash.jsx';
 import PartyLog from './PartyLog.jsx';
 import PartyNpcs from './PartyNpcs.jsx';
+import PartyGroup from './PartyGroup.jsx';
+import HirelingsPanel from './HirelingsPanel.jsx';
 import Portrait from './Portrait.jsx';
 import Panel from './Panel.jsx';
 import MouseIcon from './MouseIcon.jsx';
@@ -22,7 +24,9 @@ import { tryMove, addItem, removeItem, firstFreeFit } from '../rules/inventory.j
 import { rollSave, rollDie } from '../rules/dice.js';
 import { shareSave, shareRoll } from '../utils/discord.js';
 
-export default function CharacterSheet({ character, setCharacter, notify, onEvent, stash, partyLog, partyTime, restLocked, partyNpcs }) {
+export default function CharacterSheet({
+  character, setCharacter, notify, onEvent, stash, partyLog, partyTime, restLocked, partyNpcs, partyGroup, myPeerId,
+}) {
   const { t, lang } = useLang();
   const [activeId, setActiveId] = useState(null);
   const [externalRoll, setExternalRoll] = useState(null);
@@ -134,6 +138,32 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
     shareSave(character.name || t('app.title'), attr, r.d, r.target, r.ok);
   };
 
+  // Miethelfer-Moral (SRD): WIL-Rettungswurf, bei Misserfolg flieht er/sie.
+  // Bewusst nur lokal (Wuerfel-Panel + Toast) — kein onEvent/Discord, Mietlinge
+  // sind Sache der Spielerin, nicht Teil des Party-weiten Ereignis-Feeds.
+  const onHirelingSave = (h) => {
+    const r = rollSave(h.wil.current);
+    const label = t('hirelings.moraleFor', { name: h.name || t('hirelings.namePlaceholder') });
+    const tone = r.nat1 ? 'crit-good' : r.nat20 ? 'crit-bad' : r.ok ? 'ok' : 'bad';
+    const verdict = (r.nat1 && t('dice.nat1')) || (r.nat20 && t('dice.nat20'))
+      || (r.ok ? t('hirelings.moraleOk') : t('hirelings.moraleFlee'));
+    pushRoll(
+      {
+        label,
+        value: r.d,
+        max: 20,
+        tone,
+        verdict,
+        parts: [
+          { value: r.d, label: t('dice.roll') },
+          { value: `≤ ${r.target}`, label: t('dice.target') },
+        ],
+      },
+      { label, verdict: `${r.d} · ${verdict}`, ok: r.ok, tone },
+    );
+    notify(`${label} — d20 ${r.d} ≤ ${r.target} · ${verdict}`, r.ok ? 'ok' : 'bad');
+  };
+
   // Beim Ziehen aus der Mitte liegt der Gegenstand noch nicht im eigenen Inventar.
   const activeItem = activeId
     ? (String(activeId).startsWith(STASH_DRAG_PREFIX)
@@ -234,9 +264,17 @@ export default function CharacterSheet({ character, setCharacter, notify, onEven
         <DragOverlay>{activeItem ? <ItemCard item={activeItem} overlay dragging /> : null}</DragOverlay>
       </DndContext>
 
+      <HirelingsPanel
+        hirelings={character.hirelings || []}
+        onChange={(next) => patch({ hirelings: next })}
+        onMoraleSave={onHirelingSave}
+      />
+
       <PartyNpcs npcs={partyNpcs} />
 
       <DiceRoller character={character} onEvent={onEvent} external={externalRoll} />
+
+      <PartyGroup members={partyGroup} myPeerId={myPeerId} />
 
       {partyLog ? <PartyLog entries={partyLog.entries} shared={partyLog.shared} /> : null}
 

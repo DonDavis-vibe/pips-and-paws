@@ -3,14 +3,17 @@ import Peer from 'peerjs';
 import {
   ROOM_PREFIX, JOIN_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
   T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG, T_TIME, T_RESTCFG, T_NPCS,
+  T_GROUP, T_SOUND_FX, T_SOUND_CUSTOM, T_SOUND_VOL, T_SOUND_STOP, T_SOUND_FADE,
   GM_GIVE, GM_STASH_DENY,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
 import { readJSON, writeJSON, remove as removeStore } from '../utils/storage.js';
+import { playFx, playBlob, setLiveVolume, stopAllAudio as stopAllAudioLocal, fadeOutAllAudio as fadeOutAllAudioLocal } from '../utils/sound.js';
 
 const GM_STASH_KEY = 'pips-paws-gm-stash';
 const PARTY_LOG_KEY = 'pips-paws-party-log-on';
 const REST_LOCK_KEY = 'pips-paws-rest-locked';
+const GROUP_SHARE_KEY = 'pips-paws-group-shared';
 
 // Welche Log-Eintraege der Host an die Spieler spiegelt (kein Fluestern, keine Rohdaten).
 const isShareable = (e) =>
@@ -59,6 +62,12 @@ export function useMultiplayer() {
   const [restLocked, setRestLocked] = useState(() => readJSON(REST_LOCK_KEY, false) === true);
   // Sichtbar geschaltete NSC (beim Spieler eine Kopie, beim SL der gesendete Stand).
   const [partyNpcs, setPartyNpcs] = useState([]);
+  // Gruppenuebersicht: der SL teilt sie erst auf Wunsch (wie das Runden-Log).
+  const [groupShared, setGroupSharedState] = useState(() => readJSON(GROUP_SHARE_KEY, false) === true);
+  const [partyGroup, setPartyGroup] = useState([]); // Spieler: die jeweils ANDEREN am Tisch
+  // Eigene Peer-ID (nur als Spieler gesetzt) — damit die Gruppenuebersicht
+  // sich selbst aus der Liste der "anderen" herausfiltern kann.
+  const [myPeerId, setMyPeerId] = useState(null);
   // Zaehlt bei jedem (Wieder-)Verbinden hoch. Der Spieler muss seinen Bogen dann
   // erneut schicken — sonst kennt ein neu gestarteter Host ihn gar nicht und
   // zeigt "0 verbunden", obwohl Wuerfe ankommen.
@@ -83,6 +92,9 @@ export function useMultiplayer() {
   restLockedRef.current = restLocked;
   const partyNpcsRef = useRef([]);
   partyNpcsRef.current = partyNpcs;
+  const groupSharedRef = useRef(false);
+  groupSharedRef.current = groupShared;
+  const groupTimerRef = useRef(null);
 
   const peerRef = useRef(null);
   const hostConnRef = useRef(null); // Spieler -> SL
@@ -149,6 +161,95 @@ export function useMultiplayer() {
       });
     }
   }, []);
+
+  // --- Gruppenuebersicht: kompakte Sicht der Spieler aufeinander ---------
+  // Baut die Liste direkt aus `players` (peerId -> {character, items}) — bewusst
+  // ohne Attribute/Inventar/Pips, nur was am Tisch ohnehin sichtbar waere.
+  const groupSnapshot = useCallback(() => Object.entries(playersRef.current).map(([peerId, p]) => {
+    const c = p.character || {};
+    const items = p.items || {};
+    const conditions = Object.values(items)
+      .filter((i) => i.type === 'condition' && !i.cleared)
+      .map((i) => ({ key: i.key, name: i.name }));
+    return {
+      peerId,
+      name: c.name || '',
+      hp: { current: c.hp?.current ?? 0, max: c.hp?.max ?? 0 },
+      conditions,
+    };
+  }), []);
+
+  const broadcastGroupNow = useCallback(() => {
+    if (roleRef.current !== 'gm' || !groupSharedRef.current) return;
+    const members = groupSnapshot();
+    Object.values(clientConnsRef.current).forEach((conn) => {
+      if (conn && conn.open) {
+        try { conn.send({ t: T_GROUP, eid: uid(), members }); } catch { /* */ }
+      }
+    });
+  }, [groupSnapshot]);
+
+  // Bogen-Updates kommen bei jedem Tastendruck — kurz sammeln, dann einmal senden.
+  const scheduleGroupBroadcast = useCallback(() => {
+    clearTimeout(groupTimerRef.current);
+    groupTimerRef.current = setTimeout(broadcastGroupNow, 250);
+  }, [broadcastGroupNow]);
+
+  // SL schaltet die Gruppenuebersicht fuer die Runde an/aus.
+  const setGroupShared = useCallback((on) => {
+    setGroupSharedState(on);
+    groupSharedRef.current = on;
+    writeJSON(GROUP_SHARE_KEY, on);
+    if (roleRef.current !== 'gm') return;
+    if (on) {
+      broadcastGroupNow();
+    } else {
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_GROUP, eid: uid(), members: [] }); } catch { /* */ }
+        }
+      });
+    }
+  }, [broadcastGroupNow]);
+
+  // --- Soundboard: SL loest Sounds bei allen aus (siehe utils/sound.js) ---
+  const broadcastSound = useCallback((payload) => {
+    if (roleRef.current !== 'gm') return;
+    Object.values(clientConnsRef.current).forEach((conn) => {
+      if (conn && conn.open) {
+        try { conn.send({ eid: uid(), ...payload }); } catch { /* */ }
+      }
+    });
+  }, []);
+
+  const sendSoundFx = useCallback((kind, volume) => {
+    playFx(kind, volume);
+    broadcastSound({ t: T_SOUND_FX, kind, volume });
+  }, [broadcastSound]);
+
+  const previewSoundFx = useCallback((kind, volume) => playFx(kind, volume), []);
+
+  const sendCustomSound = useCallback((name, blob, volume) => {
+    playBlob(blob, volume);
+    broadcastSound({ t: T_SOUND_CUSTOM, name, volume, blob });
+  }, [broadcastSound]);
+
+  const previewCustomSound = useCallback((blob, volume) => playBlob(blob, volume), []);
+
+  const setSoundVolumeShared = useCallback((volume) => {
+    setLiveVolume(volume);
+    broadcastSound({ t: T_SOUND_VOL, volume });
+  }, [broadcastSound]);
+
+  const stopSoundShared = useCallback(() => {
+    stopAllAudioLocal();
+    broadcastSound({ t: T_SOUND_STOP });
+  }, [broadcastSound]);
+
+  const fadeOutSoundShared = useCallback(() => {
+    fadeOutAllAudioLocal();
+    broadcastSound({ t: T_SOUND_FADE });
+  }, [broadcastSound]);
 
   // SL teilt die Tageszeit (oder blendet sie mit clock=null wieder aus).
   const shareTime = useCallback((clock) => {
@@ -234,6 +335,8 @@ export function useMultiplayer() {
     knownPeersRef.current = new Set();
     stashRef.current = [];
     setStash([]);
+    setPartyGroup([]);
+    setMyPeerId(null);
   }, [cleanupPeer]);
 
   // SL raeumt die Tischmitte komplett ab (auch aus dem lokalen Speicher).
@@ -294,6 +397,7 @@ export function useMultiplayer() {
         ...prev,
         [peerId]: { character: payload.character, items: payload.items || {}, lastSeen: Date.now() },
       }));
+      scheduleGroupBroadcast();
       if (roleRef.current === 'gm' && !knownPeersRef.current.has(peerId) && payload.character?.name?.trim()) {
         knownPeersRef.current.add(peerId);
         pushLog({ kind: 'system', key: 'mp.log.joined', vars: { name: payload.character.name } });
@@ -316,7 +420,7 @@ export function useMultiplayer() {
         sendTo(peerId, { t: T_GM, cmd: GM_STASH_DENY, itemId: payload.itemId });
       }
     }
-  }, [pushLog, commitStash]);
+  }, [pushLog, commitStash, scheduleGroupBroadcast]);
 
   // --- SL: Sitzung hosten ---
   const hostSession = useCallback((preferredCodeArg) => {
@@ -374,6 +478,7 @@ export function useMultiplayer() {
           if (partyTimeRef.current) conn.send({ t: T_TIME, eid: uid(), clock: partyTimeRef.current });
           conn.send({ t: T_RESTCFG, eid: uid(), locked: restLockedRef.current });
           if (partyNpcsRef.current.length) conn.send({ t: T_NPCS, eid: uid(), npcs: partyNpcsRef.current });
+          if (groupSharedRef.current) conn.send({ t: T_GROUP, eid: uid(), members: groupSnapshot() });
         } catch { /* */ }
       });
       conn.on('data', (data) => handleIncoming(conn.peer, data));
@@ -388,6 +493,7 @@ export function useMultiplayer() {
           delete next[conn.peer];
           return next;
         });
+        scheduleGroupBroadcast();
       });
       clientConnsRef.current[conn.peer] = conn;
     });
@@ -402,7 +508,7 @@ export function useMultiplayer() {
       setConnectionState('error');
       setRole(null);
     });
-  }, [cleanupPeer, handleIncoming, pushLog, reconnectHost]);
+  }, [cleanupPeer, handleIncoming, pushLog, reconnectHost, groupSnapshot, scheduleGroupBroadcast]);
 
   // --- Spieler: Reconnect zum SL ---
   const attemptReconnectToHost = useCallback((code) => {
@@ -440,6 +546,7 @@ export function useMultiplayer() {
       setStatusMessage('');
       saveSession('player', code);
       setResyncNonce((n) => n + 1);
+      setMyPeerId(peerRef.current?.id || null);
     });
 
     conn.on('data', (payload) => {
@@ -457,6 +564,19 @@ export function useMultiplayer() {
         setRestLocked(!!payload.locked);
       } else if (payload.t === T_NPCS) {
         setPartyNpcs(Array.isArray(payload.npcs) ? payload.npcs : []);
+      } else if (payload.t === T_GROUP) {
+        setPartyGroup(Array.isArray(payload.members) ? payload.members : []);
+      } else if (payload.t === T_SOUND_FX) {
+        playFx(payload.kind, payload.volume);
+      } else if (payload.t === T_SOUND_CUSTOM && payload.blob) {
+        const blob = payload.blob instanceof Blob ? payload.blob : new Blob([payload.blob]);
+        playBlob(blob, payload.volume);
+      } else if (payload.t === T_SOUND_VOL) {
+        setLiveVolume(payload.volume);
+      } else if (payload.t === T_SOUND_STOP) {
+        stopAllAudioLocal();
+      } else if (payload.t === T_SOUND_FADE) {
+        fadeOutAllAudioLocal();
       } else if (payload.t === T_LOG) {
         const incoming = payload.entries || (payload.entry ? [payload.entry] : []);
         if (incoming.length) {
@@ -592,6 +712,17 @@ export function useMultiplayer() {
     setRestLockedShared,
     partyNpcs,
     shareNpcs,
+    groupShared,
+    setGroupShared,
+    partyGroup,
+    myPeerId,
+    sendSoundFx,
+    previewSoundFx,
+    sendCustomSound,
+    previewCustomSound,
+    setSoundVolumeShared,
+    stopSoundShared,
+    fadeOutSoundShared,
     resyncNonce,
     gmCommand,
     stash,

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Download, Upload, Sparkles, Languages, CircleHelp, Monitor, Sun, Moon,
+  Download, Upload, Sparkles, Languages, CircleHelp, Monitor, Sun, Moon, Brush, BookCopy,
 } from 'lucide-react';
 import { useLang, loc, LANGS } from './i18n/index.jsx';
 import { useTheme } from './useTheme.js';
+import { useSkin } from './useSkin.js';
+import { useCharacterRoster } from './useCharacterRoster.js';
+import { blankCharacter, isBlank, normalizeCharacter } from './rules/character.js';
 import {
-  blankCharacter, isBlank, normalizeCharacter, levelForXp, gritForLevel,
-} from './rules/character.js';
-import { addItem, addItemAt, firstFreeFit } from './rules/inventory.js';
-import { makeCondition } from './data/items.js';
+  applyDamage, applyHeal, applyPips, applyXp, applyGive, applyCondition,
+} from './rules/gmActions.js';
+import { CONDITION_CATALOG } from './data/items.js';
 import { readJSON, writeJSON } from './utils/storage.js';
 import { downloadCharacter, readCharacterFile } from './utils/exportImport.js';
 import { rollSave } from './rules/dice.js';
@@ -26,13 +28,17 @@ import ConnectionBadge from './components/ConnectionBadge.jsx';
 import MultiplayerModal from './components/MultiplayerModal.jsx';
 import GmDashboard from './components/GmDashboard.jsx';
 import HelpModal from './components/HelpModal.jsx';
+import RosterModal from './components/RosterModal.jsx';
 import Footer from './components/Footer.jsx';
+import { ArtMouse } from './components/Art.jsx';
+import VolumeControl from './components/VolumeControl.jsx';
 
 const STORAGE_KEY = 'pips-paws-character-v1';
 
 export default function App() {
   const { t, lang, setLang } = useLang();
   const { theme, cycle: cycleTheme } = useTheme();
+  const { skin, toggle: toggleSkin } = useSkin();
   const mp = useMultiplayer();
 
   const [character, setCharacter] = useState(() => {
@@ -42,6 +48,8 @@ export default function App() {
   const [showWizard, setShowWizard] = useState(() => isBlank(readJSON(STORAGE_KEY)));
   const [showMpModal, setShowMpModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showRoster, setShowRoster] = useState(false);
+  const { roster, mirror: mirrorRoster, remove: removeFromRoster } = useCharacterRoster();
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
   const fileInput = useRef(null);
@@ -65,7 +73,10 @@ export default function App() {
 
   useEffect(() => {
     writeJSON(STORAGE_KEY, character);
-  }, [character]);
+    // Jede je aktive Maus landet automatisch in "Meine Maeuse" — ohne
+    // manuelles Sichern, siehe useCharacterRoster.js.
+    mirrorRoster(character);
+  }, [character, mirrorRoster]);
 
   // Titel + Meta-Beschreibung an die aktuelle Sprache anpassen. Suchmaschinen
   // rendern das JS und indexieren die uebersetzte Fassung (z. B. bei ?lang=fr).
@@ -107,29 +118,47 @@ export default function App() {
     const cn = character.name || t('app.title');
 
     if (cmd === GM_HEAL) {
-      setCharacter((c) => ({ ...c, hp: { ...c.hp, current: Math.min(c.hp.max, c.hp.current + gmCommand.amount) } }));
+      setCharacter((c) => applyHeal(c, gmCommand.amount));
       notify(t('player.gm.heal', { n: gmCommand.amount }), 'ok');
       shareEvent(cn, `💚 ${t('player.gm.heal', { n: gmCommand.amount })}`, 'ok');
     } else if (cmd === GM_PIPS) {
-      setCharacter((c) => ({ ...c, pips: Math.max(0, c.pips + gmCommand.amount) }));
+      setCharacter((c) => applyPips(c, gmCommand.amount));
       notify(t('player.gm.pips', { n: gmCommand.amount }), gmCommand.amount >= 0 ? 'ok' : 'warn');
     } else if (cmd === GM_DAMAGE) {
-      let strHit = 0;
-      setCharacter((c) => {
-        let hpCur = c.hp.current - gmCommand.amount;
-        let strCur = c.str.current;
-        if (hpCur < 0) {
-          strHit = -hpCur;
-          strCur = Math.max(0, strCur - strHit);
-          hpCur = 0;
-        }
-        return { ...c, hp: { ...c.hp, current: hpCur }, str: { ...c.str, current: strCur } };
-      });
+      // applyDamage() einmal direkt aufrufen (nicht in der setCharacter-Updater-
+      // Funktion) — deren Rueckgabe wuerde erst beim naechsten Commit ausgewertet,
+      // also NACH dem synchronen Code hier unten (strHit/saveRoll waeren dann
+      // noch auf ihren Anfangswerten). Ausserdem wuerde ein zweiter Aufruf wegen
+      // des Rettungswurfs eine ANDERE Zufallszahl liefern als die gespeicherte.
+      const { character: nextChar, strHit, saveRoll, dead, injuredOk } = applyDamage(character, gmCommand.amount);
+      setCharacter(nextChar);
       notify(
         strHit > 0 ? t('player.gm.strDamage', { n: gmCommand.amount, s: strHit }) : t('player.gm.damage', { n: gmCommand.amount }),
         'bad',
       );
       shareEvent(cn, `🩸 ${gmCommand.amount} ${t('item.damage')}${strHit > 0 ? ` (${strHit} → STR)` : ''}`, 'bad');
+      // SRD-Schadenskette: STR-Schaden verlangt sofort einen automatischen
+      // STR-Rettungswurf; misslingt er, gibt's kritischen Schaden (Verletzt +
+      // kampfunfaehig). Sinkt STR auf 0, ist die Maus tot. Siehe gmActions.js.
+      if (saveRoll) {
+        sendEvent({ kind: 'save', attr: 'str', roll: saveRoll.d, target: saveRoll.target, ok: saveRoll.ok, reason: 'damage' });
+        notify(
+          `${t('dice.saveVs', { attr: t('attr.str') })} — d20 ${saveRoll.d} ≤ ${saveRoll.target} · ${saveRoll.ok ? t('dice.success') : t('dice.fail')}`,
+          saveRoll.ok ? 'ok' : 'bad',
+        );
+        shareEvent(cn, `🎲 ${t('dice.saveVs', { attr: t('attr.str') })} — W20 ${saveRoll.d} ≤ ${saveRoll.target} · ${saveRoll.ok ? '✅' : '❌'}`, saveRoll.ok ? 'ok' : 'bad');
+        if (!saveRoll.ok && !dead) {
+          notify(t('player.gm.critDamage'), 'bad');
+          shareEvent(cn, `💥 ${t('player.gm.critDamage')}`, 'bad');
+        }
+        if (injuredOk === false) {
+          notify(t('player.gm.conditionNoRoom', { name: loc(CONDITION_CATALOG.injured.name, lang) }), 'warn');
+        }
+      }
+      if (dead) {
+        notify(t('player.gm.dead'), 'bad');
+        shareEvent(cn, `☠ ${t('player.gm.dead')}`, 'bad');
+      }
     } else if (cmd === GM_SAVE) {
       const r = rollSave(character[gmCommand.attr]?.current ?? 0);
       const prefix = gmCommand.reason === 'initiative' ? `${t('combat.initiative')}: ` : '';
@@ -147,13 +176,8 @@ export default function App() {
       notify(`${t(`rest.${gmCommand.kind}`)}: ${text}`, 'ok');
       shareEvent(cn, `🌙 ${t(`rest.${gmCommand.kind}`)} — ${text}`, 'ok');
     } else if (cmd === GM_XP) {
-      const before = levelForXp(character.xp || 0);
-      const after = levelForXp(Math.max(0, (character.xp || 0) + gmCommand.amount));
-      setCharacter((c) => {
-        const xp = Math.max(0, (c.xp || 0) + gmCommand.amount);
-        const level = levelForXp(xp);
-        return { ...c, xp, level, grit: gritForLevel(level) };
-      });
+      const { before, after } = applyXp(character, gmCommand.amount);
+      setCharacter((c) => applyXp(c, gmCommand.amount).character);
       notify(t('player.gm.xp', { n: gmCommand.amount }), gmCommand.amount >= 0 ? 'ok' : 'warn');
       shareEvent(cn, `✨ ${t('player.gm.xp', { n: gmCommand.amount })}`, 'gold');
       if (after > before) shareEvent(cn, `⭐ ${t('res.level')} ${after}!`, 'gold');
@@ -162,8 +186,9 @@ export default function App() {
       const label = loc(item.name, lang);
       const wantSlot = wantSlotRef.current[item.itemId];
       delete wantSlotRef.current[item.itemId];
-      if (firstFreeFit(character.inventory, item.size === 2 ? 2 : 1)) {
-        setCharacter((c) => (wantSlot ? addItemAt(c, item, wantSlot) : addItem(c, item)).character || c);
+      const { ok } = applyGive(character, item, wantSlot);
+      if (ok) {
+        setCharacter((c) => applyGive(c, item, wantSlot).character);
         notify(t('player.gm.give', { item: label }), 'ok');
       } else {
         stashDrop(item);
@@ -171,10 +196,10 @@ export default function App() {
       }
       shareEvent(cn, `🎁 ${t('player.gm.give', { item: label })}`, 'info');
     } else if (cmd === GM_CONDITION) {
-      const cond = makeCondition(gmCommand.key);
+      const { ok, cond } = applyCondition(character, gmCommand.key);
       const label = loc(cond.name, lang);
-      if (firstFreeFit(character.inventory, 1)) {
-        setCharacter((c) => addItem(c, cond).character || c);
+      if (ok) {
+        setCharacter((c) => applyCondition(c, gmCommand.key, cond).character);
         notify(t('player.gm.condition', { name: label }), 'bad');
         shareEvent(cn, `⚠️ ${t('player.gm.condition', { name: label })}`, 'bad');
       } else {
@@ -211,7 +236,8 @@ export default function App() {
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">
-            <img src={brandMark} alt="" width="56" height="56" />
+            <img className="skin-classic-only" src={brandMark} alt="" width="56" height="56" />
+            <ArtMouse className="brand-mark-line skin-print-only" size={46} />
           </span>
           <div>
             <h1 className="brand-title">{t('app.title')}</h1>
@@ -231,6 +257,11 @@ export default function App() {
               >
                 <Sparkles size={16} /> {t('header.new')}
               </button>
+              {roster.length > 1 ? (
+                <button type="button" className="btn btn-ghost" onClick={() => setShowRoster(true)}>
+                  <BookCopy size={16} /> {t('header.roster')}
+                </button>
+              ) : null}
               <button type="button" className="btn btn-ghost" onClick={() => downloadCharacter(character)}>
                 <Download size={16} /> {t('header.export')}
               </button>
@@ -257,6 +288,16 @@ export default function App() {
             title={`${t('header.theme')}: ${t(`theme.${theme}`)}`}
           >
             {theme === 'system' ? <Monitor size={16} /> : theme === 'light' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <VolumeControl />
+          <button
+            type="button"
+            className="btn btn-ghost btn-icon-only"
+            onClick={toggleSkin}
+            aria-label={`${t('header.skin')}: ${t(`skin.${skin}`)}`}
+            title={`${t('header.skin')}: ${t(`skin.${skin}`)}`}
+          >
+            <Brush size={16} />
           </button>
           <button
             type="button"
@@ -297,6 +338,8 @@ export default function App() {
             partyTime={mp.role === 'player' ? mp.partyTime : null}
             restLocked={mp.role === 'player' && mp.restLocked}
             partyNpcs={mp.role === 'player' ? mp.partyNpcs : null}
+            partyGroup={mp.role === 'player' ? mp.partyGroup : null}
+            myPeerId={mp.role === 'player' ? mp.myPeerId : null}
           />
         )}
       </main>
@@ -316,6 +359,19 @@ export default function App() {
       {showMpModal ? <MultiplayerModal mp={mp} onClose={() => setShowMpModal(false)} /> : null}
 
       {showHelp ? <HelpModal onClose={() => setShowHelp(false)} /> : null}
+
+      {showRoster ? (
+        <RosterModal
+          roster={roster}
+          activeId={character.id}
+          onLoad={(c) => {
+            setCharacter(normalizeCharacter(c));
+            setShowRoster(false);
+          }}
+          onRemove={removeFromRoster}
+          onClose={() => setShowRoster(false)}
+        />
+      ) : null}
 
       {toast ? <div className={`toast toast-${toast.kind}`}>{toast.message}</div> : null}
     </div>

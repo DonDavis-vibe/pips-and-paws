@@ -15,7 +15,7 @@ export const BACKGROUND_TABLE = {
     1: B('Versuchstier', 'Test subject', T('Zauber: Magisches Geschoss', 'Spell: Magic missile'), K('heavy_armour')),
     2: B('Kuechensammler', 'Kitchen forager', K('light_armour'), K('cookpots')),
     3: B('Kaefigbewohner', 'Cage dweller', T('Zauber: Verstanden werden', 'Spell: Be understood'), T('Flasche Milch', 'Bottle of milk')),
-    4: B('Heckenhexe', 'Hedge witch', T('Zauber: Heilung', 'Spell: Heal'), K('incense')),
+    4: B('Heckenhexe', 'Hedge witch', T('Zauber: Genesung', 'Spell: Heal'), K('incense')),
     5: B('Lederhandwerker', 'Leatherworker', K('light_armour'), T('Schere', 'Shears')),
     6: B('Straßenschlaeger', 'Street tough', K('w_light'), T('Flasche Kaffee', 'Flask of coffee')),
   },

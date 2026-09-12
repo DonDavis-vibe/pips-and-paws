@@ -1,0 +1,30 @@
+Quelle der Soundboard-Kurzeffekte (fanfare.mp3, dramatic.mp3, coins.mp3,
+door.mp3, blade.mp3, bolt.mp3, bell.mp3):
+
+  Alle Kenney (www.kenney.nl), Lizenz: Creative Commons Zero (CC0 1.0) —
+  gemeinfrei, ohne Einschraenkung nutzbar, Zuschreibung nicht verpflichtend.
+
+  fanfare.mp3, dramatic.mp3, coins.mp3, door.mp3, bolt.mp3 — Auswahl und
+  Zuschnitt uebernommen aus dem Schwesterprojekt "Demonslayer"
+  (E:\vibe_coding\demonslayer\sounds\soundboard\), das exakt dokumentiert,
+  welche Kenney-Pakete dahinterstecken:
+    coins.mp3 <- muenzen.ogg, door.mp3 <- tuer-auf.ogg, bolt.mp3 <- riegel.ogg
+      -> Kenney "RPG Audio" (kenney.nl/assets/rpg-audio) — siehe
+         KENNEY_LICENSE_RPGAUDIO.txt
+    fanfare.mp3 <- fanfare-kurz.ogg, dramatic.mp3 <- stich-dramatisch.ogg
+      -> Kenney "Music Jingles" (kenney.nl/assets/music-jingles) — siehe
+         KENNEY_LICENSE_JINGLES.txt
+
+  blade.mp3 <- knifeSlice.ogg, direkt aus Kenneys "RPG Audio"-Paket
+  (kenney.nl/assets/rpg-audio) — siehe KENNEY_LICENSE_RPGAUDIO.txt
+
+  bell.mp3 <- impactBell_heavy_001.ogg, direkt aus Kenneys "Impact Sounds"-
+  Paket (kenney.nl/assets/impact-sounds) — siehe KENNEY_LICENSE_IMPACT.txt
+
+  Alle Dateien nach MP3 konvertiert (Safari/iOS spielt kein Ogg Vorbis ab),
+  sonst unveraendert.
+
+  Verlauf: bell.mp3 kam zuerst aus "Interface Sounds" (bong_001.ogg, nur
+  0,12s — klang eher wie ein Klicken als eine Glocke) und blade.mp3 aus
+  demonslayers klinge-ziehen.ogg (kaum hoerbar) — beide auf Nutzerfeedback
+  ("klingt merkwuerdig") gegen die obigen, praesenteren Varianten getauscht.

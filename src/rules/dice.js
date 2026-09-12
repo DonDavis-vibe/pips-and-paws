@@ -53,7 +53,7 @@ const REACTION_BY_TOTAL = {
 // "W10"). Bewusst aus dem String, damit auch alte Spielstaende und Gegenstaende
 // von aelteren Mitspielern funktionieren.
 //   1 Zahl  -> eine Option (Hand egal)
-//   2 Zahlen-> einhaendig / zweihaendig (Mausritter: mittlere Waffe W6 / W8)
+//   2 Zahlen-> einhaendig / zweihaendig (Mausritter: mittelschwere Waffe W6 / W8)
 export function weaponDamageOptions(item) {
   const nums = (String(item?.damage || '').match(/\d+/g) || []).map(Number).filter((n) => n > 0);
   if (nums.length === 0) return [];

@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Heart, Coins, Shield, Swords, Backpack, Sparkles, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  Heart, Coins, Shield, Swords, Backpack, Sparkles, AlertTriangle, ChevronDown, ChevronRight,
+  BookOpen, Download, Trash2,
+} from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { REST_KINDS } from '../rules/rest.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
@@ -17,7 +20,12 @@ const SLOT_LABELS = {
   pack_1: 'R1', pack_2: 'R2', pack_3: 'R3', pack_4: 'R4', pack_5: 'R5', pack_6: 'R6',
 };
 
-export default function GmPlayerCard({ player, onCommand }) {
+// `local`: der Bogen liegt nur im Browser des SL (kein Multiplayer-Peer).
+// `onOpenSheet`/`onSave`/`onRemove` gelten nur dann; Fluestern entfaellt, weil
+// es kein zweites Geraet gibt, an das es gehen koennte.
+export default function GmPlayerCard({
+  player, onCommand, local = false, onOpenSheet, onSave, onRemove,
+}) {
   const { t, lang } = useLang();
   const c = player.character || {};
   const items = player.items || {};
@@ -110,8 +118,13 @@ export default function GmPlayerCard({ player, onCommand }) {
         </div>
       ) : null}
 
-      {conditions.length ? (
+      {conditions.length || c.incapacitated ? (
         <div className="gm-conditions">
+          {c.incapacitated ? (
+            <span className="chip chip-bad" title={t('incap.hint')}>
+              {t('incap.label')}
+            </span>
+          ) : null}
           {conditions.map((cond) => (
             <span key={cond.itemId} className="chip chip-bad" title={loc(cond.effect, lang)}>
               {loc(cond.name, lang)}
@@ -177,16 +190,34 @@ export default function GmPlayerCard({ player, onCommand }) {
             </div>
           ) : null}
         </span>
-        <button
-          type="button"
-          className="btn btn-sm btn-ghost"
-          onClick={() => {
-            const text = window.prompt(t('gm.prompt.whisper'));
-            if (text) onCommand({ cmd: GM_WHISPER, text });
-          }}
-        >
-          {t('gm.action.whisper')}
-        </button>
+        {local ? (
+          <>
+            <button type="button" className="btn btn-sm btn-ghost" onClick={onOpenSheet}>
+              <BookOpen size={13} /> {t('gm.local.openSheet')}
+            </button>
+            <button type="button" className="btn btn-sm btn-ghost" onClick={onSave}>
+              <Download size={13} /> {t('header.export')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-danger"
+              onClick={() => window.confirm(t('gm.local.removeConfirm', { name: c.name || '?' })) && onRemove()}
+            >
+              <Trash2 size={13} /> {t('gm.local.remove')}
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost"
+            onClick={() => {
+              const text = window.prompt(t('gm.prompt.whisper'));
+              if (text) onCommand({ cmd: GM_WHISPER, text });
+            }}
+          >
+            {t('gm.action.whisper')}
+          </button>
+        )}
       </div>
 
       <button type="button" className="link-btn" onClick={() => setOpen((v) => !v)}>

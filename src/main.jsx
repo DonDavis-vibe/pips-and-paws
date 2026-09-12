@@ -4,6 +4,7 @@ import { LangProvider } from './i18n/index.jsx';
 import App from './App.jsx';
 import './index.css';
 import './theme.css';
+import './print.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

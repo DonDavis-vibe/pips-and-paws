@@ -25,13 +25,16 @@ function consumeRation(items) {
 }
 
 // -> { character, msg: { key, vars } }  (msg wird vom Aufrufer durch t() geschickt)
+// Jede Rast (auch kurz) hebt "kampfunfaehig" wieder auf (SRD: bis versorgt +
+// kurze Rast) — eigene Vereinfachung, da die App das "Versorgen" durch
+// Verbuendete nicht separat abbildet. Siehe rules/gmActions.js#applyDamage.
 export function applyRest(character, kind) {
   const c = character;
 
   if (kind === 'short') {
     const heal = rollDie(6) + 1;
     return {
-      character: { ...c, hp: { ...c.hp, current: Math.min(c.hp.max, c.hp.current + heal) } },
+      character: { ...c, hp: { ...c.hp, current: Math.min(c.hp.max, c.hp.current + heal) }, incapacitated: false },
       msg: { key: 'rest.log.short', vars: { n: heal } },
     };
   }
@@ -44,6 +47,7 @@ export function applyRest(character, kind) {
         str: { ...c.str, current: c.str.max },
         dex: { ...c.dex, current: c.dex.max },
         wil: { ...c.wil, current: c.wil.max },
+        incapacitated: false,
       },
       msg: { key: 'rest.log.full', vars: {} },
     };
@@ -57,7 +61,7 @@ export function applyRest(character, kind) {
     : ['str', 'dex', 'wil'].map((k) => ({ k, d: c[k].max - c[k].current })).sort((a, b) => b.d - a.d)[0];
   const attrAmt = gap && gap.d > 0 ? Math.min(rollDie(6), gap.d) : 0;
 
-  const next = { ...c, items: consumeRation(c.items || {}) };
+  const next = { ...c, items: consumeRation(c.items || {}), incapacitated: false };
   if (needHp) next.hp = { ...c.hp, current: c.hp.max };
   else if (attrAmt > 0) next[gap.k] = { ...c[gap.k], current: Math.min(c[gap.k].max, c[gap.k].current + attrAmt) };
 

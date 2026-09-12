@@ -1,3 +1,8 @@
+/* Kaskaden-Ebenen: base < classic; der Druckbogen-Skin (print.css) liegt
+   ausserhalb der Ebenen und gewinnt damit unabhaengig von der Spezifitaet. */
+@layer base, classic;
+
+@layer base {
 *,
 *::before,
 *::after {
@@ -49,4 +54,5 @@ h3 {
 
 #root {
   isolation: isolate;
+}
 }

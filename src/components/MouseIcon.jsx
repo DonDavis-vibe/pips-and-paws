@@ -1,5 +1,17 @@
-// Kleines Maus-Icon im Stil der lucide-Icons (Strich, currentColor).
+import { ArtMouse } from './Art.jsx';
+
+// Kleines Maus-Icon: im Classic-Skin im Stil der lucide-Icons, im
+// Druckbogen-Skin die gezeichnete Maus. CSS blendet je Skin eins ein.
 export default function MouseIcon({ size = 18, className }) {
+  return (
+    <>
+      <ArtMouse size={size} className={`skin-print-only${className ? ` ${className}` : ''}`} />
+      <MouseIconClassic size={size} className={`skin-classic-only${className ? ` ${className}` : ''}`} />
+    </>
+  );
+}
+
+function MouseIconClassic({ size, className }) {
   return (
     <svg
       width={size}

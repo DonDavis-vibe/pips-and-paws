@@ -44,12 +44,22 @@ export default function ResourceBar({ character, patch }) {
           <Sparkles size={16} /> <span>{t('res.xp')}</span>
           <InfoHint text={t('hint.xp')} />
           <strong className="res-level">
-            {t('res.level')} {level} · {t('res.grit')} {grit}
+            <span>{t('res.level')} {level}</span>
+            <span>{t('res.grit')} {grit}</span>
           </strong>
         </div>
         <Stepper value={xp} min={0} max={999999} label={t('res.xp')}
           onChange={(n) => patch({ xp: n, level: levelForXp(n), grit: gritForLevel(levelForXp(n)) })} />
       </div>
+
+      {character.incapacitated ? (
+        <div className="incap-banner">
+          <span className="chip chip-bad" title={t('incap.hint')}>{t('incap.label')}</span>
+          <button type="button" className="btn btn-sm btn-ghost" onClick={() => patch({ incapacitated: false })}>
+            {t('incap.clear')}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

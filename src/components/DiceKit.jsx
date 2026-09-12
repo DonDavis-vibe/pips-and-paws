@@ -61,6 +61,75 @@ export function DieGlyph({ sides, d66, face }) {
   return <PolyDie sides={sides} />;
 }
 
+// Echter 3D-Wuerfel (CSS-Transform-Wuerfel, 6 Seiten mit Pips) fuer den
+// Ergebnis-Bereich. Jede Seite steht per rotateX/Y + translateZ fest im
+// Wuerfel-Raum; um Seite N nach vorn zu drehen, dreht man den GANZEN Wuerfel
+// um die Umkehrung von Seite N's eigener Drehung — bei reinen 90°/180°-Drehungen
+// um eine Achse ist das einfach die Negation (siehe CUBE_SHOW).
+const CUBE_FACE_STYLE = {
+  1: { transform: 'translateZ(var(--die3d-half))' },
+  2: { transform: 'rotateX(90deg) translateZ(var(--die3d-half))' },
+  3: { transform: 'rotateY(90deg) translateZ(var(--die3d-half))' },
+  4: { transform: 'rotateY(-90deg) translateZ(var(--die3d-half))' },
+  5: { transform: 'rotateX(-90deg) translateZ(var(--die3d-half))' },
+  6: { transform: 'rotateY(180deg) translateZ(var(--die3d-half))' },
+};
+
+const CUBE_SHOW = {
+  1: { x: 0, y: 0 },
+  2: { x: -90, y: 0 },
+  3: { x: 0, y: -90 },
+  4: { x: 0, y: 90 },
+  5: { x: 90, y: 0 },
+  6: { x: 0, y: 180 },
+};
+
+const mod360 = (n) => ((n % 360) + 360) % 360;
+
+// `rollId` aendert sich bei jedem neuen Wurf (auch bei gleichem Ergebnis) und
+// loest die Drehung aus; die Zieldrehung wird immer VORWAERTS vom aktuellen
+// Drehwinkel aus erreicht (nie ein Sprung zurueck), plus ein paar Extra-
+// Umdrehungen fuers Taumel-Gefuehl.
+export function Die3D({ value, rollId, size = 42 }) {
+  const target = CUBE_SHOW[value] || CUBE_SHOW[6];
+  const [rot, setRot] = useState(target);
+  const rotRef = useRef(target);
+  const lastRollId = useRef(rollId);
+
+  useEffect(() => {
+    if (rollId === lastRollId.current) return;
+    lastRollId.current = rollId;
+    const cur = rotRef.current;
+    const dx = mod360(target.x - mod360(cur.x));
+    const dy = mod360(target.y - mod360(cur.y));
+    const extraX = (1 + Math.floor(Math.random() * 2)) * 360;
+    const extraY = (1 + Math.floor(Math.random() * 2)) * 360;
+    const next = { x: cur.x + dx + extraX, y: cur.y + dy + extraY };
+    rotRef.current = next;
+    setRot(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rollId]);
+
+  return (
+    <div className="die3d-scene" style={{ width: size, height: size }}>
+      <div
+        className="die3d-cube"
+        style={{ width: size, height: size, '--die3d-half': `${size / 2}px`, transform: `rotateX(${rot.x}deg) rotateY(${rot.y}deg)` }}
+      >
+        {[1, 2, 3, 4, 5, 6].map((f) => (
+          <div key={f} className="die3d-face" style={CUBE_FACE_STYLE[f]}>
+            <svg viewBox="0 0 24 24" className="die3d-pips" aria-hidden="true">
+              {(PIP_FACES[f] || []).map(([cx, cy], i) => (
+                <circle key={i} cx={cx} cy={cy} r="2.3" fill="currentColor" />
+              ))}
+            </svg>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Wurf-Knopf mit Glyphe. `kind` steuert die Farbe (basic | save | gm).
 export function RollButton({ sides, d66, label, title, kind = 'basic', onRoll, disabled }) {
   const [spin, setSpin] = useState(0);
@@ -131,10 +200,29 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
   }
 
   const tone = rolling ? '' : result.tone || '';
+  // Echte 3D-Wuerfel nur fuer W6 (einzeln oder als Paar bei W66) — andere
+  // Seitenzahlen (W8/W10/W12/W20) bleiben bei der Zahlen-Anzeige, ein
+  // 20-seitiger Wuerfel als Pip-Wuerfel waere ein eigenes, viel groesseres Modell.
+  const cubeSize = compact ? 30 : 42;
+  const isCubePair = result.max === 66 && result.parts?.length === 2;
+  const isCube = result.max === 6;
 
   return (
     <div className={`dice-stage stage-live${tone ? ` stage-${tone}` : ''}${compact ? ' dice-stage--compact' : ''}`}>
-      {result.parts && !rolling ? (
+      {isCubePair ? (
+        <div className="die3d-pair" key={`cp-${result.id}`}>
+          {result.parts.map((p, i) => (
+            <div className="die3d-labeled" key={i}>
+              <Die3D value={p.value} rollId={result.id} size={cubeSize} />
+              <span className="dice-part-label">{p.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : isCube ? (
+        <Die3D value={result.value} rollId={result.id} size={cubeSize} />
+      ) : null}
+
+      {result.parts && !isCubePair && !rolling ? (
         <div className="dice-parts" key={`p-${result.id}`}>
           {result.parts.map((p, i) => (
             <span key={i} className="dice-part">
@@ -145,7 +233,7 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
         </div>
       ) : null}
 
-      <span className={`dice-stage-value${rolling ? ' is-rolling' : ''}`} key={`v-${result.id}`}>
+      <span className={`dice-stage-value${rolling ? ' is-rolling' : ''}${isCube || isCubePair ? ' dice-stage-value--sub' : ''}`} key={`v-${result.id}`}>
         {shown}
       </span>
 

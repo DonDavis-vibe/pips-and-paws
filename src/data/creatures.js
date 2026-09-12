@@ -9,12 +9,12 @@ export const CREATURES = [
     note: { de: 'Kriegsbanden-Format. STR 15, DEX 15, WIL 10.', en: 'Warband scale. STR 15, DEX 15, WIL 10.' },
   },
   {
-    key: 'centipede', name: { de: 'Hundertfuesser', en: 'Centipede' }, hp: 8, armour: 1, dmg: 6, wil: 8,
+    key: 'centipede', name: { de: 'Hundertfüßer', en: 'Centipede' }, hp: 8, armour: 1, dmg: 6, wil: 8,
     attack: { de: 'W6 Giftbiss (Schaden auf DEX)', en: 'd6 venomous bite (damages DEX)' },
     note: { de: 'Kritisch: Gift wirkt, W12 Schaden auf STR.', en: 'Critical: venom takes effect, d12 STR damage.' },
   },
   {
-    key: 'crow', name: { de: 'Kraehe', en: 'Crow' }, hp: 12, armour: 1, dmg: 8, wil: 15,
+    key: 'crow', name: { de: 'Krähe', en: 'Crow' }, hp: 12, armour: 1, dmg: 8, wil: 15,
     attack: { de: 'W8 Schnabelhieb', en: 'd8 peck' },
     note: { de: 'Fliegt 3x so schnell, kennt zwei Lieder.', en: 'Flies 3x speed, knows two songs.' },
   },
@@ -26,11 +26,11 @@ export const CREATURES = [
   {
     key: 'frog', name: { de: 'Frosch', en: 'Frog' }, hp: 6, armour: 1, dmg: 10, wil: 9,
     attack: { de: 'W10 Speer oder W6 Zunge', en: 'd10 spear or d6 tongue' },
-    note: { de: 'Handelt zuerst (ausser ueberrascht), springt 2x so weit. Kritisch: springt ausser Reichweite.', en: 'Goes first unless surprised, leaps 2x. Critical: leaps out of reach.' },
+    note: { de: 'Handelt zuerst (außer überrascht), springt 2x so weit. Kritisch: springt außer Reichweite.', en: 'Goes first unless surprised, leaps 2x. Critical: leaps out of reach.' },
   },
   {
     key: 'ghost', name: { de: 'Geist', en: 'Ghost' }, hp: 9, armour: 0, dmg: 8, wil: 10,
-    attack: { de: 'W8 eisige Beruehrung (Schaden auf WIL)', en: 'd8 chilling touch (damages WIL)' },
+    attack: { de: 'W8 eisige Berührung (Schaden auf WIL)', en: 'd8 chilling touch (damages WIL)' },
     note: { de: 'Nur von Silber oder magischen Waffen verletzbar. Kritisch: besetzt die Kreatur.', en: 'Only harmed by silver or magic weapons. Critical: possesses the creature.' },
   },
   {
@@ -56,7 +56,7 @@ export const CREATURES = [
   {
     key: 'spider', name: { de: 'Spinne', en: 'Spider' }, hp: 6, armour: 1, dmg: 6, wil: 10,
     attack: { de: 'W6 Giftbiss (Schaden auf DEX)', en: 'd6 poison bite (damages DEX)' },
-    note: { de: 'Kritisch: traegt im Netz davon.', en: 'Critical: carry away in web.' },
+    note: { de: 'Kritisch: trägt im Netz davon.', en: 'Critical: carry away in web.' },
   },
 ];
 

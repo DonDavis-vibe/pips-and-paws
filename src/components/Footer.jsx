@@ -5,6 +5,7 @@ import { useLang } from '../i18n/index.jsx';
 import {
   PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, DISCORD_URL, KOFI_URL, APP_VERSION, LINKS,
 } from '../config.js';
+import { ArtMouse } from './Art.jsx';
 
 function Ext({ href, icon: Icon, children }) {
   return (
@@ -24,7 +25,9 @@ export default function Footer({ onHelp }) {
       <div className="footer-grid">
         <div className="footer-col footer-col-brand">
           <div className="footer-brand">
-            <span aria-hidden="true">🐭</span> {t('app.title')}
+            <span className="skin-classic-only" aria-hidden="true">🐭</span>
+            <ArtMouse className="footer-mouse skin-print-only" size={28} />
+            {' '}{t('app.title')}
           </div>
           <p className="footer-tagline">{t('footer.tagline')}</p>
           <p className="footer-meta">

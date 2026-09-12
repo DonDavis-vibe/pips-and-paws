@@ -35,11 +35,18 @@ data passing through the operator's server.
   birthsign · coat · detail.
 - **Drag-and-drop inventory** — two paws, two body, six pack; 1- and 2-slot items,
   swapping, usage dice, conditions as cards. Every item has an icon you can change.
-- **Dice** — d6, d66 and saves (d20 ≤ attribute) with advantage / disadvantage.
-  Clicking a weapon's damage value rolls it (one-paw and two-paw separately). Every
-  roll shows up in the dice panel.
+- **Dice** — d6 and d66 roll as real tumbling 3D cubes; saves (d20 ≤ attribute) with
+  advantage / disadvantage. Clicking a weapon's damage value rolls it (one-paw and
+  two-paw separately). Every roll shows up in the dice panel.
+- **Automatic damage chain to SRD** — STR damage triggers a STR save on the spot;
+  fail it and the mouse is Injured and incapacitated until it rests. Hit 0 STR and
+  it dies — the app never deletes or locks anything on its own, it just says so.
 - **Rest helper** — short / long / full, with ration use and attribute healing by
-  the book.
+  the book; any rest also clears "incapacitated".
+- **Hirelings** — hire from the SRD's catalogue (torchbearer, mercenary, scholar, …),
+  stats roll themselves on the spot, morale saves stay local to your sheet.
+- **Multiple mice per browser** — every mouse you've played is kept in a roster you
+  can switch back to, no manual saving needed.
 
 ## For GMs
 
@@ -57,6 +64,13 @@ data passing through the operator's server.
 - **NPC & combat tracker** — creatures from the SRD or your own, attack and morale
   rolls in one click, individual NPCs toggled visible to the players.
 - **Save & load a session**, plus general notes.
+- **Play at the table without extra devices** — create or load characters right in
+  the dashboard, run damage/heal/rest/items/conditions on them directly, and open
+  the full sheet full-screen to hand the device around.
+- **Soundboard** — built-in stingers (success/fail/critical/fumble/bell — free
+  CC0 sounds from [Kenney.nl](https://kenney.nl/assets/interface-sounds), see
+  `src/assets/sfx/CREDITS.txt`) plus your own uploaded ambience/music (stays on
+  your device, sent live to whoever's connected).
 
 ## Playing together
 
@@ -67,17 +81,28 @@ data passing through the operator's server.
   rolls and events on their own sheet. Players' rolls always reach the GM regardless.
 - **Optional Discord webhook** — mirrors rolls and events into a channel. The URL
   lives in `localStorage` only, never in the character file.
+- **Group overview** — the GM can share a compact view of the party (name, HP,
+  conditions) so players see each other, not just their own sheet.
+
+## Look & feel
+
+The default look is a **printed sheet**: ink on paper, thick hand-drawn rules,
+flat spot colours, handwritten margin notes and a "negative print" dark mode.
+Every line drawing (the mouse, the portrait placeholder, the empty-state
+vignettes) is an inline SVG, no stock icons for the brand. The previous app
+look is still there as **Classic** — the brush button in the header switches
+between the two, the choice is remembered.
 
 ## Also
 
-Collapsible panels (state remembered) · light / dark toggle with its own
-background image per mode · a dice panel that sticks in view on wide screens ·
-JSON export / import of the sheet · runs offline from a single file.
+Collapsible panels (state remembered) · light / dark toggle (Classic has its
+own background image per mode) · a dice panel that sticks in view on wide
+screens · JSON export / import of the sheet · runs offline from a single file.
 
 <details>
-<summary>Light mode</summary>
+<summary>Dark mode</summary>
 
-<img src="docs/screenshots/character-sheet-light.jpg" alt="Character sheet, light mode" width="70%" />
+<img src="docs/screenshots/character-sheet-dark.jpg" alt="Character sheet, dark mode" width="70%" />
 
 </details>
 
@@ -96,13 +121,23 @@ A push to `main` builds and deploys via GitHub Actions to GitHub Pages.
 **Stack:** Vite + React 19 (plain JS, no TypeScript), `@dnd-kit` for the inventory
 grid, `peerjs` for multiplayer, `lucide-react` for icons. No backend, no account.
 
+**Styling:** `src/theme.css` is the Classic look and carries all layout; it sits in
+`@layer classic`. `src/print.css` is the default print-sheet look — unlayered and
+scoped to `html[data-skin="print"]`, so it overrides only colours, borders, fonts
+and shadows, never grid/flex structure. Line art lives in `src/components/Art.jsx`.
+
 ## Contributing
 
 Pull requests are welcome — translations especially. The UI ships in English,
 German, Spanish, French, Italian and Japanese. Spanish was contributed by
 [@Salgraphics](https://github.com/Salgraphics); FR/IT/JA are machine-assisted, so
-corrections from native speakers are very welcome. The flow and the steps for a
-new language are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+corrections from native speakers are very welcome. Keys added after the Spanish
+PR (local play, soundboard, group overview, the print-sheet skin, hirelings, the
+character roster, the automatic damage chain) are deliberately left untranslated
+in `es.json` — they fall back to English — so
+that gap stays open for a native speaker rather than getting pre-filled by a
+machine translation. The flow and the steps for a new language are in
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Rules data & images
 
@@ -113,6 +148,12 @@ are kept local only (their artwork is not CC BY, excluded via `.gitignore`).
 The crest, background images, vignettes and portrait placeholder are derived from
 my own AI generations (sources in `img/`) — **not** official Mausritter artwork
 and **not** a publisher logo.
+
+The GM soundboard's built-in stingers (`src/assets/sfx/`) are from Kenney's
+["Music Jingles"](https://kenney.nl/assets/music-jingles) and
+["Interface Sounds"](https://kenney.nl/assets/interface-sounds) packs, licensed
+[CC0](https://creativecommons.org/publicdomain/zero/1.0/) — see
+`src/assets/sfx/CREDITS.txt`.
 
 ## Legal
 
