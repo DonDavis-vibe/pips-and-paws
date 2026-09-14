@@ -13,12 +13,12 @@ export const ITEM_CATALOG = {
   // --- Waffenklassen (SRD S. "Weapons") ---
   w_improvised: {
     type: 'weapon', size: 1, damage: 'W6', usage: { max: 3 }, cost: 1,
-    name: { de: 'Improvisierte Waffe', en: 'Improvised weapon' },
-    effect: { de: 'W6 Schaden. Nach jedem Kampf Nutzung markieren.', en: 'd6 damage. Always mark usage after a fight.' },
+    name: { de: 'Improvisierte Waffe', en: 'Improvised weapon', es: 'Arma improvisada' },
+    effect: { de: 'W6 Schaden. Nach jedem Kampf Nutzung markieren.', en: 'd6 damage. Always mark usage after a fight.', es: 'd6 de daño. Siempre marca un uso después de un combate.' },
   },
   w_light: {
     type: 'weapon', size: 1, damage: 'W6', usage: { max: 3 }, cost: 10,
-    name: { de: 'Leichte Waffe', en: 'Light weapon' },
+    name: { de: 'Leichte Waffe', en: 'Light weapon', es: 'Arma ligera' },
     effect: { de: 'W6. Haupt- oder Nebenpfote. Mit zwei Waffen: beide Wuerfel, besseres Ergebnis. (Nadel, Dolch, Beil)', en: 'd6. Main or off paw. Two weapons: roll both, take best. (Needle, dagger, hatchet)' },
   },
   w_medium: {
