@@ -1073,6 +1073,23 @@
   .roll-btn:active { transform: translate(1px, 1px) scale(0.98); }
   .die-svg-num { font-family: var(--f-label); }
 
+  .dice-custom { color: var(--ink-2); }
+
+  .dice-custom-input {
+    border: 0;
+    border-bottom: 2.5px solid var(--ink);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--f-hand);
+    font-size: 15px;
+  }
+
+  .dice-custom-input:focus {
+    background: var(--mustard-l);
+    outline: none;
+  }
+
   .dice-stage {
     position: relative;
     padding: 16px;

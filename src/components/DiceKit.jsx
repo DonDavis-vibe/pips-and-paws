@@ -130,6 +130,119 @@ export function Die3D({ value, rollId, size = 42 }) {
   );
 }
 
+// --- Generische Vielflaechner (W4/W8/W10/W12) ---
+// Der Wuerfel hat nur rechte Winkel zwischen seinen Seiten, das geht mit
+// einfachem rotateX/rotateY. Die anderen Formen nicht — hier reicht nur eine
+// echte Achse-Winkel-Drehung (kuerzester Drehweg zwischen zwei Normalen-
+// Vektoren), sonst identisches Prinzip: jede Seite steht per fester Drehung +
+// translateZ im Wuerfelraum, der ganze Koerper dreht sich um die Umkehrung
+// der Ziel-Seiten-Drehung, damit die Seite nach vorn zeigt.
+function vnorm([x, y, z]) {
+  const len = Math.sqrt(x * x + y * y + z * z) || 1;
+  return [x / len, y / len, z / len];
+}
+function vcross([ax, ay, az], [bx, by, bz]) {
+  return [ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx];
+}
+function vdot([ax, ay, az], [bx, by, bz]) { return ax * bx + ay * by + az * bz; }
+
+// Achse+Winkel, die den Vektor `from` auf `to` dreht (kuerzester Weg).
+function rotationBetween(from, to) {
+  const f = vnorm(from);
+  const d = Math.max(-1, Math.min(1, vdot(f, to)));
+  if (d > 0.999999) return { axis: [1, 0, 0], angle: 0 };
+  if (d < -0.999999) return { axis: [1, 0, 0], angle: 180 };
+  return { axis: vnorm(vcross(f, to)), angle: (Math.acos(d) * 180) / Math.PI };
+}
+
+const rot3dCss = ({ axis, angle }) => `rotate3d(${axis[0]}, ${axis[1]}, ${axis[2]}, ${angle}deg)`;
+const FORWARD = [0, 0, 1];
+const PHI = (1 + Math.sqrt(5)) / 2; // Goldener Schnitt, fuers Dodekaeder
+
+// Flaechen-Normalen je Wuerfelform (Index i => Seite i+1). Reihenfolge ist
+// beliebig — welche Zahl auf welcher Seite steht, ist bei diesen Formen auch
+// bei echten Wuerfeln nicht einheitlich genormt.
+const POLY_NORMALS = {
+  4: [ // Tetraeder: 4 abwechselnde Ecken eines Wuerfels
+    [-1, -1, -1], [-1, 1, 1], [1, -1, 1], [1, 1, -1],
+  ].map(vnorm),
+  8: [ // Oktaeder: dual zum Wuerfel, Normalen = dessen Eckenrichtungen
+    [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+    [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1],
+  ].map(vnorm),
+  10: (() => { // Angenaeherter Pentagon-Trapezoeder: zwei gestaffelte 5er-Ringe
+    const tilt = (58 * Math.PI) / 180;
+    const out = [];
+    for (let k = 0; k < 10; k += 1) {
+      const az = (k * 36 * Math.PI) / 180;
+      const y = k % 2 === 0 ? Math.cos(tilt) : -Math.cos(tilt);
+      out.push(vnorm([Math.sin(tilt) * Math.cos(az), y, Math.sin(tilt) * Math.sin(az)]));
+    }
+    return out;
+  })(),
+  12: [ // Dodekaeder: Normalen entlang der Ikosaeder-Eckpunkte (Goldener Schnitt)
+    [0, 1, PHI], [0, 1, -PHI], [0, -1, PHI], [0, -1, -PHI],
+    [1, PHI, 0], [1, -PHI, 0], [-1, PHI, 0], [-1, -PHI, 0],
+    [PHI, 0, 1], [PHI, 0, -1], [-PHI, 0, 1], [-PHI, 0, -1],
+  ].map(vnorm),
+};
+
+const POLY_SHAPE = { 4: 'tri', 8: 'tri', 10: 'kite', 12: 'penta' }; // Klasse .die3d-face--<shape> traegt den clip-path
+const POLY_DIST_FACTOR = { 4: 0.22, 8: 0.3, 10: 0.44, 12: 0.42 };
+
+// Wie Die3D, aber fuer W4/W8/W10/W12. `flourish` ist eine reine rotateX/Y-
+// Zusatzdrehung (wie beim Wuerfel, mit wachsendem Winkel fuers Taumeln), die
+// eigentliche Ziel-Seite kommt per rotate3d obendrauf — der Browser interpoliert
+// beides im selben Übergang (rotate3d nimmt dabei den kuerzesten Drehweg direkt
+// zur neuen Seite, das Taumel-Gefuehl liefert allein die rotateX/Y-Zusatzdrehung).
+export function PolyDie3D({ sides, value, rollId, size = 42 }) {
+  const normals = POLY_NORMALS[sides];
+  const shape = POLY_SHAPE[sides];
+  const dist = size * POLY_DIST_FACTOR[sides];
+  const targetIdx = Math.min(Math.max(value, 1), sides) - 1;
+  const target = rotationBetween(normals[targetIdx], FORWARD);
+
+  const [show, setShow] = useState(target);
+  const [flourish, setFlourish] = useState({ x: 0, y: 0 });
+  const flourishRef = useRef({ x: 0, y: 0 });
+  const lastRollId = useRef(rollId);
+
+  useEffect(() => {
+    if (rollId === lastRollId.current) return;
+    lastRollId.current = rollId;
+    const cur = flourishRef.current;
+    const next = {
+      x: cur.x + (1 + Math.floor(Math.random() * 2)) * 360,
+      y: cur.y + (1 + Math.floor(Math.random() * 2)) * 360,
+    };
+    flourishRef.current = next;
+    setFlourish(next);
+    setShow(target);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rollId]);
+
+  const numSize = Math.round(size * 0.34);
+
+  return (
+    <div className="die3d-scene" style={{ width: size, height: size }}>
+      <div
+        className="die3d-poly"
+        style={{ width: size, height: size, transform: `rotateX(${flourish.x}deg) rotateY(${flourish.y}deg) ${rot3dCss(show)}` }}
+      >
+        {normals.map((n, i) => (
+          <div
+            key={i}
+            className={`die3d-face die3d-face--${shape}`}
+            style={{ transform: `${rot3dCss(rotationBetween(FORWARD, n))} translateZ(${dist}px)` }}
+          >
+            <span className="die3d-num" style={{ fontSize: numSize }}>{i + 1}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Wurf-Knopf mit Glyphe. `kind` steuert die Farbe (basic | save | gm).
 export function RollButton({ sides, d66, label, title, kind = 'basic', onRoll, disabled }) {
   const [spin, setSpin] = useState(0);
@@ -200,12 +313,13 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
   }
 
   const tone = rolling ? '' : result.tone || '';
-  // Echte 3D-Wuerfel nur fuer W6 (einzeln oder als Paar bei W66) — andere
-  // Seitenzahlen (W8/W10/W12/W20) bleiben bei der Zahlen-Anzeige, ein
-  // 20-seitiger Wuerfel als Pip-Wuerfel waere ein eigenes, viel groesseres Modell.
+  // Echte 3D-Wuerfel fuer W4/W6/W8/W10/W12 (einzeln oder als Wuerfel-Paar bei
+  // W66). W20 bleibt bei der Zahlen-Anzeige — ein 20-seitiger Pip-Wuerfel
+  // waere ein eigenes, viel groesseres Modell (Ikosaeder mit 20 Dreiecken).
   const cubeSize = compact ? 30 : 42;
   const isCubePair = result.max === 66 && result.parts?.length === 2;
   const isCube = result.max === 6;
+  const isPoly = [4, 8, 10, 12].includes(result.max);
 
   return (
     <div className={`dice-stage stage-live${tone ? ` stage-${tone}` : ''}${compact ? ' dice-stage--compact' : ''}`}>
@@ -220,6 +334,8 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
         </div>
       ) : isCube ? (
         <Die3D value={result.value} rollId={result.id} size={cubeSize} />
+      ) : isPoly ? (
+        <PolyDie3D sides={result.max} value={result.value} rollId={result.id} size={cubeSize} />
       ) : null}
 
       {result.parts && !isCubePair && !rolling ? (
@@ -233,7 +349,7 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
         </div>
       ) : null}
 
-      <span className={`dice-stage-value${rolling ? ' is-rolling' : ''}${isCube || isCubePair ? ' dice-stage-value--sub' : ''}`} key={`v-${result.id}`}>
+      <span className={`dice-stage-value${rolling ? ' is-rolling' : ''}${isCube || isCubePair || isPoly ? ' dice-stage-value--sub' : ''}`} key={`v-${result.id}`}>
         {shown}
       </span>
 

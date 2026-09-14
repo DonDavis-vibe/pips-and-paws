@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  Users, ScrollText, Megaphone, Dices, Save, FolderOpen, Handshake, Gem,
+  Users, ScrollText, Megaphone, Dices, Save, FolderOpen, Handshake, Gem, Dice6,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { RollButton, DiceStage } from './DiceKit.jsx';
@@ -60,6 +60,7 @@ function isRollEntry(e) {
 function GmDicePanel({ onLog, log }) {
   const { t } = useLang();
   const [result, setResult] = useState(null);
+  const [customSides, setCustomSides] = useState('');
   const dieLabel = (sides) => `${t('dice.dieLetter')}${sides}`;
   const stamp = () => `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -67,6 +68,15 @@ function GmDicePanel({ onLog, log }) {
     const r = rollDice(1, sides);
     setResult({ id: stamp(), label: dieLabel(sides), value: r.total, max: sides });
     onLog('gm.log.roll', { label: dieLabel(sides), value: r.total });
+  };
+
+  // Eigener Wuerfel mit frei eingegebener Seitenzahl — fuer alles, was nicht
+  // schon einen Knopf hat (W3, W100, ...). rollN() ist bereits generisch genug.
+  const rollCustom = (e) => {
+    e.preventDefault();
+    const sides = parseInt(customSides, 10);
+    if (!Number.isFinite(sides) || sides < 2 || sides > 1000) return;
+    rollN(sides);
   };
 
   const roll66 = () => {
@@ -113,11 +123,29 @@ function GmDicePanel({ onLog, log }) {
 
       <div className="dice-buttons">
         <span className="dice-sep">{t('gm.roll')}</span>
-        {[6, 8, 10, 12, 20].map((sides) => (
+        {[4, 6, 8, 10, 12, 20].map((sides) => (
           <RollButton key={sides} sides={sides} label={dieLabel(sides)} kind="gm" onRoll={() => rollN(sides)} />
         ))}
         <RollButton d66 label={t('dice.d66')} kind="gm" onRoll={roll66} />
       </div>
+
+      <form className="dice-custom" onSubmit={rollCustom}>
+        <Dice6 size={15} className="dice-custom-icon" aria-hidden="true" />
+        <input
+          type="number"
+          min="2"
+          max="1000"
+          inputMode="numeric"
+          className="dice-custom-input"
+          placeholder={t('dice.customPlaceholder')}
+          value={customSides}
+          onChange={(e) => setCustomSides(e.target.value)}
+          aria-label={t('dice.customLabel')}
+        />
+        <button type="submit" className="btn btn-sm" disabled={!customSides}>
+          {t('dice.customRoll')}
+        </button>
+      </form>
 
       <div className="gm-quick-rolls">
         <button type="button" className="btn btn-sm btn-ghost" onClick={reaction}>

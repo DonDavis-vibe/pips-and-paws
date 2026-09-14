@@ -1,6 +1,23 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-09-12 (Abend)
+Stand: 2026-09-14
+
+**Runde 2026-09-14b (Spanisch-PR #2 gemergt + Footer-Credit):** Salgraphics' zweiter
+Spanisch-PR (`es`-Feld fuer Item-/Zauber-/Zustands-/Kreaturen-/Tabellen-Namen in
+`data/*`) geprueft und gemergt — nicht direkt mergbar, da der PR vom Stand direkt
+nach dem ersten Spanisch-PR (32bd43d) forkte, also vor der Umlaut-Normalisierung und
+der Angleichung der Item-/Zauber-Namen an die offizielle Uebersetzung. Echte
+Konflikte in `creatures.js`/`items.js`/`tables.js` von Hand aufgeloest (unsere
+de/en-Texte behalten, ihre `es`-Werte uebernommen); dabei auch ein paar echte Fehler
+aus dem PR gerade gezogen (fehlendes Komma, spanischer Text im falschen Feld,
+doppelter Objekt-Key, zwei Tippfehler). `backgrounds.js`s PR-Aenderung dort komplett
+verworfen — referenzierte eine nie definierte Variable (waere beim Laden der
+Hintergrundtabelle sofort abgestuerzt) und keiner der Aufrufe uebergab ohnehin einen
+spanischen Text. `es.json` selbst mergte sauber dazu. Danke-Vermerk fuer die
+spanische Uebersetzung im Footer ergaenzt (`footer.translatorEs`, klein und verlinkt
+zu [github.com/salgraphics](https://github.com/salgraphics)) — bewusst NICHT in
+`es.json` selbst uebersetzt (faellt dort auf Englisch zurueck), passend zur
+bestehenden Policy, keine neuen Keys maschinell nachzuziehen.
 
 Arbeitstitel: **Pips & Paws** (siehe §15.4 — jederzeit änderbar).
 
@@ -18,6 +35,26 @@ Rettungswürfe/Initiative fordern, würfeln, Zeit & Licht & Begegnungen, NSC-Kam
 **Discord-Webhook** (optional, wie in den anderen Tools): im Multiplayer-Menü einklappbar. Würfe und
 Ereignisse werden in einen Discord-Kanal gespiegelt (Maus-Name als Absender, farbcodierte Embeds).
 URL nur im localStorage, nicht in der Charakterdatei. SL kann den Webhook an die Runde verteilen.
+
+**Runde 2026-09-14 (3D-Wuerfel fuer W4/W8/W10/W12 + eigener Wuerfel):** Der W6-Wuerfel aus
+Runde h bekommt Geschwister. `DiceKit.jsx#PolyDie3D`: generischer Vielflaechner-Wuerfel fuer
+Tetraeder (W4), Oktaeder (W8), angenaeherter Pentagon-Trapezoeder (W10) und Dodekaeder (W12) —
+anders als der Wuerfel haben diese Formen keine rechten Winkel zwischen ihren Seiten, darum eine
+echte Achse-Winkel-Drehung (kuerzester Drehweg zwischen zwei Flaechen-Normalen, `rotationBetween()`)
+statt der einfachen rotateX/Y-90°-Logik des Wuerfels. Flaechen-Normalen: Tetraeder aus
+Wuerfel-Eckpunkten, Oktaeder dual zum Wuerfel (Normalen = dessen Eckenrichtungen), Dodekaeder exakt
+nach der bekannten Ikosaeder-Eckpunkt-Formel (Goldener Schnitt) — beim Testen bestaetigt: Front-Seite
+per World-Space-Normalen-Check (nicht nur Bildschirm-Flaeche, die bei diesen Formen anders als beim
+Wuerfel nicht zuverlaessig zwischen Vorder-/Hinterseite unterscheidet) stimmt exakt mit dem
+gewuerfelten Wert ueberein. W20 bleibt bei der Zahlen-Anzeige (Ikosaeder mit 20 Dreiecken waere
+nochmal ein eigenes, groesseres Stueck Arbeit). SL-Wuerfelpanel hat jetzt auch einen W4-Knopf (fehlte
+bisher, obwohl die SRD ihn fuer beeintraechtigte Angriffe vorsieht). **Eigener Wuerfel**: kleines
+Eingabefeld + Knopf (Spieler-Wuerfelleiste und SL-Panel) fuer eine frei getippte Seitenzahl (2-1000)
+— bekannte Seitenzahlen (4/6/8/10/12) bekommen automatisch denselben 3D-Wuerfel wie die festen
+Knoepfe, alles andere (W3, W100, ...) die normale Zahlen-Anzeige. Bewusst nicht angefasst: NSC-Angriffe
+im Kampf-Tracker landen weiterhin nur im Log, nicht in der gemeinsamen Wuerfel-Buehne — das haette
+eine groessere Umstrukturierung gebraucht (Ergebnis-State von `GmDicePanel` nach `GmDashboard`
+hochziehen, damit `GmCombatTracker` mitschreiben kann), waere aber ein sinnvoller Folgeschritt.
 
 **Runde 2026-09-12i (Pre-Push-Test: echter Multiplayer-Bug gefunden + gefixt):** Vor dem ersten Push
 seit Langem einen echten Zwei-Tab-Multiplayer-Test gemacht (SL + Fern-Spieler ueber WebRTC, nicht nur

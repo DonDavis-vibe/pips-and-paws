@@ -8,6 +8,9 @@ export const DISCORD_URL = 'https://discord.gg/s6J6JqBQ8w';
 export const KOFI_URL = 'https://ko-fi.com/don_davis';
 export const APP_VERSION = '0.3.0';
 
+// Spanische Uebersetzung: Community-Beitrag, im Footer verlinkt (siehe PLAN.md).
+export const TRANSLATOR_ES_URL = 'https://github.com/salgraphics';
+
 export const LINKS = {
   mausritter: 'https://mausritter.com',
   srd: 'https://mausritter.com/srd/',

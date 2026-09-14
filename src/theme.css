@@ -1464,6 +1464,34 @@ summary,
   margin-top: 12px;
 }
 
+.dice-custom {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  color: var(--ink-dim);
+}
+
+.dice-custom-icon { flex-shrink: 0; }
+
+.dice-custom-input {
+  width: 64px;
+  padding: 5px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.dice-custom-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Zahl-Spinner-Pfeile ausblenden — bei nur 3 Ziffern eher im Weg als nuetzlich. */
+.dice-custom-input::-webkit-outer-spin-button,
+.dice-custom-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.dice-custom-input[type='number'] { -moz-appearance: textfield; }
+
 .dice-sep {
   display: flex;
   align-items: center;
@@ -1767,6 +1795,25 @@ summary,
 }
 
 .die3d-pips { width: 66%; height: 66%; overflow: visible; }
+
+/* ---- 3D-Vielflaechner (W4/W8/W10/W12) ---- */
+.die3d-poly {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.22, 0.85, 0.3, 1);
+  /* Kein `filter` hier — siehe Kommentar bei .die3d-scene: das wuerde die
+     3D-Kinder auf eine flache Bitmap reduzieren. Schatten sitzt dort. */
+}
+
+.die3d-face--tri { clip-path: polygon(50% 4%, 94% 92%, 6% 92%); }
+.die3d-face--kite { clip-path: polygon(50% 6%, 92% 42%, 50% 94%, 8% 42%); }
+.die3d-face--penta { clip-path: polygon(50% 4%, 94% 38%, 78% 94%, 22% 94%, 6% 38%); }
+
+.die3d-num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+}
 
 .die3d-pair {
   display: flex;
@@ -2402,6 +2449,20 @@ summary,
   font-size: 11px;
   letter-spacing: 0.02em;
 }
+
+.footer-credit {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--ink-dim);
+}
+
+.footer-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+.footer-credit a:hover { color: var(--accent); }
 
 .footer-col nav,
 .footer-col {

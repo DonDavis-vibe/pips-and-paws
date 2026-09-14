@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Dices, Trash2 } from 'lucide-react';
+import { Dices, Trash2, Dice6 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { rollDice, rollD66, rollSave } from '../rules/dice.js';
 import { shareRoll, shareSave } from '../utils/discord.js';
@@ -16,6 +16,7 @@ export default function DiceRoller({ character, onEvent, external }) {
   const [log, setLog] = useState([]);
   const [result, setResult] = useState(null);
   const [saveMode, setSaveMode] = useState('normal');
+  const [customSides, setCustomSides] = useState('');
   const lastExternalRef = useRef(null);
 
   const record = (logEntry, stage) => {
@@ -59,6 +60,23 @@ export default function DiceRoller({ character, onEvent, external }) {
     );
     if (onEvent) onEvent({ kind: 'roll', label: t('dice.d66'), value: r.value });
     shareRoll(who, t('dice.d66'), r.value, '');
+  };
+
+  // Eigener Wuerfel mit frei eingegebener Seitenzahl — fuer alles, was nicht
+  // schon einen Knopf hat (W3, W100, ...). Bekannte Seitenzahlen (4/6/8/10/12)
+  // bekommen denselben 3D-Wuerfel wie die festen Knoepfe, siehe DiceStage.
+  const rollCustom = (e) => {
+    e.preventDefault();
+    const sides = parseInt(customSides, 10);
+    if (!Number.isFinite(sides) || sides < 2 || sides > 1000) return;
+    const { total } = rollDice(1, sides);
+    const label = `${t('dice.dieLetter')}${sides}`;
+    record(
+      { label, verdict: t('dice.rolled', { value: total }) },
+      { label, value: total, max: sides },
+    );
+    if (onEvent) onEvent({ kind: 'roll', label, value: total });
+    shareRoll(who, label, total, '');
   };
 
   const save = (attrKey) => {
@@ -125,6 +143,24 @@ export default function DiceRoller({ character, onEvent, external }) {
           />
         ))}
       </div>
+
+      <form className="dice-custom" onSubmit={rollCustom}>
+        <Dice6 size={15} className="dice-custom-icon" aria-hidden="true" />
+        <input
+          type="number"
+          min="2"
+          max="1000"
+          inputMode="numeric"
+          className="dice-custom-input"
+          placeholder={t('dice.customPlaceholder')}
+          value={customSides}
+          onChange={(e) => setCustomSides(e.target.value)}
+          aria-label={t('dice.customLabel')}
+        />
+        <button type="submit" className="btn btn-sm" disabled={!customSides}>
+          {t('dice.customRoll')}
+        </button>
+      </form>
 
       <div className="save-mode" role="group" aria-label={t('dice.mode.label')}>
         {SAVE_MODES.map((m) => (

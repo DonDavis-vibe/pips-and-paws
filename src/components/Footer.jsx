@@ -3,7 +3,7 @@ import {
 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import {
-  PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, DISCORD_URL, KOFI_URL, APP_VERSION, LINKS,
+  PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, DISCORD_URL, KOFI_URL, APP_VERSION, LINKS, TRANSLATOR_ES_URL,
 } from '../config.js';
 import { ArtMouse } from './Art.jsx';
 
@@ -20,6 +20,7 @@ function Ext({ href, icon: Icon, children }) {
 export default function Footer({ onHelp }) {
   const { t } = useLang();
   const [d1pre, d1post] = t('footer.disclaimer1').split('{name}');
+  const [tEsPre, tEsPost] = t('footer.translatorEs').split('{name}');
   return (
     <footer className="site-footer">
       <div className="footer-grid">
@@ -32,6 +33,11 @@ export default function Footer({ onHelp }) {
           <p className="footer-tagline">{t('footer.tagline')}</p>
           <p className="footer-meta">
             v{APP_VERSION} · <span>{t('footer.codeLicense')}</span> · <span>{t('footer.rulesLicense')}</span>
+          </p>
+          <p className="footer-credit">
+            {tEsPre}
+            <a href={TRANSLATOR_ES_URL} target="_blank" rel="noopener noreferrer">Salgraphics</a>
+            {tEsPost}
           </p>
         </div>
 
