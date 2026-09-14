@@ -5,9 +5,9 @@
 // oder { t: { de, en } } fuer Dinge ohne eigenen Katalogeintrag (Zauber, Mietlinge, Kuriosa).
 // Deutsche Hintergrund-Namen sind eigene Uebersetzungen (PLAN.md §15.7).
 
-const B = (de, en, ...items) => ({ name: { de, en, es }, items });
+const B = (de, en, ...items) => ({ name: { de, en }, items });
 const K = (k) => ({ k });
-const T = (de, en, es) => ({ t: { de, en, es } });
+const T = (de, en) => ({ t: { de, en } });
 
 // TABLE[hp][pips]
 export const BACKGROUND_TABLE = {
