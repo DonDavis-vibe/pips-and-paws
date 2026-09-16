@@ -2,6 +2,23 @@
 
 Stand: 2026-09-16
 
+**Runde 2026-09-16d (WIL-Box haengt im Druckbogen-Skin ueber):** Nutzer-Screenshot:
+im Druckbogen-Skin (Standard) haengt die dritte Attribut-Box (WIL) sichtbar ueber
+den rechten Kartenrand hinaus, im Classic-Skin nicht. Per `getBoundingClientRect()`
+nachgemessen statt geraten: `.attr-grid` (`repeat(3, 1fr)`) war 590px breit, aber
+alle drei `.attr-box`-Spalten wurden trotzdem auf 199.2px statt der rechnerisch
+passenden 190px gesetzt (599px + Gaps > 590px verfuegbar) — klassischer CSS-Grid-
+Bug: `1fr`-Spalten schrumpfen nicht unter das Min-Content ihres Inhalts, `overflow:
+hidden` auf `.attr-box` allein reicht dafuer nicht. Ausloeser nur im Druckbogen-
+Skin: `.attr-cell:first-child .stepper input` (der grosse AKTUELL-Wert) hat dort
+`font-size: 42px` (Classic: 30px) — bei zwei Ziffern braucht das trotz expliziter
+`width: 46px` mehr Min-Content-Breite, was durch die verschachtelten Flex-Container
+(`.stepper` → `.attr-row` → `.attr-box`) nach oben durchschlaegt. Fix: `min-width: 0`
+auf `.attr-box` in `theme.css` (gilt fuer beide Skins) — zwingt den Browser, die
+Spaltenbreite wirklich am verfuegbaren Platz zu bemessen statt am Inhalt. Vorher/
+nachher live vermessen (nicht nur optisch geprueft): Rand lag bei 891.7px statt
+864px Container-Rand, nach dem Fix exakt gleich.
+
 **Runde 2026-09-16c (Echtes Mumm/Grit — Zustaende ignorieren):** Im Discord fragte
 jemand, ob unsere Mumm-Erklaerung eine Hausregel sei. War sie, nur nicht absichtlich:
 `hint.xp` beschrieb Mumm bisher als "Bonus-Trefferpunkte pro Stufe, die vor der

@@ -851,6 +851,7 @@ summary,
 
 .attr-box {
   position: relative;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 13px 13px 12px;
