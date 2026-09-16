@@ -12,7 +12,7 @@ const fresh = () => ({ round: 0, npcs: [] });
 const nid = () => `n_${Math.random().toString(36).slice(2, 8)}`;
 
 // NSC-/Kampf-Tracker fuer den Spielleiter. Rein lokal, ueberlebt einen Reload.
-export default function GmCombatTracker({ onLog, onInitiative, shareNpcs }) {
+export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRoll }) {
   const { t, lang } = useLang();
   const [s, setS] = useState(() => ({ ...fresh(), ...readJSON(KEY) }));
   const [addOpen, setAddOpen] = useState(false);
@@ -74,6 +74,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs }) {
   const attack = (n) => {
     const roll = rollDie(n.dmg);
     onLog('combat.log.attack', { name: n.name, roll, die: `W${n.dmg}` });
+    pushRoll?.({ label: `${n.name} · ${t('dice.dieLetter')}${n.dmg}`, value: roll, max: n.dmg });
   };
 
   const morale = (n) => {

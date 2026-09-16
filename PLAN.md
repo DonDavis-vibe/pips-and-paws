@@ -2,6 +2,19 @@
 
 Stand: 2026-09-16 · v0.4.0
 
+**Runde 2026-09-16f (NSC-Angriffe auf der gemeinsamen Würfel-Bühne):** Letzten offenen Punkt aus der
+Notiz zu Runde 2026-09-14 nachgezogen: NSC-Angriffe im Kampf-Tracker landeten bisher nur im SL-Log,
+nicht in der animierten Würfel-Bühne, die eigene SL-Würfe/Reaktion/Schatz schon zeigen. Dafür den
+`result`-State aus `GmDicePanel` eine Ebene höher nach `GmDashboard` gezogen (`diceResult`/`pushRoll`,
+`pushRoll` vergibt die Stamp-ID selbst) — `GmDicePanel` bekommt Bühne und Setter jetzt als Props statt
+eigenem `useState`, sichtbar ändert sich dort nichts. `GmCombatTracker#attack()` ruft nach dem
+Log-Eintrag jetzt zusätzlich `pushRoll({ label, value, max })` mit `n.dmg` als Bühnen-Seitenzahl — da
+alle Katalog-Kreaturen (`data/creatures.js`) und die Eigenbau-NSC-Auswahl nur W4/W6/W8/W10/W12 kennen,
+landet der Angriffswurf automatisch auf demselben 3D-Würfel/Vielflächner wie die übrigen SL-Würfe,
+kein Sonderfall nötig. Bewusst kein `tone` (ok/bad) gesetzt — Schaden ist kein Erfolg/Fehlschlag wie
+ein Rettungswurf, die übrigen Schnellwürfe (Reaktion, Schatz) machen das genauso. `npm run lint`/
+`npm run build` grün.
+
 **Runde 2026-09-16e (AKTUELL/MAX immer gestapelt + v0.4.0):** Nachfrage, ob man
 AKTUELL/MAX in den Attribut-Boxen nicht immer wie im schmalen Zwei-Spalten-Layout
 untereinander anzeigen sollte — die +/- Knoepfe sind dort besser lesbar, und es

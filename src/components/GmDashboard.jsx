@@ -42,6 +42,8 @@ export function cmdVars(cmd, name, lang, t) {
 
 const formatEntry = formatLogEntry;
 
+const stamp = () => `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
 // Welche Log-Eintraege gelten als "Wurf" und gehoeren damit ins Wuerfel-Protokoll
 // des SL — eigene Wuerfe, NSC-Wuerfe und die Wuerfe der Spieler.
 const ROLL_KEYS = new Set([
@@ -56,17 +58,17 @@ function isRollEntry(e) {
 }
 
 // Vollwertiges Wuerfel-Panel fuer den SL: Buehne, Wuerfel, Schnellwuerfe und ein
-// Protokoll, in dem auch die Wuerfe der Spieler auftauchen.
-function GmDicePanel({ onLog, log }) {
+// Protokoll, in dem auch die Wuerfe der Spieler auftauchen. Die Buehne (`result`)
+// lebt eine Ebene hoeher in GmDashboard, damit auch GmCombatTracker (NSC-Angriffe)
+// ueber `pushRoll` mitschreiben kann statt nur ins Log zu gehen.
+function GmDicePanel({ onLog, log, result, pushRoll }) {
   const { t } = useLang();
-  const [result, setResult] = useState(null);
   const [customSides, setCustomSides] = useState('');
   const dieLabel = (sides) => `${t('dice.dieLetter')}${sides}`;
-  const stamp = () => `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
   const rollN = (sides) => {
     const r = rollDice(1, sides);
-    setResult({ id: stamp(), label: dieLabel(sides), value: r.total, max: sides });
+    pushRoll({ label: dieLabel(sides), value: r.total, max: sides });
     onLog('gm.log.roll', { label: dieLabel(sides), value: r.total });
   };
 
@@ -81,8 +83,7 @@ function GmDicePanel({ onLog, log }) {
 
   const roll66 = () => {
     const r = rollD66();
-    setResult({
-      id: stamp(),
+    pushRoll({
       label: t('dice.d66'),
       value: r.value,
       max: 66,
@@ -97,8 +98,7 @@ function GmDicePanel({ onLog, log }) {
   const reaction = () => {
     const r = rollReaction();
     const verdict = t(`reaction.${r.key}`);
-    setResult({
-      id: stamp(),
+    pushRoll({
       label: t('gm.reaction'),
       value: r.total,
       max: 12,
@@ -111,7 +111,7 @@ function GmDicePanel({ onLog, log }) {
   const treasure = () => {
     const r = rollTreasure();
     const verdict = r.key === 'pips' ? t('treasure.pips', { n: r.pips }) : t(`treasure.${r.key}`);
-    setResult({ id: stamp(), label: t('gm.treasure'), value: r.d, max: 20, verdict });
+    pushRoll({ label: t('gm.treasure'), value: r.d, max: 20, verdict });
     onLog('gm.log.treasure', { d: r.d, result: verdict });
   };
 
@@ -182,6 +182,11 @@ export default function GmDashboard({ mp, notify }) {
   const localApi = useLocalPlayers();
   const [openLocalId, setOpenLocalId] = useState(null);
   const openLocal = localApi.players.find((p) => p.id === openLocalId);
+
+  // Gemeinsame Wuerfel-Buehne des SL-Bereichs: eigene Wuerfe im GmDicePanel UND
+  // NSC-Angriffe aus GmCombatTracker landen hier, nicht nur im Log.
+  const [diceResult, setDiceResult] = useState(null);
+  const pushRoll = (stage) => setDiceResult({ id: stamp(), ...stage });
 
   // SL-Log + optional an Discord (nur die fuer die Runde relevanten Meldungen).
   const gmLog = (key, vars) => {
@@ -299,7 +304,7 @@ export default function GmDashboard({ mp, notify }) {
         cmdVars={cmdVars}
       />
 
-      <GmDicePanel onLog={gmLog} log={mp.liveLog} />
+      <GmDicePanel onLog={gmLog} log={mp.liveLog} result={diceResult} pushRoll={pushRoll} />
 
       <GmSoundboard mp={mp} notify={notify} />
 
@@ -308,6 +313,7 @@ export default function GmDashboard({ mp, notify }) {
       <GmCombatTracker
         onLog={gmLog}
         shareNpcs={mp.shareNpcs}
+        pushRoll={pushRoll}
         onInitiative={() => {
           mp.sendGmCommand(null, { cmd: GM_SAVE, attr: 'dex', reason: 'initiative' });
           gmLog('combat.log.initiative', {});
