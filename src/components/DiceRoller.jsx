@@ -82,9 +82,8 @@ export default function DiceRoller({ character, onEvent, external }) {
   const save = (attrKey) => {
     const r = rollSave(character[attrKey].current, saveMode);
     const attr = t(`attr.${attrKey}`);
-    const tone = r.nat1 ? 'crit-good' : r.nat20 ? 'crit-bad' : r.ok ? 'ok' : 'bad';
-    const verdict = (r.nat1 && t('dice.nat1')) || (r.nat20 && t('dice.nat20'))
-      || (r.ok ? t('dice.success') : t('dice.fail'));
+    const tone = r.ok ? 'ok' : 'bad';
+    const verdict = r.ok ? t('dice.success') : t('dice.fail');
     const modeTag = saveMode === 'normal' ? '' : ` (${t(`dice.mode.${saveMode}`)})`;
     const parts = r.dice.length === 2
       ? [
@@ -183,9 +182,7 @@ export default function DiceRoller({ character, onEvent, external }) {
           {log.map((e) => (
             <li
               key={e.id}
-              className={`${e.ok === true ? 'roll-ok' : e.ok === false ? 'roll-bad' : ''}${
-                e.tone === 'crit-good' ? ' roll-crit-good' : e.tone === 'crit-bad' ? ' roll-crit-bad' : ''
-              }`}
+              className={e.ok === true ? 'roll-ok' : e.ok === false ? 'roll-bad' : ''}
             >
               <strong>{e.label}</strong>
               <span className="dice-verdict">{e.verdict}</span>

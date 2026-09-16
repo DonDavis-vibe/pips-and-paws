@@ -104,8 +104,6 @@
   "dice.ones": "Unidades",
   "dice.roll": "Tirada",
   "dice.target": "Objetivo",
-  "dice.nat1": "Perfecto! (1 natural)",
-  "dice.nat20": "Fracaso (20natural)",
   "wizard.title": "Crea un ratón",
   "wizard.step": "Paso {n} de {total}",
   "wizard.next": "Siguiente",

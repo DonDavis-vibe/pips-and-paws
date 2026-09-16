@@ -190,6 +190,18 @@ const POLY_NORMALS = {
 const POLY_SHAPE = { 4: 'tri', 8: 'tri', 10: 'kite', 12: 'penta' }; // Klasse .die3d-face--<shape> traegt den clip-path
 const POLY_DIST_FACTOR = { 4: 0.22, 8: 0.3, 10: 0.44, 12: 0.42 };
 
+// Dieselben Eckpunkte wie die `.die3d-face--<shape>` clip-paths in theme.css,
+// nur als SVG-Polygon (0-100 Koordinatenraum). `border` auf dem Face-Div
+// selbst funktioniert hier NICHT: der Rahmen wird am Rechteck-Rand gezeichnet,
+// der clip-path schneidet aber ein eingeruecktes Vieleck aus — der Rahmen
+// liegt also fast komplett ausserhalb der sichtbaren Flaeche und verschwindet.
+// Der Umriss kommt deshalb separat als gestrichenes SVG-Polygon obendrauf.
+const POLY_OUTLINE_POINTS = {
+  tri: '50,4 94,92 6,92',
+  kite: '50,6 92,42 50,94 8,42',
+  penta: '50,4 94,38 78,94 22,94 6,38',
+};
+
 // Wie Die3D, aber fuer W4/W8/W10/W12. `flourish` ist eine reine rotateX/Y-
 // Zusatzdrehung (wie beim Wuerfel, mit wachsendem Winkel fuers Taumeln), die
 // eigentliche Ziel-Seite kommt per rotate3d obendrauf — der Browser interpoliert
@@ -235,6 +247,9 @@ export function PolyDie3D({ sides, value, rollId, size = 42 }) {
             className={`die3d-face die3d-face--${shape}`}
             style={{ transform: `${rot3dCss(rotationBetween(FORWARD, n))} translateZ(${dist}px)` }}
           >
+            <svg viewBox="0 0 100 100" className="die3d-face-outline" preserveAspectRatio="none" aria-hidden="true">
+              <polygon points={POLY_OUTLINE_POINTS[shape]} />
+            </svg>
             <span className="die3d-num" style={{ fontSize: numSize }}>{i + 1}</span>
           </div>
         ))}
@@ -268,7 +283,7 @@ export function RollButton({ sides, d66, label, title, kind = 'basic', onRoll, d
 }
 
 // Ergebnis-Buehne. `result`: { id, label, value, max, parts?, verdict?, tone? }
-//   tone: 'ok' | 'bad' | 'crit-good' | 'crit-bad'
+//   tone: 'ok' | 'bad'
 export function DiceStage({ result, idleIcon, idleText, compact }) {
   const [shown, setShown] = useState(null);
   const [rolling, setRolling] = useState(false);

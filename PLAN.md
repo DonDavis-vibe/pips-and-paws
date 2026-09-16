@@ -1,6 +1,30 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-09-14
+Stand: 2026-09-16
+
+**Runde 2026-09-16 (Vielflaechner-Umriss-Fix + Discord-Feedback von Ingo):** Beim
+Nachtesten der W4/W8/W10/W12-Wuerfel aus Runde 2026-09-14 fiel auf, dass sie kaum
+lesbar sind — `border` auf `.die3d-face` (geteilt mit dem W6) wird am Rechteck-Rand
+gezeichnet, der `clip-path` schneidet aber ein eingeruecktes Vieleck aus, der Rahmen
+faellt also fast komplett weg und die Flaechen verschwimmen zu einem Klecks. Fix:
+jede Vielflaechner-Flaeche bekommt zusaetzlich ein SVG-Polygon (`die3d-face-outline`
+in `DiceKit.jsx`) mit denselben Eckpunkten wie der clip-path, das den Umriss
+unabhaengig vom Rechteck-Rand zeichnet — in beiden Skins (`theme.css`/`print.css`)
+nachgezogen. — Danach drei von Ingos vier Discord-Vorschlaegen umgesetzt (Punkt 4,
+Ruestungs-Slots, war schon eine bekannte/dokumentierte Abweichung, siehe §11.7,
+kein neuer Fund; wartet noch auf sein Bild per PN): **[1]** Natuerliche 1/20 bei
+Rettungswuerfen zeigten bisher ein Sonder-Label ("Perfekt!"/"Patzer",
+`crit-good`/`crit-bad`-Ton) — das gibt es in Mausritter nicht, `ok` haengt eh nur am
+Vergleich mit dem Attributwert. Rausgenommen aus `rules/dice.js`, `DiceRoller.jsx`,
+`CharacterSheet.jsx` (2x), inkl. der zugehoerigen CSS-Animationen/-Farben in beiden
+Skins und der `dice.nat1`/`dice.nat20`-Keys in allen 6 Sprachen (auch `es.json` —
+das ist Aufraeumen eines jetzt toten Keys, keine neue Uebersetzung, faellt nicht
+unter die ES-Policy). **[2]** Panel-Titel "Miethelfer" → "Mietlinge" (`hirelings.title`,
+nur DE) — passt jetzt auch zum Fliesstext in `backgrounds.js`, der schon vorher
+"Mietling: ..." sagte. **[3]** Mietlinge waren dem SL komplett unsichtbar
+(`GmPlayerCard.jsx` las `character.hirelings` nirgends) — jetzt eine kompakte
+Chip-Zeile (Name + TP) zwischen Attributen und Aktions-Buttons, gleiche Optik wie
+die bestehende Waffen-Zeile (`gm-gear`).
 
 **Runde 2026-09-14b (Spanisch-PR #2 gemergt + Footer-Credit):** Salgraphics' zweiter
 Spanisch-PR (`es`-Feld fuer Item-/Zauber-/Zustands-/Kreaturen-/Tabellen-Namen in

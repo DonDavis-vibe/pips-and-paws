@@ -107,8 +107,6 @@
   "dice.ones": "Ones",
   "dice.roll": "Roll",
   "dice.target": "Target",
-  "dice.nat1": "Perfect! (natural 1)",
-  "dice.nat20": "Fumble (natural 20)",
   "wizard.title": "Create a mouse",
   "wizard.step": "Step {n} of {total}",
   "wizard.next": "Next",

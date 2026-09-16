@@ -107,8 +107,6 @@
   "dice.ones": "Unità",
   "dice.roll": "Tiro",
   "dice.target": "Obiettivo",
-  "dice.nat1": "Perfetto! (1 naturale)",
-  "dice.nat20": "Fallimento critico (20 naturale)",
   "wizard.title": "Crea un topo",
   "wizard.step": "Passo {n} di {total}",
   "wizard.next": "Avanti",

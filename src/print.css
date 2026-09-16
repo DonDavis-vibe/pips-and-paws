@@ -1101,8 +1101,6 @@
 
   .dice-stage.stage-ok { border-color: var(--ink); background: var(--olive-l); }
   .dice-stage.stage-bad { border-color: var(--ink); background: var(--rose-l); }
-  .dice-stage.stage-crit-good { border-color: var(--ink); background: var(--mustard-l); }
-  .dice-stage.stage-crit-bad { border-color: var(--ink); background: var(--rose); }
 
   .dice-stage-idle {
     font-family: var(--f-hand);
@@ -1143,12 +1141,12 @@
     border-radius: 12%;
   }
 
-  .stage-ok .dice-stage-value,
-  .stage-bad .dice-stage-value,
-  .stage-crit-good .dice-stage-value,
-  .stage-crit-bad .dice-stage-value { color: var(--ink); text-shadow: none; }
+  /* Wie in theme.css: der Rahmen faellt beim clip-path fast komplett weg,
+     der Umriss kommt hier von der SVG (.die3d-face-outline, folgt --ink). */
+  .die3d-face--tri, .die3d-face--kite, .die3d-face--penta { border: none; }
 
-  .stage-crit-good .dice-stage-value { animation: roll-punch 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .stage-ok .dice-stage-value,
+  .stage-bad .dice-stage-value { color: var(--ink); text-shadow: none; }
 
   .dice-stage-label { font-family: var(--f-label); font-weight: 700; color: var(--ink-2); }
 
@@ -1167,8 +1165,6 @@
 
   .stage-ok .dice-badge { color: var(--ink); background: var(--olive); }
   .stage-bad .dice-badge { color: var(--ink); background: var(--rose); }
-  .stage-crit-good .dice-badge { color: var(--ink); background: var(--mustard); }
-  .stage-crit-bad .dice-badge { color: var(--paper); background: var(--ink); box-shadow: none; }
 
   .dice-stage--compact { padding: 5px 12px; border-radius: var(--wob-a); box-shadow: none; }
   .dice-stage--compact.stage-idle { border-color: transparent; background: transparent; box-shadow: none; }
@@ -1188,8 +1184,6 @@
   .dice-log li.roll-from-player { border-left: 3px solid var(--slate); padding-left: 8px; }
   .dice-log li.roll-ok .dice-verdict { color: var(--ok); }
   .dice-log li.roll-bad .dice-verdict { color: var(--bad); }
-  .dice-log li.roll-crit-good .dice-verdict { color: var(--warn); }
-  .dice-log li.roll-crit-bad .dice-verdict { color: var(--bad); }
   .dice-log li.roll-say { font-family: var(--f-hand); font-size: 16px; font-style: normal; }
 
   .dice-log strong { font-family: var(--f-display); font-weight: 700; font-size: 14.5px; }

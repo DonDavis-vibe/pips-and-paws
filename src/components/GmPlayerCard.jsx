@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import {
   Heart, Coins, Shield, Swords, Backpack, Sparkles, AlertTriangle, ChevronDown, ChevronRight,
-  BookOpen, Download, Trash2,
+  BookOpen, Download, Trash2, Users,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { REST_KINDS } from '../rules/rest.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { gritForLevel, ALL_SLOTS, PAW_SLOTS } from '../rules/character.js';
 import { CONDITION_CATALOG } from '../data/items.js';
+import { HIRELING_CATALOG } from '../rules/hirelings.js';
 import AddItemMenu from './AddItemMenu.jsx';
 import Portrait from './Portrait.jsx';
 import {
@@ -37,6 +38,7 @@ export default function GmPlayerCard({
   const hpPct = c.hp?.max > 0 ? Math.max(0, Math.min(100, (c.hp.current / c.hp.max) * 100)) : 0;
   const hpColor = hpPct > 50 ? 'var(--ok)' : hpPct > 25 ? 'var(--warn)' : 'var(--bad)';
 
+  const hirelings = c.hirelings || [];
   const conditions = Object.values(items).filter((i) => i.type === 'condition' && !i.cleared);
   const grit = gritForLevel(c.level || 1);
   const usedSlots = ALL_SLOTS.filter((s) => inv[s]).length;
@@ -113,6 +115,18 @@ export default function GmPlayerCard({
             <span key={i.itemId}>
               {loc(i.name, lang)}
               {i.damage ? ` (${i.damage})` : ''}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      {hirelings.length ? (
+        <div className="gm-gear">
+          <Users size={12} />
+          {hirelings.map((h) => (
+            <span key={h.id}>
+              {h.name || loc(HIRELING_CATALOG.find((k) => k.key === h.kind)?.name, lang) || t('hirelings.customKind')}
+              {' '}{h.hp?.current ?? 0}/{h.hp?.max ?? 0}
             </span>
           ))}
         </div>

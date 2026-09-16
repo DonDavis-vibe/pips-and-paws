@@ -22,7 +22,10 @@ export function rollD66() {
   return { tens, ones, value: tens * 10 + ones };
 }
 
-// Mausritter-Rettungswurf: W20, Wurf <= Attributwert ist ein Erfolg.
+// Mausritter-Rettungswurf: W20, Wurf <= Attributwert ist ein Erfolg. Anders
+// als z.B. bei D&D gibt es in Mausritter keine Sonderregel fuer natuerliche
+// 1/20 (kein Auto-Erfolg, kein Patzer) — Erfolg/Misserfolg haengt einzig am
+// Vergleich mit dem Attributwert.
 // mode: 'normal' | 'adv' (Vorteil: 2W20, niedrigeren nehmen)
 //                | 'disadv' (Nachteil: 2W20, hoeheren nehmen)
 export function rollSave(attrValue, mode = 'normal') {
@@ -35,8 +38,6 @@ export function rollSave(attrValue, mode = 'normal') {
     mode,
     target: attrValue,
     ok: d <= attrValue,
-    nat1: d === 1,
-    nat20: d === 20,
   };
 }
 

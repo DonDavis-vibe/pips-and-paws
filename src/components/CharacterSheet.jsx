@@ -113,9 +113,8 @@ export default function CharacterSheet({
     const r = rollSave(character[attrKey].current);
     const attr = t(`attr.${attrKey}`);
     const label = t('dice.saveVs', { attr });
-    const tone = r.nat1 ? 'crit-good' : r.nat20 ? 'crit-bad' : r.ok ? 'ok' : 'bad';
-    const verdict = (r.nat1 && t('dice.nat1')) || (r.nat20 && t('dice.nat20'))
-      || (r.ok ? t('dice.success') : t('dice.fail'));
+    const tone = r.ok ? 'ok' : 'bad';
+    const verdict = r.ok ? t('dice.success') : t('dice.fail');
     pushRoll(
       {
         label,
@@ -128,12 +127,9 @@ export default function CharacterSheet({
           { value: `≤ ${r.target}`, label: t('dice.target') },
         ],
       },
-      { label, verdict: `${r.d} · ${r.ok ? t('dice.success') : t('dice.fail')}`, ok: r.ok, tone },
+      { label, verdict: `${r.d} · ${verdict}`, ok: r.ok, tone },
     );
-    notify(
-      `${label} — d20 ${r.d} ≤ ${r.target} · ${r.ok ? t('dice.success') : t('dice.fail')}`,
-      r.ok ? 'ok' : 'bad',
-    );
+    notify(`${label} — d20 ${r.d} ≤ ${r.target} · ${verdict}`, tone);
     if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok });
     shareSave(character.name || t('app.title'), attr, r.d, r.target, r.ok);
   };
@@ -144,9 +140,8 @@ export default function CharacterSheet({
   const onHirelingSave = (h) => {
     const r = rollSave(h.wil.current);
     const label = t('hirelings.moraleFor', { name: h.name || t('hirelings.namePlaceholder') });
-    const tone = r.nat1 ? 'crit-good' : r.nat20 ? 'crit-bad' : r.ok ? 'ok' : 'bad';
-    const verdict = (r.nat1 && t('dice.nat1')) || (r.nat20 && t('dice.nat20'))
-      || (r.ok ? t('hirelings.moraleOk') : t('hirelings.moraleFlee'));
+    const tone = r.ok ? 'ok' : 'bad';
+    const verdict = r.ok ? t('hirelings.moraleOk') : t('hirelings.moraleFlee');
     pushRoll(
       {
         label,

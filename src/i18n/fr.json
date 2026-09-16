@@ -107,8 +107,6 @@
   "dice.ones": "Unités",
   "dice.roll": "Jet",
   "dice.target": "Objectif",
-  "dice.nat1": "Parfait ! (1 naturel)",
-  "dice.nat20": "Échec critique (20 naturel)",
   "wizard.title": "Créer une souris",
   "wizard.step": "Étape {n} sur {total}",
   "wizard.next": "Suivant",

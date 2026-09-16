@@ -107,8 +107,6 @@
   "dice.ones": "一の位",
   "dice.roll": "出目",
   "dice.target": "目標値",
-  "dice.nat1": "完璧！（自然の1）",
-  "dice.nat20": "大失敗（自然の20）",
   "wizard.title": "ネズミを作成",
   "wizard.step": "ステップ {n} / {total}",
   "wizard.next": "次へ",
