@@ -3,26 +3,44 @@
 //   { itemId }               Anker eines Gegenstands
 //   { itemId, cont: true }   Fortsetzungsfeld eines 2-Platz-Gegenstands
 
-import { ALL_SLOTS, PAW_SLOTS, BODY_SLOTS, PACK_SLOTS, SLOT_PAIR_FIRST, SLOT_PAIR_SECOND } from './character.js';
+import {
+  ALL_SLOTS, PAW_SLOTS, BODY_SLOTS, PACK_SLOTS,
+  SLOT_PAIR_FIRST, SLOT_PAIR_SECOND, CROSS_PAIR_FIRST, CROSS_PAIR_SECOND,
+} from './character.js';
 
-// Wohin ein neuer Gegenstand bevorzugt wandert: Waffen an die Pfoten, Ruestung
-// an den Koerper, alles andere in den Rucksack. Spieler koennen danach frei
-// umsortieren (Mausritter schreibt keine Platztypen vor).
-function preferredOrder(type) {
-  if (type === 'weapon') return [...PAW_SLOTS, ...PACK_SLOTS, ...BODY_SLOTS];
-  if (type === 'armour') return [...BODY_SLOTS, ...PACK_SLOTS, ...PAW_SLOTS];
+// Wohin ein neuer Gegenstand bevorzugt wandert: Waffen an die Pfoten, ein
+// Pfote+Koerper-Paar (`pairKind: 'pawBody'`, siehe Leichte Ruestung) an die
+// Pfoten (dort beginnt sein Anker), sonstige Ruestung an den Koerper, alles
+// andere in den Rucksack. Spieler koennen danach frei umsortieren.
+function preferredOrder(item) {
+  if (item.pairKind === 'pawBody') return [...PAW_SLOTS, ...BODY_SLOTS, ...PACK_SLOTS];
+  if (item.type === 'weapon') return [...PAW_SLOTS, ...PACK_SLOTS, ...BODY_SLOTS];
+  if (item.type === 'armour') return [...BODY_SLOTS, ...PACK_SLOTS, ...PAW_SLOTS];
   return [...PACK_SLOTS, ...BODY_SLOTS, ...PAW_SLOTS];
 }
 
-export function anchorFor(slot, size) {
-  return size === 2 ? SLOT_PAIR_FIRST[slot] : slot;
+// `pairKind: 'pawBody'` (Leichte Ruestung, siehe items.js + character.js) nimmt
+// auf Pfoten-/Koerperfeldern das echte Pfote+Koerper-Paar (CROSS_PAIR_*), sonst
+// (und im Rucksack, wo es keine Pfote/Koerper-Unterscheidung gibt) das
+// gleichartige Paar (SLOT_PAIR_*).
+function pairMaps(slot, pairKind) {
+  if (pairKind === 'pawBody' && CROSS_PAIR_FIRST[slot] != null) {
+    return { first: CROSS_PAIR_FIRST, second: CROSS_PAIR_SECOND };
+  }
+  return { first: SLOT_PAIR_FIRST, second: SLOT_PAIR_SECOND };
 }
 
-export function cellsFor(slot, size) {
+export function anchorFor(slot, size, pairKind) {
+  if (size !== 2) return slot;
+  return pairMaps(slot, pairKind).first[slot];
+}
+
+export function cellsFor(slot, size, pairKind) {
   if (size !== 2) return [slot];
-  const first = SLOT_PAIR_FIRST[slot];
-  const second = SLOT_PAIR_SECOND[first];
-  return second ? [first, second] : [first];
+  const { first, second } = pairMaps(slot, pairKind);
+  const anchor = first[slot];
+  const partner = second[anchor];
+  return partner ? [anchor, partner] : [anchor];
 }
 
 export function slotsOfItem(inventory, itemId) {
@@ -41,20 +59,20 @@ function withItemRemoved(inventory, itemId) {
   return next;
 }
 
-function withItemPlaced(inventory, itemId, slot, size) {
+function withItemPlaced(inventory, itemId, slot, size, pairKind) {
   const next = { ...inventory };
-  const cells = cellsFor(slot, size);
+  const cells = cellsFor(slot, size, pairKind);
   next[cells[0]] = { itemId };
   if (cells[1]) next[cells[1]] = { itemId, cont: true };
   return next;
 }
 
 // Erster freier Ankerplatz, an den ein Gegenstand dieser Groesse passt.
-export function firstFreeFit(inventory, size, order = ALL_SLOTS) {
+export function firstFreeFit(inventory, size, order = ALL_SLOTS, pairKind) {
   for (const slot of order) {
-    const cells = cellsFor(slot, size);
+    const cells = cellsFor(slot, size, pairKind);
     if (cells.length < size) continue;
-    if (size === 2 && SLOT_PAIR_FIRST[slot] !== slot) continue; // nur am Paar-Anker beginnen
+    if (size === 2 && anchorFor(slot, size, pairKind) !== slot) continue; // nur am Paar-Anker beginnen
     if (cells.every((c) => inventory[c] == null)) return cells[0];
   }
   return null;
@@ -67,7 +85,7 @@ export function tryMove(inventory, items, itemId, targetSlot) {
   if (!item) return { ok: false, reason: 'slotOccupied' };
   const size = item.size === 2 ? 2 : 1;
 
-  const targetCells = cellsFor(targetSlot, size);
+  const targetCells = cellsFor(targetSlot, size, item.pairKind);
   if (targetCells.length < size) return { ok: false, reason: 'needsTwoSlots' };
 
   const fromAnchor = anchorSlotOfItem(inventory, itemId);
@@ -80,7 +98,7 @@ export function tryMove(inventory, items, itemId, targetSlot) {
   }
 
   if (blockers.size === 0) {
-    return { ok: true, inventory: withItemPlaced(withItemRemoved(inventory, itemId), itemId, targetSlot, size) };
+    return { ok: true, inventory: withItemPlaced(withItemRemoved(inventory, itemId), itemId, targetSlot, size, item.pairKind) };
   }
 
   // Tausch nur, wenn genau ein 1-Platz-Gegenstand im Weg ist und wir selbst 1 Platz sind
@@ -102,15 +120,16 @@ export function tryMove(inventory, items, itemId, targetSlot) {
 // Legt einen neuen Gegenstand ins Inventar (an den ersten passenden Platz).
 export function addItem(character, item) {
   const size = item.size === 2 ? 2 : 1;
-  const order = preferredOrder(item.type);
-  const slot = firstFreeFit(character.inventory, size, order) || firstFreeFit(character.inventory, size);
+  const order = preferredOrder(item);
+  const slot = firstFreeFit(character.inventory, size, order, item.pairKind)
+    || firstFreeFit(character.inventory, size, ALL_SLOTS, item.pairKind);
   if (!slot) return { ok: false, reason: 'noRoom' };
   return {
     ok: true,
     character: {
       ...character,
       items: { ...character.items, [item.itemId]: item },
-      inventory: withItemPlaced(character.inventory, item.itemId, slot, size),
+      inventory: withItemPlaced(character.inventory, item.itemId, slot, size, item.pairKind),
     },
   };
 }
@@ -120,7 +139,7 @@ export function addItem(character, item) {
 // ist — der Gegenstand darf auf keinen Fall verloren gehen.
 export function addItemAt(character, item, slot) {
   const size = item.size === 2 ? 2 : 1;
-  const cells = cellsFor(slot, size);
+  const cells = cellsFor(slot, size, item.pairKind);
   const fits = cells.length === size && cells.every((c) => character.inventory[c] == null);
   if (!fits) return addItem(character, item);
   return {
@@ -128,7 +147,7 @@ export function addItemAt(character, item, slot) {
     character: {
       ...character,
       items: { ...character.items, [item.itemId]: item },
-      inventory: withItemPlaced(character.inventory, item.itemId, slot, size),
+      inventory: withItemPlaced(character.inventory, item.itemId, slot, size, item.pairKind),
     },
   };
 }

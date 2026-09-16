@@ -46,6 +46,7 @@
   "inv.body": "Body",
   "inv.pack": "Pack",
   "inv.empty": "empty",
+  "inv.linkedBy": "Taken by: {name}",
   "inv.emptyHint": "Nothing here yet. Use “Add item” to pick gear, weapons or spells — then drag them between paws, body and pack. Large items take up two slots.",
   "inv.add": "Add item",
   "inv.addFromCatalog": "From list",

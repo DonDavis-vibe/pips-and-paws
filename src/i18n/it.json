@@ -46,6 +46,7 @@
   "inv.body": "Corpo",
   "inv.pack": "Zaino",
   "inv.empty": "vuoto",
+  "inv.linkedBy": "Occupato da: {name}",
   "inv.emptyHint": "Ancora niente. Usa « Aggiungi oggetto » per scegliere equipaggiamento, armi o incantesimi — poi trascinali tra zampe, corpo e zaino. Gli oggetti ingombranti occupano due spazi.",
   "inv.add": "Aggiungi oggetto",
   "inv.addFromCatalog": "Dall'elenco",

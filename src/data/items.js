@@ -54,21 +54,21 @@ export const ITEM_CATALOG = {
   },
 
   // --- Ruestung (SRD: beide verhindern 1 Schaden) ---
-  // Laut SRD belegt Leichte Ruestung eigentlich "Nebenpfote + ein Koerperplatz"
-  // (ein echtes Pfote+Koerper-Paar). Das Platzmodell hier kennt nur Paare
-  // derselben Art (zwei Pfoten, zwei Koerper, zwei Rucksack — SLOT_PAIR_FIRST/
-  // SECOND in rules/character.js), darum beschreibt der Text bewusst das, was
-  // die App tatsaechlich tut, statt eine Kombination zu versprechen, die sich
-  // nicht draufziehen laesst. Siehe PLAN.md §11.7.
+  // Laut SRD belegt Leichte Ruestung "Nebenpfote + ein Koerperplatz" (ein
+  // echtes Pfote+Koerper-Paar), Schwere Ruestung zwei Koerperplaetze.
+  // `pairKind: 'pawBody'` bei Leichter Ruestung schaltet auf Pfoten-/
+  // Koerperfeldern das echte Paar (CROSS_PAIR_FIRST/SECOND in
+  // rules/character.js), im Rucksack bleibt es beim gleichartigen Paar
+  // (dort gibt es keine Pfote/Koerper-Unterscheidung). Siehe PLAN.md §11.7.
   light_armour: {
-    type: 'armour', size: 2, defense: 1, usage: { max: 3 }, cost: 150,
+    type: 'armour', size: 2, pairKind: 'pawBody', defense: 1, usage: { max: 3 }, cost: 150,
     name: { de: 'Leichte Rüstung', en: 'Light armour', es: 'Armadura ligera' },
-    effect: { de: 'Verhindert 1 Schaden. Belegt zwei benachbarte Plätze derselben Art (z. B. beide Pfoten, beide Körper oder zwei Rucksackplätze).', en: 'Prevents 1 damage. Takes up two adjacent slots of the same kind (e.g. both paws, both body, or two pack slots).', es: 'Previene 1 de daño. Ocupa dos espacios adyacentes del mismo tipo (p. ej. ambas patas, ambos cuerpo o dos espacios de mochila).' },
+    effect: { de: 'Verhindert 1 Schaden. Belegt eine Pfote und einen Körperplatz.', en: 'Prevents 1 damage. Takes up one paw and one body slot.', es: 'Previene 1 de daño. Ocupa un espacio de pata y uno de cuerpo.' },
   },
   heavy_armour: {
     type: 'armour', size: 2, defense: 1, usage: { max: 3 }, cost: 500,
     name: { de: 'Schwere Rüstung', en: 'Heavy armour', es: 'Armadura pesada' },
-    effect: { de: 'Verhindert 1 Schaden. Belegt zwei benachbarte Plätze derselben Art.', en: 'Prevents 1 damage. Takes up two adjacent slots of the same kind.', es: 'Previene 1 de daño. Ocupa dos espacios adyacentes del mismo tipo.' },
+    effect: { de: 'Verhindert 1 Schaden. Belegt zwei Körperplätze.', en: 'Prevents 1 damage. Takes up two body slots.', es: 'Previene 1 de daño. Ocupa dos espacios de cuerpo.' },
   },
 
   // --- Licht & Nahrung ---
@@ -217,6 +217,7 @@ export function makeItem(key, overrides = {}) {
     key: spec.key ?? null,
     type: overrides.type || spec.type,
     size: overrides.size || spec.size || 1,
+    pairKind: overrides.pairKind ?? spec.pairKind ?? null,
     name: overrides.name || spec.name,
     effect: overrides.effect || spec.effect || { de: '', en: '', es: '' },
     damage: overrides.damage ?? spec.damage ?? null,

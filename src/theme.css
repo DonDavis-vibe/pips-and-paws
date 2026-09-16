@@ -1148,6 +1148,21 @@ summary,
   transform: scale(1.015);
 }
 
+/* Zweites Feld eines gruppenuebergreifenden Paars (Pfote+Koerper-Ruestung) —
+   gehoert dem Anker in der anderen Gruppe, kein eigenes Drop-Ziel. */
+.inv-slot.slot-linked {
+  border-style: solid;
+  border-color: color-mix(in srgb, #4a7da0 45%, var(--line-strong));
+  background: color-mix(in srgb, #4a7da0 10%, var(--bg-sunk));
+  cursor: default;
+}
+
+.slot-linked-mark {
+  margin: auto;
+  font-size: 16px;
+  color: color-mix(in srgb, #4a7da0 70%, var(--ink-dim));
+}
+
 .slot-empty {
   margin: auto;
   font-family: var(--font-display);

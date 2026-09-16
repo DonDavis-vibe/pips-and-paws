@@ -10,9 +10,7 @@ faellt also fast komplett weg und die Flaechen verschwimmen zu einem Klecks. Fix
 jede Vielflaechner-Flaeche bekommt zusaetzlich ein SVG-Polygon (`die3d-face-outline`
 in `DiceKit.jsx`) mit denselben Eckpunkten wie der clip-path, das den Umriss
 unabhaengig vom Rechteck-Rand zeichnet — in beiden Skins (`theme.css`/`print.css`)
-nachgezogen. — Danach drei von Ingos vier Discord-Vorschlaegen umgesetzt (Punkt 4,
-Ruestungs-Slots, war schon eine bekannte/dokumentierte Abweichung, siehe §11.7,
-kein neuer Fund; wartet noch auf sein Bild per PN): **[1]** Natuerliche 1/20 bei
+nachgezogen. — Danach Ingos vier Discord-Vorschlaege umgesetzt: **[1]** Natuerliche 1/20 bei
 Rettungswuerfen zeigten bisher ein Sonder-Label ("Perfekt!"/"Patzer",
 `crit-good`/`crit-bad`-Ton) — das gibt es in Mausritter nicht, `ok` haengt eh nur am
 Vergleich mit dem Attributwert. Rausgenommen aus `rules/dice.js`, `DiceRoller.jsx`,
@@ -24,7 +22,30 @@ nur DE) — passt jetzt auch zum Fliesstext in `backgrounds.js`, der schon vorhe
 "Mietling: ..." sagte. **[3]** Mietlinge waren dem SL komplett unsichtbar
 (`GmPlayerCard.jsx` las `character.hirelings` nirgends) — jetzt eine kompakte
 Chip-Zeile (Name + TP) zwischen Attributen und Aktions-Buttons, gleiche Optik wie
-die bestehende Waffen-Zeile (`gm-gear`).
+die bestehende Waffen-Zeile (`gm-gear`). **[4]** Ruestungs-Slots (§11.7) — Ingo
+schickte einen Ausschnitt des offiziellen Blatts nach: Pfoten und Koerper stehen
+dort als zwei Spalten nebeneinander (Hauptpfote/Koerper, Nebenpfote/Koerper), nicht
+als zwei gestapelte Blocke wie bisher bei uns — bestaetigt die schon dokumentierte
+Vereinfachung, jetzt mit Bild. Echten Fix nachgeliefert (siehe Folge-Eintrag unten).
+
+**Runde 2026-09-16b (Echtes Pfote+Koerper-Paar fuer Leichte Ruestung):** Ruestungs-
+Platzmodell aus §11.7 doch noch SRD-genau gemacht, nachdem Ingos Bild vom
+offiziellen Blatt zeigte, wie es gemeint ist. Neues `pairKind: 'pawBody'`
+(`items.js`, nur bei `light_armour`) schaltet auf Pfoten-/Koerperfeldern ein echtes
+Kreuz-Paar frei — `CROSS_PAIR_FIRST/SECOND` in `rules/character.js`, zeilenweise
+wie auf dem Blatt (Hauptpfote+Koerper, Nebenpfote+Koerper; welche Pfote "Neben-"
+ist, legt die Spielerin am Tisch fest). `rules/inventory.js` (`cellsFor`/`anchorFor`/
+`firstFreeFit`/`tryMove`/`addItem`/`addItemAt`) nimmt jetzt ueberall den `pairKind`
+des Items durch; im Rucksack bleibt es beim alten gleichartigen Paar (keine Pfote/
+Koerper-Unterscheidung dort) — als Fallback, falls kein Pfote+Koerper-Platz frei
+ist. `makeItem()` hatte `pairKind` zunaechst schlicht nicht durchgereicht (nur eine
+feste Feldliste kopiert) — beim Testen aufgefallen, nachgezogen. Schwere Ruestung
+unangetastet (Koerper+Koerper war schon immer der Standardfall). Visuell: das
+zweite Feld eines gruppenuebergreifenden Paars ist keine leere Zelle mehr, sondern
+eine `.slot-linked`-Markierung (↑, Tooltip mit Item-Namen) in der jeweils anderen
+Gruppe (`InventoryGrid.jsx`) — die Karte selbst bleibt einspaltig in ihrer eigenen
+Gruppe, kein Grid-Merge noetig. In beiden Skins getestet (Auto-Platzierung, Drag auf
+Koerper- und Pfotenfelder, Fallback in den Rucksack wenn Koerper/Pfoten belegt).
 
 **Runde 2026-09-14b (Spanisch-PR #2 gemergt + Footer-Credit):** Salgraphics' zweiter
 Spanisch-PR (`es`-Feld fuer Item-/Zauber-/Zustands-/Kreaturen-/Tabellen-Namen in

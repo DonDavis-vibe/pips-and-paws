@@ -46,6 +46,7 @@
   "inv.body": "Corps",
   "inv.pack": "Sac",
   "inv.empty": "vide",
+  "inv.linkedBy": "Occupé par : {name}",
   "inv.emptyHint": "Rien pour l'instant. Utilise « Ajouter un objet » pour choisir de l'équipement, des armes ou des sorts — puis fais-les glisser entre les pattes, le corps et le sac. Les objets encombrants occupent deux emplacements.",
   "inv.add": "Ajouter un objet",
   "inv.addFromCatalog": "Depuis la liste",

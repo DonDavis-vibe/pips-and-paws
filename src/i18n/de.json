@@ -46,6 +46,7 @@
   "inv.body": "Körper",
   "inv.pack": "Rucksack",
   "inv.empty": "leer",
+  "inv.linkedBy": "Belegt: {name}",
   "inv.emptyHint": "Noch nichts dabei. Über „Gegenstand hinzufügen“ Ausrüstung, Waffen oder Zauber wählen — danach per Ziehen zwischen Pfoten, Körper und Rucksack einsortieren. Große Sachen belegen zwei Plätze.",
   "inv.add": "Gegenstand hinzufügen",
   "inv.addFromCatalog": "Aus Liste",

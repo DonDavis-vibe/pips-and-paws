@@ -824,6 +824,14 @@
     transform: none;
   }
 
+  .inv-slot.slot-linked {
+    border-style: solid;
+    border-color: var(--slate);
+    background: var(--slate-l);
+  }
+
+  .slot-linked-mark { color: var(--ink); }
+
   .slot-empty {
     font-family: var(--f-hand);
     font-size: 18px;

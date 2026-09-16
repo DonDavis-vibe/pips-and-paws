@@ -46,6 +46,7 @@
   "inv.body": "身体",
   "inv.pack": "バックパック",
   "inv.empty": "空き",
+  "inv.linkedBy": "使用中：{name}",
   "inv.emptyHint": "まだ何もありません。「アイテムを追加」から装備・武器・呪文を選び、手・身体・バックパックの間へドラッグしてください。大型のアイテムは2枠を使います。",
   "inv.add": "アイテムを追加",
   "inv.addFromCatalog": "一覧から",

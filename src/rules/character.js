@@ -7,12 +7,9 @@ export const BODY_SLOTS = ['body_1', 'body_2'];
 export const PACK_SLOTS = ['pack_1', 'pack_2', 'pack_3', 'pack_4', 'pack_5', 'pack_6'];
 export const ALL_SLOTS = [...PAW_SLOTS, ...BODY_SLOTS, ...PACK_SLOTS];
 
-// Ein 2-Platz-Gegenstand belegt immer ein festes Paar derselben Art (zwei
-// Pfoten, zwei Koerper oder zwei Rucksack); das erste Feld ist der "Anker".
-// Bewusste Vereinfachung: die SRD gibt Leichter Ruestung eigentlich ein
-// echtes Pfote+Koerper-Paar — das haette ein item-abhaengiges Paar-Modell
-// gebraucht (jeder Slot muesste wissen, WAS gerade draufgezogen wird), statt
-// des rein slot-basierten Modells hier. Siehe PLAN.md §11.7.
+// Ein 2-Platz-Gegenstand belegt standardmaessig ein festes Paar derselben Art
+// (zwei Pfoten, zwei Koerper oder zwei Rucksack); das erste Feld ist der
+// "Anker". Gilt fuer alle 2-Platz-Gegenstaende ohne eigenes `pairKind`.
 export const SLOT_PAIR_FIRST = {
   paw_left: 'paw_left',
   paw_right: 'paw_left',
@@ -32,6 +29,26 @@ export const SLOT_PAIR_SECOND = {
   pack_1: 'pack_2',
   pack_3: 'pack_4',
   pack_5: 'pack_6',
+};
+
+// Item-abhaengige Ausnahme fuer `pairKind: 'pawBody'` (siehe items.js,
+// Leichte Ruestung): die SRD gibt ihr ein echtes Pfote+Koerper-Paar statt
+// zweier gleichartiger Plaetze. Zeilenweise gepaart wie auf dem offiziellen
+// Blatt (Hauptpfote+Koerper, Nebenpfote+Koerper) — welche Pfote gerade
+// "Nebenpfote" ist, legt die Spielerin am Tisch fest, beide Zeilen sind
+// gleichwertig nutzbar. Greift nur auf diesen vier Feldern; im Rucksack
+// bleibt es beim gleichartigen Paar (SLOT_PAIR_FIRST/SECOND), da es dort
+// keine Pfote/Koerper-Unterscheidung gibt. Siehe PLAN.md §11.7.
+export const CROSS_PAIR_FIRST = {
+  paw_left: 'paw_left',
+  body_1: 'paw_left',
+  paw_right: 'paw_right',
+  body_2: 'paw_right',
+};
+
+export const CROSS_PAIR_SECOND = {
+  paw_left: 'body_1',
+  paw_right: 'body_2',
 };
 
 export function newId(prefix = 'id') {
