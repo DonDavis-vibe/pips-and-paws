@@ -39,7 +39,10 @@ export default function GmPlayerCard({
   const hpColor = hpPct > 50 ? 'var(--ok)' : hpPct > 25 ? 'var(--warn)' : 'var(--bad)';
 
   const hirelings = c.hirelings || [];
-  const conditions = Object.values(items).filter((i) => i.type === 'condition' && !i.cleared);
+  const gritIds = new Set(c.gritConditions || []);
+  // Ein Zustand im Mumm-Feld ist ignoriert (SRD §"Grit") — soll dem SL nicht
+  // als aktives Problem angezeigt werden.
+  const conditions = Object.values(items).filter((i) => i.type === 'condition' && !i.cleared && !gritIds.has(i.itemId));
   const grit = gritForLevel(c.level || 1);
   const usedSlots = ALL_SLOTS.filter((s) => inv[s]).length;
   const defence = Object.values(items)
@@ -254,6 +257,13 @@ export default function GmPlayerCard({
               );
             })}
           </div>
+
+          {gritIds.size ? (
+            <div className="gm-player-notes">
+              <span className="gm-mini-label">{t('res.grit')}</span>
+              <p>{[...gritIds].map((id) => loc(items[id]?.name, lang)).filter(Boolean).join(', ')}</p>
+            </div>
+          ) : null}
 
           {c.notes ? (
             <div className="gm-player-notes">

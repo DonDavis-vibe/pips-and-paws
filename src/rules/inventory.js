@@ -6,6 +6,7 @@
 import {
   ALL_SLOTS, PAW_SLOTS, BODY_SLOTS, PACK_SLOTS,
   SLOT_PAIR_FIRST, SLOT_PAIR_SECOND, CROSS_PAIR_FIRST, CROSS_PAIR_SECOND,
+  gritForLevel,
 } from './character.js';
 
 // Wohin ein neuer Gegenstand bevorzugt wandert: Waffen an die Pfoten, ein
@@ -155,5 +156,36 @@ export function addItemAt(character, item, slot) {
 export function removeItem(character, itemId) {
   const items = { ...character.items };
   delete items[itemId];
-  return { ...character, items, inventory: withItemRemoved(character.inventory, itemId) };
+  return {
+    ...character,
+    items,
+    inventory: withItemRemoved(character.inventory, itemId),
+    gritConditions: (character.gritConditions || []).filter((id) => id !== itemId),
+  };
+}
+
+// Mumm/Grit (SRD §"Grit"): ein Zustand im Mumm-Feld wird ignoriert, solange er
+// dort liegt — belegt dafuer einen von `gritForLevel(level)` vielen Plaetzen,
+// getrennt vom normalen Inventar (SRD: "place one Condition into the Grit
+// space", nicht in einen Inventarplatz). Nur Zustaende, nur wenn noch Platz
+// frei ist; einmal drin, laut SRD nicht entfernbar, bis er geloescht wird
+// (siehe removeItem oben + `locked` in ItemCard.jsx).
+export function placeInGrit(character, itemId) {
+  const item = character.items[itemId];
+  if (!item || item.type !== 'condition') return { ok: false, reason: 'gritOnlyConditions' };
+  const capacity = gritForLevel(character.level || 1);
+  const parked = character.gritConditions || [];
+  if (parked.includes(itemId)) return { ok: true, character };
+  if (parked.length >= capacity) return { ok: false, reason: 'gritFull' };
+  return {
+    ok: true,
+    character: {
+      ...character,
+      inventory: withItemRemoved(character.inventory, itemId),
+      gritConditions: [...parked, itemId],
+      // "Verletzt" im Mumm-Feld ignoriert -> nicht mehr kampfunfaehig, solange
+      // es dort liegt (rules/gmActions.js setzt incapacitated beim Zufuegen).
+      incapacitated: item.key === 'injured' ? false : character.incapacitated,
+    },
+  };
 }

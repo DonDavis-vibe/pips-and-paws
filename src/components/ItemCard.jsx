@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import {
-  GripVertical, Trash2, Swords, Info, PackagePlus,
+  GripVertical, Trash2, Swords, Info, PackagePlus, Lock,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { InfoHint } from './ui.jsx';
@@ -11,7 +11,11 @@ import IconPicker from './IconPicker.jsx';
 
 // overlay  = statische, nicht bedienbare Karte (z.B. in der Tischmitte)
 // dragging = die Karte, die gerade am Mauszeiger haengt (bekommt die Schraeglage)
-export default function ItemCard({ item, onChange, onRemove, onStash, onRollDamage, dragId, overlay, dragging }) {
+// locked   = darf nicht gezogen werden (z.B. ein Zustand im Mumm-Feld — SRD:
+//            "cannot be removed until cleared")
+export default function ItemCard({
+  item, onChange, onRemove, onStash, onRollDamage, dragId, overlay, dragging, locked,
+}) {
   const { t, lang } = useLang();
   const [showEffect, setShowEffect] = useState(false);
   const [pickerAnchor, setPickerAnchor] = useState(null);
@@ -20,7 +24,7 @@ export default function ItemCard({ item, onChange, onRemove, onStash, onRollDama
   // Symbol wechseln darf, wer die Karte auch sonst aendern darf.
   const canPickIcon = !overlay && !!onChange;
 
-  const drag = useDraggable({ id: dragId ?? item.itemId, disabled: overlay });
+  const drag = useDraggable({ id: dragId ?? item.itemId, disabled: overlay || locked });
   // Bei aktivem Ziehen uebernimmt das DragOverlay die Bewegung — die Quelle
   // bleibt an Ort und Stelle und wird nur ausgegraut (kein doppeltes Kaertchen).
   const style = overlay ? undefined : { opacity: drag.isDragging ? 0.3 : 1 };
@@ -31,10 +35,12 @@ export default function ItemCard({ item, onChange, onRemove, onStash, onRollDama
     <div
       ref={overlay ? undefined : drag.setNodeRef}
       style={style}
-      className={`item-card type-${item.type}${item.cleared ? ' item-cleared' : ''}${item.size === 2 ? ' item-wide' : ''}${overlay ? ' item-overlay' : ''}${dragging ? ' item-dragging' : ''}`}
+      className={`item-card type-${item.type}${item.cleared ? ' item-cleared' : ''}${item.size === 2 ? ' item-wide' : ''}${overlay ? ' item-overlay' : ''}${dragging ? ' item-dragging' : ''}${locked ? ' item-locked' : ''}`}
     >
       <div className="item-top">
-        {overlay ? null : (
+        {overlay ? null : locked ? (
+          <Lock size={14} className="item-grip item-locked-icon" aria-label={t('item.locked')} title={t('item.locked')} />
+        ) : (
           <button
             type="button"
             className="item-grip"

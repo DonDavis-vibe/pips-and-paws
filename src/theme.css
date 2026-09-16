@@ -1273,6 +1273,11 @@ summary,
   touch-action: none;
 }
 
+.item-locked-icon {
+  cursor: default;
+  color: color-mix(in srgb, var(--gold) 70%, var(--ink-dim));
+}
+
 .item-name {
   font-family: var(--font-display);
   font-weight: 600;

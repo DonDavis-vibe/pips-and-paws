@@ -20,7 +20,10 @@ import HirelingsPanel from './HirelingsPanel.jsx';
 import Portrait from './Portrait.jsx';
 import Panel from './Panel.jsx';
 import MouseIcon from './MouseIcon.jsx';
-import { tryMove, addItem, removeItem, firstFreeFit } from '../rules/inventory.js';
+import {
+  tryMove, addItem, removeItem, firstFreeFit, placeInGrit,
+} from '../rules/inventory.js';
+import { GRIT_SLOT_PREFIX } from '../rules/character.js';
 import { rollSave, rollDie } from '../rules/dice.js';
 import { shareSave, shareRoll } from '../utils/discord.js';
 
@@ -74,6 +77,19 @@ export default function CharacterSheet({
         return;
       }
       stash.take(itemId, over.id);
+      return;
+    }
+
+    // Ablage im Mumm-Feld (SRD "Grit space") statt eines normalen Inventar-Platzes.
+    if (String(over.id).startsWith(GRIT_SLOT_PREFIX)) {
+      setCharacter((c) => {
+        const res = placeInGrit(c, active.id);
+        if (!res.ok) {
+          notify(t(`inv.${res.reason}`), 'warn');
+          return c;
+        }
+        return res.character;
+      });
       return;
     }
 

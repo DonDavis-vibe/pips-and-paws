@@ -78,6 +78,12 @@ export function blankCharacter() {
     items: {}, // itemId -> Item
     notes: '',
     hirelings: [], // siehe rules/hirelings.js — kein eigenes Inventarraster
+    // Mumm/Grit (SRD §"Grit"): itemIds von Zustaenden, die im Mumm-Feld liegen
+    // und dort ignoriert werden — siehe gritForLevel() unten + rules/inventory.js
+    // #placeInGrit. Eigene Liste statt `inventory`-Slot, weil das Mumm-Feld ein
+    // separater Bereich mit variabler Kapazitaet (0-3, je nach Stufe) ist, keine
+    // feste Anzahl Plaetze wie Pfoten/Koerper/Rucksack.
+    gritConditions: [],
     // Kritischer Schaden (SRD: misslungener STR-Rettungswurf nach STR-Schaden)
     // macht kampfunfaehig, bis versorgt + gerastet wird. Kein Zustands-Item
     // (die SRD kennt dafuer keine Zustandskarte, die einen Platz belegt) —
@@ -108,6 +114,7 @@ export function normalizeCharacter(raw) {
   merged.inventory = { ...base.inventory, ...raw.inventory };
   merged.items = raw.items && typeof raw.items === 'object' ? raw.items : {};
   merged.hirelings = Array.isArray(raw.hirelings) ? raw.hirelings : [];
+  merged.gritConditions = Array.isArray(raw.gritConditions) ? raw.gritConditions : [];
   merged.incapacitated = !!raw.incapacitated;
   merged.portrait = typeof raw.portrait === 'string' ? raw.portrait : '';
   merged.schemaVersion = SCHEMA_VERSION;
@@ -132,3 +139,8 @@ export function gritForLevel(level) {
   if (level >= 2) return 1;
   return 0;
 }
+
+// Droppable-IDs der Mumm-Feld-Plaetze (rules/inventory.js#placeInGrit,
+// InventoryGrid.jsx). Eigenes Praefix, damit CharacterSheet.jsx#onDragEnd
+// eine Ablage dort von einer normalen Inventar-Verschiebung unterscheiden kann.
+export const GRIT_SLOT_PREFIX = 'grit_slot_';

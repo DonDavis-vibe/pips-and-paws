@@ -1,8 +1,11 @@
 import { useDroppable } from '@dnd-kit/core';
 import { useLang, loc } from '../i18n/index.jsx';
-import { PAW_SLOTS, BODY_SLOTS, PACK_SLOTS } from '../rules/character.js';
+import {
+  PAW_SLOTS, BODY_SLOTS, PACK_SLOTS, GRIT_SLOT_PREFIX, gritForLevel,
+} from '../rules/character.js';
 import { cellsFor, anchorSlotOfItem } from '../rules/inventory.js';
 import ItemCard from './ItemCard.jsx';
+import { InfoHint } from './ui.jsx';
 
 function Slot({ slot, item, onChange, onRemove, onStash, onRollDamage, wide }) {
   const { t } = useLang();
@@ -77,6 +80,61 @@ function Group({ title, slots, inventory, items, onItemChange, onItemRemove, onI
   );
 }
 
+// Leeres Mumm-Feld: Drop-Ziel fuer einen Zustand (siehe CharacterSheet.jsx
+// onDragEnd -> placeInGrit). Eigenes Praefix statt eines echten Inventar-
+// Slots, weil Kapazitaet variabel ist (0-3 je nach Stufe).
+function GritEmptySlot({ index }) {
+  const { t } = useLang();
+  const { setNodeRef, isOver } = useDroppable({ id: `${GRIT_SLOT_PREFIX}${index}` });
+  return (
+    <div ref={setNodeRef} className={`inv-slot${isOver ? ' slot-over' : ''}`}>
+      <span className="slot-empty">{t('inv.empty')}</span>
+    </div>
+  );
+}
+
+// Zustand, der im Mumm-Feld liegt und dort ignoriert wird (SRD §"Grit"). Kann
+// nicht weggezogen werden — erst wenn er geloescht ist (`cleared`, per Klick
+// auf der Karte), gibt's den Loeschen-Knopf.
+function GritFilledSlot({ item, onItemChange, onItemRemove }) {
+  return (
+    <div className="inv-slot slot-filled">
+      <ItemCard
+        item={item}
+        onChange={onItemChange}
+        onRemove={item.cleared ? () => onItemRemove(item.itemId) : undefined}
+        locked
+      />
+    </div>
+  );
+}
+
+function GritGroup({ character, onItemChange, onItemRemove }) {
+  const { t } = useLang();
+  const capacity = gritForLevel(character.level || 1);
+  if (capacity === 0) return null;
+  const parked = character.gritConditions || [];
+  const cells = Array.from({ length: capacity }, (_, i) => {
+    const itemId = parked[i];
+    const item = itemId ? character.items[itemId] : null;
+    return item ? (
+      <GritFilledSlot key={itemId} item={item} onItemChange={onItemChange} onItemRemove={onItemRemove} />
+    ) : (
+      <GritEmptySlot key={`empty-${i}`} index={i} />
+    );
+  });
+
+  return (
+    <div className="inv-group">
+      <div className="inv-group-title">
+        {t('res.grit')}
+        <InfoHint text={t('hint.grit')} />
+      </div>
+      <div className="inv-cells">{cells}</div>
+    </div>
+  );
+}
+
 export default function InventoryGrid({ character, onItemChange, onItemRemove, onItemStash, onRollDamage }) {
   const { t, lang } = useLang();
   const { inventory, items } = character;
@@ -90,6 +148,7 @@ export default function InventoryGrid({ character, onItemChange, onItemRemove, o
       <Group title={t('inv.paws')} slots={PAW_SLOTS} {...shared} />
       <Group title={t('inv.body')} slots={BODY_SLOTS} {...shared} />
       <Group title={t('inv.pack')} slots={PACK_SLOTS} {...shared} />
+      <GritGroup character={character} onItemChange={onItemChange} onItemRemove={onItemRemove} />
     </div>
   );
 }

@@ -2,6 +2,34 @@
 
 Stand: 2026-09-16
 
+**Runde 2026-09-16c (Echtes Mumm/Grit — Zustaende ignorieren):** Im Discord fragte
+jemand, ob unsere Mumm-Erklaerung eine Hausregel sei. War sie, nur nicht absichtlich:
+`hint.xp` beschrieb Mumm bisher als "Bonus-Trefferpunkte pro Stufe, die vor der
+normalen TP verloren gehen" — in der lokalen SRD-Referenz (`reference/mausritter-
+srd-2.3.1.md` §"Grit") steht aber etwas komplett anderes: pro Mumm-Punkt darf ein
+Zustand in ein eigenes Mumm-Feld auf dem Bogen gelegt werden, wo er ignoriert wird,
+bis er reguraer geloescht ist (Rast etc.) — keine Bonus-TP. War in keiner PLAN.md-
+Runde als bewusste Design-Entscheidung dokumentiert, und im Code passierte mit Mumm
+ohnehin nichts (nur `gritForLevel()` fuer die Anzeige, nirgends gelesen). Jetzt echt
+gebaut: neue `character.gritConditions`-Liste (itemIds), getrennt vom normalen
+`inventory`-Slotraster, weil das Mumm-Feld eine eigene, variable Kapazitaet hat
+(0-3 je Stufe) statt fester Plaetze. `rules/inventory.js#placeInGrit` nimmt nur
+Zustaende, prueft Kapazitaet, entfernt den Gegenstand aus dem normalen Inventar
+(SRD: "place into the Grit space", kein Inventarplatz mehr) und loescht bei
+"Verletzt" automatisch `incapacitated` (die einzige Stelle, an der ein Zustand
+im Code tatsaechlich eine mechanische Wirkung hat). `InventoryGrid.jsx` zeigt das
+Mumm-Feld als vierte Gruppe (nur ab Stufe 2 sichtbar); `CharacterSheet.jsx#onDragEnd`
+erkennt Ablagen per `GRIT_SLOT_PREFIX`-Praefix und routet sie um `tryMove` herum.
+Ein im Mumm-Feld liegender Zustand ist per SRD nicht entfernbar, bis er geloescht
+ist — neues `locked`-Prop auf `ItemCard.jsx` deaktiviert das Ziehen und zeigt ein
+Schloss-Symbol statt des Greifgriffs; der Loeschen-Knopf erscheint erst, wenn der
+Zustand als erledigt markiert wurde. `GmPlayerCard.jsx` blendet im Mumm-Feld
+liegende Zustaende aus der "aktive Probleme"-Chip-Zeile aus (sie sind ja ignoriert)
+und listet sie stattdessen unter den Details. `hint.xp`/neues `hint.grit` in DE/EN/
+FR/IT/JA korrigiert — `es.json` bewusst NICHT angefasst: der dortige Text hat
+denselben (falschen) Fehler, aber das ist ein Korrektur-Fall fuer @Salgraphics, kein
+neuer Key, den wir maschinell nachziehen wuerden.
+
 **Runde 2026-09-16 (Vielflaechner-Umriss-Fix + Discord-Feedback von Ingo):** Beim
 Nachtesten der W4/W8/W10/W12-Wuerfel aus Runde 2026-09-14 fiel auf, dass sie kaum
 lesbar sind — `border` auf `.die3d-face` (geteilt mit dem W6) wird am Rechteck-Rand
