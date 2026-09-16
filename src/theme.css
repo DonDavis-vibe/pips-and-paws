@@ -893,6 +893,7 @@ summary,
 
 .attr-row {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   align-items: stretch;
 }
@@ -956,14 +957,18 @@ summary,
 
 .attr-wounded .attr-cell:first-child .stepper input { color: var(--bad); }
 
-/* MAX — klein, sekundaer */
+/* MAX — klein, sekundaer, immer unter AKTUELL (siehe .attr-row) — sonst wuerde
+   es im schmalen Zwei-Spalten-Layout aus der Karte gedraengt (§Runde
+   2026-09-16d). */
 .attr-cell:last-child {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   justify-content: center;
 }
 
-/* Kompakt genug, dass AKTUELL + MAX auch im engen Zwei-Spalten-Layout
-   nebeneinander in die Karte passen (transform aendert die Box nicht). */
+.attr-cell:last-child .stepper {
+  align-self: center;
+}
+
 .attr-cell:last-child .stepper button {
   padding: 4px 7px;
   font-size: 13px;
@@ -3529,12 +3534,4 @@ summary,
     text-align: center;
   }
 }
-
-/* Solange die zweite Spalte die erste einengt, stapeln die Attributskarten
-   AKTUELL ueber MAX — nebeneinander wuerde MAX sonst aus der Karte gedraengt. */
-@media (min-width: 1200px) and (max-width: 1420px) {
-  .attr-row { flex-direction: column; align-items: stretch; }
-  .attr-cell:last-child { flex: 0 0 auto; }
-  .attr-cell:last-child .stepper { align-self: center; }
-}
-}
+} /* @layer classic */

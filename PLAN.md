@@ -1,6 +1,21 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-09-16
+Stand: 2026-09-16 · v0.4.0
+
+**Runde 2026-09-16e (AKTUELL/MAX immer gestapelt + v0.4.0):** Nachfrage, ob man
+AKTUELL/MAX in den Attribut-Boxen nicht immer wie im schmalen Zwei-Spalten-Layout
+untereinander anzeigen sollte — die +/- Knoepfe sind dort besser lesbar, und es
+raeumt genau die Bedingung aus, die den WIL-Ueberstand aus Runde 2026-09-16d erst
+ausgeloest hat. `.attr-row` steht jetzt fest auf `flex-direction: column`, die
+Sonderfall-Media-Query (1200-1420px) dafuer ist raus (`theme.css`); `print.css`
+ueberschreibt `flex-direction` nirgends, erbt die gestapelte Anordnung also
+automatisch mit. Dabei versehentlich beim Entfernen der Media-Query die
+schliessende Klammer von `@layer classic` mit rausgeschnitten (die stand direkt
+danach als vermeintlich verwaiste Klammer am Dateiende) — `npm run build` hat das
+sofort als "Unclosed block" gemeldet, wieder eingesetzt. Danach Version auf 0.4.0
+gehoben (`package.json`, `config.js#APP_VERSION`) — buendelt Mumm/Grit-Feature,
+Vielflaechner-Umriss-Fix, Rettungswurf-Krit-Entfernung, Mietlinge-Sichtbarkeit
+beim SL, Pfote+Koerper-Ruestungspaar und diesen Layout-Fix seit v0.3.0.
 
 **Runde 2026-09-16d (WIL-Box haengt im Druckbogen-Skin ueber):** Nutzer-Screenshot:
 im Druckbogen-Skin (Standard) haengt die dritte Attribut-Box (WIL) sichtbar ueber

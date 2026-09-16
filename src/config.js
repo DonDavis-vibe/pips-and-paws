@@ -6,7 +6,7 @@ export const REPO_URL = 'https://github.com/DonDavis-vibe/pips-and-paws';
 export const SITE_URL = 'https://dondavis-vibe.github.io/pips-and-paws/';
 export const DISCORD_URL = 'https://discord.gg/s6J6JqBQ8w';
 export const KOFI_URL = 'https://ko-fi.com/don_davis';
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '0.4.0';
 
 // Spanische Uebersetzung: Community-Beitrag, im Footer verlinkt (siehe PLAN.md).
 export const TRANSLATOR_ES_URL = 'https://github.com/salgraphics';
