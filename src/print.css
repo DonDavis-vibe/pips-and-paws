@@ -175,6 +175,7 @@
   svg.lucide {
     stroke-width: 2.4px;
     filter: url(#ink-line);
+    transform: translateZ(0);
   }
 
   /* ---- Kopfzeile ---- */
@@ -384,9 +385,10 @@
     box-shadow: 5px 5px 0 var(--hard-soft);
     pointer-events: none;
     filter: url(#ink-edge);
+    transform: translateZ(0);
   }
 
-  .panel:nth-child(even)::before { filter: url(#ink-edge-2); }
+  .panel:nth-child(even)::before { filter: url(#ink-edge-2); transform: translateZ(0); }
   .panel::after { display: none; }
 
   .panel-head {
@@ -400,14 +402,10 @@
     background: var(--olive-l);
   }
 
-  .sheet > .panel:nth-child(4n+1) > .panel-head,
-  .gm-dash > .panel:nth-child(4n+1) > .panel-head { background: var(--rose-l); }
-  .sheet > .panel:nth-child(4n+2) > .panel-head,
-  .gm-dash > .panel:nth-child(4n+2) > .panel-head { background: var(--olive-l); }
-  .sheet > .panel:nth-child(4n+3) > .panel-head,
-  .gm-dash > .panel:nth-child(4n+3) > .panel-head { background: var(--mustard-l); }
-  .sheet > .panel:nth-child(4n) > .panel-head,
-  .gm-dash > .panel:nth-child(4n) > .panel-head { background: var(--slate-l); }
+  .sheet-main > .panel:nth-child(4n+1) > .panel-head { background: var(--rose-l); }
+  .sheet-main > .panel:nth-child(4n+2) > .panel-head { background: var(--olive-l); }
+  .sheet-main > .panel:nth-child(4n+3) > .panel-head { background: var(--mustard-l); }
+  .sheet-main > .panel:nth-child(4n) > .panel-head { background: var(--slate-l); }
   .dice-panel > .panel-head { background: var(--slate-l); }
 
   .panel-closed > .panel-head {
@@ -652,9 +650,10 @@
     box-shadow: 4px 4px 0 var(--hard);
     pointer-events: none;
     filter: url(#ink-edge-2);
+    transform: translateZ(0);
   }
 
-  .attr-box:nth-child(2)::before { filter: url(#ink-edge); }
+  .attr-box:nth-child(2)::before { filter: url(#ink-edge); transform: translateZ(0); }
 
   .attr-box.attr-wounded { border-color: transparent; box-shadow: none; }
   .attr-box.attr-wounded::before { background: none; border-color: var(--ink); }
@@ -729,9 +728,10 @@
     border-radius: inherit;
     pointer-events: none;
     filter: url(#ink-edge);
+    transform: translateZ(0);
   }
 
-  .res-block:nth-child(2)::before { filter: url(#ink-edge-2); }
+  .res-block:nth-child(2)::before { filter: url(#ink-edge-2); transform: translateZ(0); }
 
   .res-head {
     font-family: var(--f-label);
@@ -868,10 +868,11 @@
     box-shadow: 4px 4px 0 var(--hard);
     pointer-events: none;
     filter: url(#ink-edge);
+    transform: translateZ(0);
   }
 
   .inv-slot:nth-child(even) .item-card::before,
-  .stash-grid > :nth-child(even) .item-card::before { filter: url(#ink-edge-2); }
+  .stash-grid > :nth-child(even) .item-card::before { filter: url(#ink-edge-2); transform: translateZ(0); }
 
   /* Karten liegen minimal schief auf dem Tisch. */
   .inv-slot:nth-child(3n+1) .item-card { transform: rotate(-0.35deg); }
@@ -1241,6 +1242,7 @@
     box-shadow: 6px 6px 0 var(--hard);
     pointer-events: none;
     filter: url(#ink-edge);
+    transform: translateZ(0);
   }
 
   .modal-head {
@@ -1460,6 +1462,7 @@
     box-shadow: 4px 4px 0 var(--hard);
     pointer-events: none;
     filter: url(#ink-edge-2);
+    transform: translateZ(0);
   }
 
   .hireling-name { font-family: var(--f-display); }
@@ -1488,9 +1491,10 @@
     box-shadow: 4px 4px 0 var(--hard);
     pointer-events: none;
     filter: url(#ink-edge);
+    transform: translateZ(0);
   }
 
-  .party-group-member:nth-child(even)::before { filter: url(#ink-edge-2); }
+  .party-group-member:nth-child(even)::before { filter: url(#ink-edge-2); transform: translateZ(0); }
   .party-group-head strong { font-family: var(--f-display); font-size: 14.5px; }
   .party-group-hp { font-family: var(--f-label); }
 
@@ -1529,9 +1533,10 @@
     box-shadow: 4px 4px 0 var(--hard);
     pointer-events: none;
     filter: url(#ink-edge-2);
+    transform: translateZ(0);
   }
 
-  .gm-card:nth-child(even)::before { filter: url(#ink-edge); }
+  .gm-card:nth-child(even)::before { filter: url(#ink-edge); transform: translateZ(0); }
   .gm-card:hover { box-shadow: none; transform: none; }
 
   .gm-card-head {

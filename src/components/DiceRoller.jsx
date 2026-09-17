@@ -38,7 +38,7 @@ export default function DiceRoller({ character, onEvent, external }) {
     const { total } = rollDice(1, 6);
     record(
       { label: t('dice.d6'), verdict: t('dice.rolled', { value: total }) },
-      { label: t('dice.d6'), value: total, max: 6 },
+      { label: t('dice.d6'), value: total, max: 6, die: 6 },
     );
     if (onEvent) onEvent({ kind: 'roll', label: '1W6', value: total });
     shareRoll(who, '1W6', total, '');
@@ -63,8 +63,9 @@ export default function DiceRoller({ character, onEvent, external }) {
   };
 
   // Eigener Wuerfel mit frei eingegebener Seitenzahl — fuer alles, was nicht
-  // schon einen Knopf hat (W3, W100, ...). Bekannte Seitenzahlen (4/6/8/10/12)
-  // bekommen denselben 3D-Wuerfel wie die festen Knoepfe, siehe DiceStage.
+  // schon einen Knopf hat (W3, W100, ...). Bewusst OHNE `die`-Flag, auch bei
+  // Seitenzahlen wie 6/8/10/12: die Buehne zeigt fuer diese Wuerfel nur die
+  // Zahl, den 3D-Wuerfel gibt es nur bei den festen Knoepfen, siehe DiceStage.
   const rollCustom = (e) => {
     e.preventDefault();
     const sides = parseInt(customSides, 10);

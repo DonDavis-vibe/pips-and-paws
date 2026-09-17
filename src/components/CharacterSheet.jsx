@@ -117,7 +117,7 @@ export default function CharacterSheet({
     const die = `${t('dice.dieLetter')}${opt.sides}`;
     const verdict = `${t('item.damage')} ${value}`;
     pushRoll(
-      { label: `${label} ${die}`, value, max: opt.sides, tone: 'bad', verdict },
+      { label: `${label} ${die}`, value, max: opt.sides, die: opt.sides, tone: 'bad', verdict },
       { label: `${label} ${die}`, verdict },
     );
     notify(`${label} ${die} — ${verdict}`, 'bad');
@@ -184,6 +184,14 @@ export default function CharacterSheet({
 
   return (
     <div className="sheet">
+      {/* Alles ausser dem Wuerfel-Panel steckt in EINEM Wrapper, damit die
+          Wuerfel-Spalte (siehe .dice-panel in theme.css) in exakt eine
+          Grid-Zeile faellt statt mehrere zu ueberspannen — WebKit/Safari
+          rechnet sonst die volle Hoehe eines ueber mehrere Zeilen
+          gespannten Elements komplett der ERSTEN Zeile zu, was zwischen
+          Steckbrief und Attributen eine Luecke aufreisst, die mit jedem
+          Wuerfelwurf im Protokoll waechst. */}
+      <div className="sheet-main">
       {partyTime ? (
         <div className="party-time" title={t('time.playerTitle')}>
           <Timer size={15} />
@@ -283,8 +291,6 @@ export default function CharacterSheet({
 
       <PartyNpcs npcs={partyNpcs} />
 
-      <DiceRoller character={character} onEvent={onEvent} external={externalRoll} />
-
       <PartyGroup members={partyGroup} myPeerId={myPeerId} />
 
       {partyLog ? <PartyLog entries={partyLog.entries} shared={partyLog.shared} /> : null}
@@ -298,6 +304,9 @@ export default function CharacterSheet({
           onChange={(e) => patch({ notes: e.target.value })}
         />
       </Panel>
+      </div>
+
+      <DiceRoller character={character} onEvent={onEvent} external={externalRoll} />
     </div>
   );
 }

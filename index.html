@@ -95,7 +95,14 @@
   </head>
   <body>
     <!-- Tusche-Filter fuer den Druckbogen-Look: Linien und Kanten bekommen
-         eine leichte, handgezeichnete Unruhe. Nur per CSS referenziert. -->
+         eine leichte, handgezeichnete Unruhe. Nur per CSS referenziert.
+         WebKit/Safari faellt bei feTurbulence+feDisplacementMap manchmal auf
+         den ersten Frame rein: das gefilterte Element bleibt unsichtbar oder
+         falsch plaziert, bis ein Resize eine neue Compositing-Ebene erzwingt.
+         Jede filter:url(#ink-...)-Regel in print.css traegt deshalb ein
+         begleitendes transform:translateZ(0), das die Ebene schon beim ersten
+         Paint anlegt. -->
+
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
       <defs>
         <filter id="ink-line" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">

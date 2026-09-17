@@ -74,7 +74,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
   const attack = (n) => {
     const roll = rollDie(n.dmg);
     onLog('combat.log.attack', { name: n.name, roll, die: `W${n.dmg}` });
-    pushRoll?.({ label: `${n.name} · ${t('dice.dieLetter')}${n.dmg}`, value: roll, max: n.dmg });
+    pushRoll?.({ label: `${n.name} · ${t('dice.dieLetter')}${n.dmg}`, value: roll, max: n.dmg, die: n.dmg });
   };
 
   const morale = (n) => {

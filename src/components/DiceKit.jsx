@@ -331,10 +331,15 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
   // Echte 3D-Wuerfel fuer W4/W6/W8/W10/W12 (einzeln oder als Wuerfel-Paar bei
   // W66). W20 bleibt bei der Zahlen-Anzeige — ein 20-seitiger Pip-Wuerfel
   // waere ein eigenes, viel groesseres Modell (Ikosaeder mit 20 Dreiecken).
+  // `die` markiert einen echten Einzelwuerfel unserer festen Formen (Knoepfe,
+  // Waffenschaden, NSC-Angriffe). Eigene Wuerfel (frei eingegebene Seitenzahl)
+  // und abgeleitete Werte wie die NSC-Reaktion (2W6-Summe, zufaellig auch mal
+  // 4/8/10/12) setzen `die` bewusst NICHT — sonst wuerde die Buehne einen
+  // 3D-Wuerfel zeigen, der gar nicht dem tatsaechlichen Wurf entspricht.
   const cubeSize = compact ? 30 : 42;
   const isCubePair = result.max === 66 && result.parts?.length === 2;
-  const isCube = result.max === 6;
-  const isPoly = [4, 8, 10, 12].includes(result.max);
+  const isCube = result.die === 6;
+  const isPoly = [4, 8, 10, 12].includes(result.die);
 
   return (
     <div className={`dice-stage stage-live${tone ? ` stage-${tone}` : ''}${compact ? ' dice-stage--compact' : ''}`}>

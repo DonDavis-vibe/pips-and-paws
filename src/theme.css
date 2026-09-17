@@ -443,7 +443,8 @@ summary,
 }
 
 /* ---- Panels ---- */
-.sheet {
+.sheet,
+.sheet-main {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -516,10 +517,10 @@ summary,
   animation: rise-in 0.22s ease both;
 }
 
-.sheet > .panel:nth-child(2) { animation-delay: 0.04s; }
-.sheet > .panel:nth-child(3) { animation-delay: 0.08s; }
-.sheet > .panel:nth-child(4) { animation-delay: 0.12s; }
-.sheet > .panel:nth-child(5) { animation-delay: 0.16s; }
+.sheet-main > .panel:nth-child(2) { animation-delay: 0.04s; }
+.sheet-main > .panel:nth-child(3) { animation-delay: 0.08s; }
+.sheet-main > .panel:nth-child(4) { animation-delay: 0.12s; }
+.sheet-main > .panel:nth-child(5) { animation-delay: 0.16s; }
 
 .panel-head {
   display: flex;
@@ -3494,15 +3495,23 @@ summary,
     align-items: start;
   }
 
-  /* Alles ausser dem Wuerfel-Panel bleibt in Spalte 1 ... */
-  .sheet > *,
-  .gm-dash > * { grid-column: 1; }
+  /* Spalte 1 ist bewusst EIN einziges Kind (.sheet-main in CharacterSheet.jsx
+     / GmDashboard.jsx), nicht mehrere. Das Wuerfel-Panel sass frueher als
+     eines von vielen Geschwistern daneben und ueberspannte per
+     `grid-row: 1 / -1` alle ihre Zeilen — WebKit/Safari rechnet die volle
+     Hoehe eines ueber mehrere Zeilen gespannten Elements aber komplett der
+     ERSTEN Zeile zu, statt sie auf alle gespannten Zeilen zu verteilen. Das
+     riss zwischen der ersten und zweiten Karte in Spalte 1 eine Luecke auf,
+     die mit jedem Eintrag im Wurf-Protokoll wuchs. Mit nur einer Zeile gibt
+     es nichts mehr zu verteilen: die Zeilenhoehe ist schlicht das Maximum aus
+     .sheet-main und dem Wuerfel-Panel. */
+  .sheet > .sheet-main,
+  .gm-dash > .sheet-main { grid-column: 1; }
 
-  /* ... das Wuerfel-Panel bekommt die ganze zweite Spalte und klebt darin. */
+  /* ... das Wuerfel-Panel bekommt Spalte 2 und klebt darin. */
   .sheet > .dice-panel,
   .gm-dash > .dice-panel {
     grid-column: 2;
-    grid-row: 1 / -1;
     position: sticky;
     top: 16px;
     align-self: start;

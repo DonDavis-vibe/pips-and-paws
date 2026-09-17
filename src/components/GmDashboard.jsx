@@ -66,19 +66,24 @@ function GmDicePanel({ onLog, log, result, pushRoll }) {
   const [customSides, setCustomSides] = useState('');
   const dieLabel = (sides) => `${t('dice.dieLetter')}${sides}`;
 
-  const rollN = (sides) => {
+  // `preset`: kommt der Wurf von einem der festen Knoepfe (dann `die` fuer den
+  // 3D-Wuerfel in DiceStage) oder aus dem Eigener-Wuerfel-Feld (dann nicht —
+  // siehe Kommentar bei rollCustom).
+  const rollN = (sides, preset = true) => {
     const r = rollDice(1, sides);
-    pushRoll({ label: dieLabel(sides), value: r.total, max: sides });
+    pushRoll({ label: dieLabel(sides), value: r.total, max: sides, ...(preset ? { die: sides } : {}) });
     onLog('gm.log.roll', { label: dieLabel(sides), value: r.total });
   };
 
   // Eigener Wuerfel mit frei eingegebener Seitenzahl — fuer alles, was nicht
-  // schon einen Knopf hat (W3, W100, ...). rollN() ist bereits generisch genug.
+  // schon einen Knopf hat (W3, W100, ...). Bewusst OHNE `die`-Flag, auch bei
+  // Seitenzahlen wie 6/8/10/12: die Buehne zeigt fuer diese Wuerfel nur die
+  // Zahl, den 3D-Wuerfel gibt es nur bei den festen Knoepfen, siehe DiceStage.
   const rollCustom = (e) => {
     e.preventDefault();
     const sides = parseInt(customSides, 10);
     if (!Number.isFinite(sides) || sides < 2 || sides > 1000) return;
-    rollN(sides);
+    rollN(sides, false);
   };
 
   const roll66 = () => {
@@ -232,6 +237,11 @@ export default function GmDashboard({ mp, notify }) {
 
   return (
     <div className="gm-dash">
+      {/* Alles ausser dem Wuerfel-Panel steckt in EINEM Wrapper — siehe
+          Kommentar bei .sheet-main in CharacterSheet.jsx: sonst spannt die
+          gemeinsame Wuerfel-Spalte mehrere Grid-Zeilen, und WebKit/Safari
+          rechnet deren volle Hoehe komplett der ersten Zeile zu. */}
+      <div className="sheet-main">
       <section className="panel">
         <div className="panel-head">
           <h2>
@@ -304,8 +314,6 @@ export default function GmDashboard({ mp, notify }) {
         cmdVars={cmdVars}
       />
 
-      <GmDicePanel onLog={gmLog} log={mp.liveLog} result={diceResult} pushRoll={pushRoll} />
-
       <GmSoundboard mp={mp} notify={notify} />
 
       <GmTimeTracker onLog={gmLog} shareTime={mp.shareTime} />
@@ -372,6 +380,9 @@ export default function GmDashboard({ mp, notify }) {
           )}
         </ul>
       </Panel>
+      </div>
+
+      <GmDicePanel onLog={gmLog} log={mp.liveLog} result={diceResult} pushRoll={pushRoll} />
     </div>
   );
 }
