@@ -4,6 +4,7 @@ import {
   ROOM_PREFIX, JOIN_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
   T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG, T_TIME, T_RESTCFG, T_NPCS,
   T_GROUP, T_SOUND_FX, T_SOUND_CUSTOM, T_SOUND_VOL, T_SOUND_STOP, T_SOUND_FADE,
+  T_MAP_SHARE, T_MAP, T_MAP_IMG,
   GM_GIVE, GM_STASH_DENY,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
@@ -14,6 +15,7 @@ const GM_STASH_KEY = 'pips-paws-gm-stash';
 const PARTY_LOG_KEY = 'pips-paws-party-log-on';
 const REST_LOCK_KEY = 'pips-paws-rest-locked';
 const GROUP_SHARE_KEY = 'pips-paws-group-shared';
+const MAP_SHARE_KEY = 'pips-paws-gm-map-shared';
 
 // Welche Log-Eintraege der Host an die Spieler spiegelt (kein Fluestern, keine Rohdaten).
 const isShareable = (e) =>
@@ -65,6 +67,11 @@ export function useMultiplayer() {
   // Gruppenuebersicht: der SL teilt sie erst auf Wunsch (wie das Runden-Log).
   const [groupShared, setGroupSharedState] = useState(() => readJSON(GROUP_SHARE_KEY, false) === true);
   const [partyGroup, setPartyGroup] = useState([]); // Spieler: die jeweils ANDEREN am Tisch
+  // Battlemap: der SL teilt sie erst auf Wunsch. `partyMap` ist beim Spieler
+  // der komplette Stand (Bild + Zustand), beim SL ungenutzt (der haelt seine
+  // eigenen Karten selbst, siehe GmBattleMap).
+  const [mapShared, setMapSharedState] = useState(() => readJSON(MAP_SHARE_KEY, false) === true);
+  const [partyMap, setPartyMap] = useState(null);
   // Eigene Peer-ID (nur als Spieler gesetzt) — damit die Gruppenuebersicht
   // sich selbst aus der Liste der "anderen" herausfiltern kann.
   const [myPeerId, setMyPeerId] = useState(null);
@@ -95,6 +102,11 @@ export function useMultiplayer() {
   const groupSharedRef = useRef(false);
   groupSharedRef.current = groupShared;
   const groupTimerRef = useRef(null);
+  const mapSharedRef = useRef(false);
+  mapSharedRef.current = mapShared;
+  const mapStateRef = useRef(null); // letzter { name, raster, figuren, formen, nebel }
+  const mapImageRef = useRef(null); // letztes { name, dataUrl }
+  const mapStateTimerRef = useRef(null);
 
   const peerRef = useRef(null);
   const hostConnRef = useRef(null); // Spieler -> SL
@@ -211,6 +223,50 @@ export function useMultiplayer() {
       });
     }
   }, [broadcastGroupNow]);
+
+  // --- Battlemap: SL ist Autoritaet, Bild und Zustand laufen getrennt ---
+  // (siehe Kommentar bei T_MAP in protocol.js). Beide Refs merken sich den
+  // letzten Stand, damit neu (wieder) verbundene Spieler ihn sofort bekommen.
+  const broadcastMapState = useCallback((state) => {
+    mapStateRef.current = state;
+    if (roleRef.current !== 'gm' || !mapSharedRef.current) return;
+    clearTimeout(mapStateTimerRef.current);
+    mapStateTimerRef.current = setTimeout(() => {
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_MAP, eid: uid(), ...mapStateRef.current }); } catch { /* */ }
+        }
+      });
+    }, 150);
+  }, []);
+
+  const broadcastMapImage = useCallback((name, dataUrl) => {
+    mapImageRef.current = { name, dataUrl };
+    if (roleRef.current !== 'gm' || !mapSharedRef.current) return;
+    Object.values(clientConnsRef.current).forEach((conn) => {
+      if (conn && conn.open) {
+        try { conn.send({ t: T_MAP_IMG, eid: uid(), name, dataUrl }); } catch { /* */ }
+      }
+    });
+  }, []);
+
+  // SL schaltet die Kartenfreigabe an/aus. Beim Einschalten den zuletzt
+  // gemeldeten Stand sofort mitschicken, statt auf die naechste Aenderung zu warten.
+  const setMapShared = useCallback((on) => {
+    setMapSharedState(on);
+    mapSharedRef.current = on;
+    writeJSON(MAP_SHARE_KEY, on);
+    if (roleRef.current !== 'gm') return;
+    Object.values(clientConnsRef.current).forEach((conn) => {
+      if (conn && conn.open) {
+        try { conn.send({ t: T_MAP_SHARE, eid: uid(), shared: on }); } catch { /* */ }
+      }
+    });
+    if (on) {
+      if (mapStateRef.current) broadcastMapState(mapStateRef.current);
+      if (mapImageRef.current) broadcastMapImage(mapImageRef.current.name, mapImageRef.current.dataUrl);
+    }
+  }, [broadcastMapState, broadcastMapImage]);
 
   // --- Soundboard: SL loest Sounds bei allen aus (siehe utils/sound.js) ---
   const broadcastSound = useCallback((payload) => {
@@ -337,6 +393,7 @@ export function useMultiplayer() {
     setStash([]);
     setPartyGroup([]);
     setMyPeerId(null);
+    setPartyMap(null);
   }, [cleanupPeer]);
 
   // SL raeumt die Tischmitte komplett ab (auch aus dem lokalen Speicher).
@@ -479,6 +536,11 @@ export function useMultiplayer() {
           conn.send({ t: T_RESTCFG, eid: uid(), locked: restLockedRef.current });
           if (partyNpcsRef.current.length) conn.send({ t: T_NPCS, eid: uid(), npcs: partyNpcsRef.current });
           if (groupSharedRef.current) conn.send({ t: T_GROUP, eid: uid(), members: groupSnapshot() });
+          conn.send({ t: T_MAP_SHARE, eid: uid(), shared: mapSharedRef.current });
+          if (mapSharedRef.current) {
+            if (mapStateRef.current) conn.send({ t: T_MAP, eid: uid(), ...mapStateRef.current });
+            if (mapImageRef.current) conn.send({ t: T_MAP_IMG, eid: uid(), ...mapImageRef.current });
+          }
         } catch { /* */ }
       });
       conn.on('data', (data) => handleIncoming(conn.peer, data));
@@ -566,6 +628,13 @@ export function useMultiplayer() {
         setPartyNpcs(Array.isArray(payload.npcs) ? payload.npcs : []);
       } else if (payload.t === T_GROUP) {
         setPartyGroup(Array.isArray(payload.members) ? payload.members : []);
+      } else if (payload.t === T_MAP_SHARE) {
+        if (!payload.shared) setPartyMap(null);
+      } else if (payload.t === T_MAP) {
+        const { name, raster, figuren, formen, nebel } = payload;
+        setPartyMap((prev) => ({ ...prev, name, raster, figuren, formen, nebel }));
+      } else if (payload.t === T_MAP_IMG) {
+        setPartyMap((prev) => ({ ...prev, name: payload.name, dataUrl: payload.dataUrl }));
       } else if (payload.t === T_SOUND_FX) {
         playFx(payload.kind, payload.volume);
       } else if (payload.t === T_SOUND_CUSTOM && payload.blob) {
@@ -716,6 +785,11 @@ export function useMultiplayer() {
     setGroupShared,
     partyGroup,
     myPeerId,
+    mapShared,
+    setMapShared,
+    broadcastMapState,
+    broadcastMapImage,
+    partyMap,
     sendSoundFx,
     previewSoundFx,
     sendCustomSound,

@@ -16,6 +16,7 @@ import SharedStash, { STASH_DRAG_PREFIX } from './SharedStash.jsx';
 import PartyLog from './PartyLog.jsx';
 import PartyNpcs from './PartyNpcs.jsx';
 import PartyGroup from './PartyGroup.jsx';
+import PartyBattleMap from './battlemap/PartyBattleMap.jsx';
 import HirelingsPanel from './HirelingsPanel.jsx';
 import Portrait from './Portrait.jsx';
 import Panel from './Panel.jsx';
@@ -28,7 +29,7 @@ import { rollSave, rollDie } from '../rules/dice.js';
 import { shareSave, shareRoll } from '../utils/discord.js';
 
 export default function CharacterSheet({
-  character, setCharacter, notify, onEvent, stash, partyLog, partyTime, restLocked, partyNpcs, partyGroup, myPeerId,
+  character, setCharacter, notify, onEvent, stash, partyLog, partyTime, restLocked, partyNpcs, partyGroup, myPeerId, partyMap,
 }) {
   const { t, lang } = useLang();
   const [activeId, setActiveId] = useState(null);
@@ -288,6 +289,8 @@ export default function CharacterSheet({
         onChange={(next) => patch({ hirelings: next })}
         onMoraleSave={onHirelingSave}
       />
+
+      <PartyBattleMap map={partyMap} />
 
       <PartyNpcs npcs={partyNpcs} />
 

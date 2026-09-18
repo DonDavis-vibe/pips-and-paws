@@ -340,6 +340,7 @@ export default function App() {
             partyNpcs={mp.role === 'player' ? mp.partyNpcs : null}
             partyGroup={mp.role === 'player' ? mp.partyGroup : null}
             myPeerId={mp.role === 'player' ? mp.myPeerId : null}
+            partyMap={mp.role === 'player' ? mp.partyMap : null}
           />
         )}
       </main>

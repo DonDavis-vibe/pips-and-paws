@@ -54,6 +54,13 @@ export const GM_WEBHOOK = 'webhook'; // { url } SL teilt den Discord-Webhook mit
 export const GM_WHISPER = 'whisper'; // { text }
 export const GM_BROADCAST = 'broadcast'; // { text }
 
+// Battlemap: der SL ist Autoritaet. Bild und haeufig aenderender Zustand
+// (Tokens/Zeichnungen/Nebel) laufen getrennt, damit ein Token-Zug nicht bei
+// jedem Pixel das Kartenbild erneut ueberträgt.
+export const T_MAP_SHARE = 'mapShare'; // { shared } SL schaltet die Kartenfreigabe an/aus
+export const T_MAP = 'map'; // { name, raster, figuren, formen, nebel } haeufig, ohne Bild
+export const T_MAP_IMG = 'mapImg'; // { name, dataUrl } nur bei Bild- oder Kartenwechsel
+
 export function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // ohne I/O/0/1
   let code = '';

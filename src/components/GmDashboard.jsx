@@ -14,6 +14,7 @@ import SharedStash from './SharedStash.jsx';
 import GmTimeTracker from './GmTimeTracker.jsx';
 import GmCombatTracker from './GmCombatTracker.jsx';
 import GmNotes from './GmNotes.jsx';
+import GmBattleMap from './battlemap/GmBattleMap.jsx';
 import EmptyState from './EmptyState.jsx';
 import emptyLobby from '../assets/empty-lobby.jpg';
 import { ArtLantern } from './Art.jsx';
@@ -327,6 +328,8 @@ export default function GmDashboard({ mp, notify }) {
           gmLog('combat.log.initiative', {});
         }}
       />
+
+      <GmBattleMap mp={mp} />
 
       <SharedStash
         mode="gm"
