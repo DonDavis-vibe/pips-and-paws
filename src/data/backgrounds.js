@@ -12,7 +12,7 @@ const T = (de, en, es) => ({ t: { de, en, es } });
 // TABLE[hp][pips]
 export const BACKGROUND_TABLE = {
   1: {
-    1: B('Versuchstier', 'Test subject', T('Zauber: Magisches Geschoss', 'Spell: Magic missile', 'Hechizo: Proyectil mágico'), K('heavy_armour')),
+    1: B('Versuchstier', 'Test subject', 'Ratón de laboratorio', T('Zauber: Magisches Geschoss', 'Spell: Magic missile', 'Hechizo: Proyectil mágico'), K('heavy_armour')),
     2: B('Kuechensammler', 'Kitchen forager', 'forrajeador', K('light_armour'), K('cookpots')),
     3: B('Kaefigbewohner', 'Cage dweller','Habitante de las jaulas', T('Zauber: Verstanden werden', 'Spell: Be understood', 'Hechizo: Comprensión'), T('Flasche Milch', 'Bottle of milk')),
     4: B('Heckenhexe', 'Hedge witch', 'Curandero del arbusto', T('Zauber: Genesung', 'Spell: Heal', 'Hechizo: Curar'), K('incense')),
@@ -25,7 +25,7 @@ export const BACKGROUND_TABLE = {
     3: B('Bierbrauer', 'Ale brewer','Cervecero', T('Mietling: Betrunkener Fackeltraeger', 'Hireling: Drunken torchbearer', 'Ayudante: Portaantorchas borracho'), T('Faesschen Bier', 'Small barrel of ale', 'Barril de cerveza pequeño')),
     4: B('Fischermaus', 'Fishermouse','Pescador', K('net'), K('w_light')),
     5: B('Schmied', 'Blacksmith','Herrero', K('w_medium'), K('metal_file')),
-    6: B('Drahtzieher', 'Wireworker','Cableador', T('Draht, Spule', 'Wire, spool', 'Rollo de calbe'), K('electric_lantern')),
+    6: B('Drahtzieher', 'Wireworker','Cableador', T('Draht, Spule', 'Wire, spool', 'Rollo de cable'), K('electric_lantern')),
   },
   3: {
     1: B('Holzfaeller', 'Woodcutter','Leñador', K('w_medium'), K('twine')),
@@ -49,7 +49,7 @@ export const BACKGROUND_TABLE = {
     3: B('Fallendieb', 'Trap thief','Ladrón trampero', T('Kaeselaib', 'Block of cheese', 'cuña de queso'), K('glue')),
     4: B('Landstreicher', 'Vagabond','Vagabundo', K('tent'), T('Zweifelhafte Schatzkarte', 'Treasure map, dubious', 'Mapa del tesoro, no fiable')),
     5: B('Getreidebauer', 'Grain farmer','Agricultor de grano', K('w_heavy'), K('whistle')),
-    6: B('Botenlaeufer', 'Message runner','Mensajero', K('bedroll'), T('Versiegelte Dokumente', 'Documents, sealed', 'Documentss, sellados')),
+    6: B('Botenlaeufer', 'Message runner','Mensajero', K('bedroll'), T('Versiegelte Dokumente', 'Documents, sealed', 'Documentos, sellados')),
   },
   6: {
     1: B('Troubadour', 'Troubadour','Trovador', K('instrument'), K('disguise_kit')),
