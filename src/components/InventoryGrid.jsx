@@ -1,4 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useLang, loc } from '../i18n/index.jsx';
 import {
   PAW_SLOTS, BODY_SLOTS, PACK_SLOTS, GRIT_SLOT_PREFIX, gritForLevel,
@@ -6,6 +7,10 @@ import {
 import { cellsFor, anchorSlotOfItem } from '../rules/inventory.js';
 import ItemCard from './ItemCard.jsx';
 import { InfoHint } from './ui.jsx';
+import SortableItem from './SortableItem.jsx';
+
+export const GROUP_ORDER_KEY = 'pips-paws-inv-group-order';
+export const DEFAULT_GROUP_ORDER = ['paws', 'body', 'pack'];
 
 function Slot({ slot, item, onChange, onRemove, onStash, onRollDamage, wide }) {
   const { t } = useLang();
@@ -135,19 +140,38 @@ function GritGroup({ character, onItemChange, onItemRemove }) {
   );
 }
 
-export default function InventoryGrid({ character, onItemChange, onItemRemove, onItemStash, onRollDamage }) {
+// `groupOrder`: vom Elternteil verwaltete Reihenfolge (siehe useOrder in
+// CharacterSheet.jsx) — lebt bewusst NICHT hier drin. Das Umsortieren teilt
+// sich den ohnehin vorhandenen DndContext ums Inventar (Karten aus der
+// Tischmitte, zwischen Feldern); ein zweiter, hier verschachtelter
+// DndContext wuerde dessen Drag-Ziele kapern und Tischmitte->Inventar bricht.
+export default function InventoryGrid({
+  character, onItemChange, onItemRemove, onItemStash, onRollDamage, groupOrder,
+}) {
   const { t, lang } = useLang();
   const { inventory, items } = character;
   const shared = {
     inventory, items, onItemChange, onItemRemove, onItemStash, onRollDamage, lang,
   };
   const isEmpty = Object.keys(items || {}).length === 0;
+
+  const GROUPS = {
+    paws: { title: t('inv.paws'), slots: PAW_SLOTS },
+    body: { title: t('inv.body'), slots: BODY_SLOTS },
+    pack: { title: t('inv.pack'), slots: PACK_SLOTS },
+  };
+  const order = groupOrder || DEFAULT_GROUP_ORDER;
+
   return (
     <div className="inventory">
       {isEmpty ? <p className="hint inv-empty-hint">{t('inv.emptyHint')}</p> : null}
-      <Group title={t('inv.paws')} slots={PAW_SLOTS} {...shared} />
-      <Group title={t('inv.body')} slots={BODY_SLOTS} {...shared} />
-      <Group title={t('inv.pack')} slots={PACK_SLOTS} {...shared} />
+      <SortableContext items={order} strategy={verticalListSortingStrategy}>
+        {order.map((key) => (
+          <SortableItem key={key} id={key} className="sortable-item-inv-group">
+            <Group title={GROUPS[key].title} slots={GROUPS[key].slots} {...shared} />
+          </SortableItem>
+        ))}
+      </SortableContext>
       <GritGroup character={character} onItemChange={onItemChange} onItemRemove={onItemRemove} />
     </div>
   );

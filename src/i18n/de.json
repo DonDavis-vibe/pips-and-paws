@@ -481,6 +481,7 @@
 
   "panel.collapse": "Einklappen",
   "panel.expand": "Ausklappen",
+  "panel.dragHandle": "Ziehen zum Umordnen",
   "party.title": "Runden-Log",
   "party.show": "ausklappen",
   "party.hide": "einklappen",

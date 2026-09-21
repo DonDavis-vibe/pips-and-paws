@@ -473,6 +473,63 @@ summary,
   background: linear-gradient(90deg, var(--accent), var(--gold) 52%, transparent 92%);
 }
 
+/* ---- Umordnen per Ziehgriff (SortableItem.jsx) ---- */
+.sortable-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sortable-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.sortable-item-dragging {
+  z-index: 5;
+  opacity: 0.85;
+}
+
+.sortable-handle {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg-raise);
+  color: var(--ink-faint);
+  box-shadow: var(--shadow-sm);
+  cursor: grab;
+  touch-action: none;
+}
+
+.sortable-handle:hover,
+.sortable-handle:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.sortable-item-dragging .sortable-handle {
+  cursor: grabbing;
+}
+
+/* Inventar-Gruppen (Pfoten/Koerper/Rucksack): kleinerer Griff als bei den
+   grossen Panels, damit er neben dem kompakten 2-Spalten-Block nicht dominiert. */
+.sortable-item-inv-group {
+  gap: 4px;
+}
+
+.sortable-item-inv-group .sortable-handle {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
 .panel-head { position: relative; }
 
 .panel-head-right {
@@ -517,10 +574,13 @@ summary,
   animation: rise-in 0.22s ease both;
 }
 
-.sheet-main > .panel:nth-child(2) { animation-delay: 0.04s; }
-.sheet-main > .panel:nth-child(3) { animation-delay: 0.08s; }
-.sheet-main > .panel:nth-child(4) { animation-delay: 0.12s; }
-.sheet-main > .panel:nth-child(5) { animation-delay: 0.16s; }
+/* Zweite Selektor-Haelfte je Zeile: auf dem Spielerbogen liegt jedes Panel
+   jetzt in einem .sortable-item (SortableItem.jsx), auf dem SL-Dashboard
+   (kein Umordnen) ist .panel weiterhin ein direktes Kind. */
+.sheet-main > .panel:nth-child(2), .sheet-main > .sortable-item:nth-child(2) .panel { animation-delay: 0.04s; }
+.sheet-main > .panel:nth-child(3), .sheet-main > .sortable-item:nth-child(3) .panel { animation-delay: 0.08s; }
+.sheet-main > .panel:nth-child(4), .sheet-main > .sortable-item:nth-child(4) .panel { animation-delay: 0.12s; }
+.sheet-main > .panel:nth-child(5), .sheet-main > .sortable-item:nth-child(5) .panel { animation-delay: 0.16s; }
 
 .panel-head {
   display: flex;

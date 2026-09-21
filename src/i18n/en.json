@@ -481,6 +481,7 @@
 
   "panel.collapse": "Collapse",
   "panel.expand": "Expand",
+  "panel.dragHandle": "Drag to reorder",
   "party.title": "Party log",
   "party.show": "expand",
   "party.hide": "collapse",
