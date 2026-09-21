@@ -1100,7 +1100,11 @@ summary,
 
 .res-hp .res-head strong { font-size: 18px; }
 
-.res-level {
+/* Scope ".res-head .res-level" statt nur ".res-level": ".res-head strong"
+   oben ist sonst spezifischer und gewinnt trotz Quellreihenfolge — genau
+   deshalb blieb white-space bisher bei nowrap haengen und "Grit"/"Level"
+   lief bei laengerem Text ueber den Rand der Box statt umzubrechen. */
+.res-head .res-level {
   flex-basis: 100%;
   min-width: 0; /* sonst schrumpft das Flex-Item nie unter die ungebrochene Textbreite — laeuft dann ueber den Rand statt umzubrechen (auffaellig bei der groesseren Druckbogen-Handschrift) */
   margin-left: 0;
