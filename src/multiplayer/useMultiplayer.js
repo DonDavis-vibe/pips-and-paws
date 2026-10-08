@@ -4,7 +4,7 @@ import {
   ROOM_PREFIX, JOIN_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
   T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG, T_TIME, T_RESTCFG, T_NPCS,
   T_GROUP, T_SOUND_FX, T_SOUND_CUSTOM, T_SOUND_VOL, T_SOUND_STOP, T_SOUND_FADE,
-  T_MAP_SHARE, T_MAP, T_MAP_IMG,
+  T_MAP_SHARE, T_MAP, T_MAP_IMG, T_HANDOUT,
   GM_GIVE, GM_STASH_DENY,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
@@ -16,6 +16,8 @@ const PARTY_LOG_KEY = 'pips-paws-party-log-on';
 const REST_LOCK_KEY = 'pips-paws-rest-locked';
 const GROUP_SHARE_KEY = 'pips-paws-group-shared';
 const MAP_SHARE_KEY = 'pips-paws-gm-map-shared';
+const HANDOUTS_KEY = 'pips-paws-handouts'; // Spieler: erhaltene Handouts (pro Geraet)
+const MAX_HANDOUTS = 30;
 
 // Welche Log-Eintraege der Host an die Spieler spiegelt (kein Fluestern, keine Rohdaten).
 const isShareable = (e) =>
@@ -72,6 +74,12 @@ export function useMultiplayer() {
   // eigenen Karten selbst, siehe GmBattleMap).
   const [mapShared, setMapSharedState] = useState(() => readJSON(MAP_SHARE_KEY, false) === true);
   const [partyMap, setPartyMap] = useState(null);
+  // Handouts, die der SL gezeigt hat (Spieler). Bleiben pro Geraet erhalten.
+  const [handouts, setHandouts] = useState(() => {
+    const saved = readJSON(HANDOUTS_KEY);
+    return Array.isArray(saved) ? saved : [];
+  });
+  const [newHandoutId, setNewHandoutId] = useState(null); // zuletzt eingetroffen -> Popup
   // Eigene Peer-ID (nur als Spieler gesetzt) — damit die Gruppenuebersicht
   // sich selbst aus der Liste der "anderen" herausfiltern kann.
   const [myPeerId, setMyPeerId] = useState(null);
@@ -267,6 +275,30 @@ export function useMultiplayer() {
       if (mapImageRef.current) broadcastMapImage(mapImageRef.current.name, mapImageRef.current.dataUrl);
     }
   }, [broadcastMapState, broadcastMapImage]);
+
+  // SL zeigt ein Handout: allen (peerIds = null) oder nur den angegebenen
+  // Spielern. Gibt zurueck, wie vielen es zugestellt wurde.
+  const sendHandout = useCallback((handout, peerIds = null) => {
+    if (roleRef.current !== 'gm') return 0;
+    const targets = peerIds || Object.keys(clientConnsRef.current);
+    let delivered = 0;
+    targets.forEach((pid) => {
+      const conn = clientConnsRef.current[pid];
+      if (conn && conn.open) {
+        try { conn.send({ t: T_HANDOUT, eid: uid(), handout }); delivered += 1; } catch { /* */ }
+      }
+    });
+    return delivered;
+  }, []);
+
+  const clearNewHandout = useCallback(() => setNewHandoutId(null), []);
+  const removeHandout = useCallback((id) => {
+    setHandouts((prev) => {
+      const next = prev.filter((h) => h.id !== id);
+      writeJSON(HANDOUTS_KEY, next);
+      return next;
+    });
+  }, []);
 
   // --- Soundboard: SL loest Sounds bei allen aus (siehe utils/sound.js) ---
   const broadcastSound = useCallback((payload) => {
@@ -635,6 +667,14 @@ export function useMultiplayer() {
         setPartyMap((prev) => ({ ...prev, name, raster, figuren, formen, nebel }));
       } else if (payload.t === T_MAP_IMG) {
         setPartyMap((prev) => ({ ...prev, name: payload.name, dataUrl: payload.dataUrl }));
+      } else if (payload.t === T_HANDOUT && payload.handout?.id) {
+        const h = payload.handout;
+        setHandouts((prev) => {
+          const next = [h, ...prev.filter((x) => x.id !== h.id)].slice(0, MAX_HANDOUTS);
+          writeJSON(HANDOUTS_KEY, next);
+          return next;
+        });
+        setNewHandoutId(h.id);
       } else if (payload.t === T_SOUND_FX) {
         playFx(payload.kind, payload.volume);
       } else if (payload.t === T_SOUND_CUSTOM && payload.blob) {
@@ -790,6 +830,11 @@ export function useMultiplayer() {
     broadcastMapState,
     broadcastMapImage,
     partyMap,
+    handouts,
+    newHandoutId,
+    clearNewHandout,
+    removeHandout,
+    sendHandout,
     sendSoundFx,
     previewSoundFx,
     sendCustomSound,

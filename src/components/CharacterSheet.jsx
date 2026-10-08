@@ -18,6 +18,7 @@ import PartyLog from './PartyLog.jsx';
 import PartyNpcs from './PartyNpcs.jsx';
 import PartyGroup from './PartyGroup.jsx';
 import PartyBattleMap from './battlemap/PartyBattleMap.jsx';
+import PartyHandouts, { HandoutPopup } from './PartyHandouts.jsx';
 import HirelingsPanel from './HirelingsPanel.jsx';
 import Portrait from './Portrait.jsx';
 import Panel from './Panel.jsx';
@@ -33,15 +34,16 @@ import { useOrder } from '../useOrder.js';
 
 const PANEL_ORDER_KEY = 'pips-paws-panel-order';
 const DEFAULT_PANEL_ORDER = [
-  'identity', 'attributes', 'inventory', 'hirelings', 'battlemap', 'npcs', 'group', 'log', 'notes',
+  'identity', 'attributes', 'inventory', 'hirelings', 'battlemap', 'handouts', 'npcs', 'group', 'log', 'notes',
 ];
 
 export default function CharacterSheet({
-  character, setCharacter, notify, onEvent, stash, partyLog, partyTime, restLocked, partyNpcs, partyGroup, myPeerId, partyMap,
+  character, setCharacter, notify, onEvent, stash, partyLog, partyTime, restLocked, partyNpcs, partyGroup, myPeerId, partyMap, handouts, newHandoutId, onHandoutSeen, onHandoutRemove,
 }) {
   const { t, lang } = useLang();
   const [activeId, setActiveId] = useState(null);
   const [externalRoll, setExternalRoll] = useState(null);
+  const [handoutViewId, setHandoutViewId] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -221,6 +223,7 @@ export default function CharacterSheet({
   // entscheiden erst beim Rendern, ob sie null zurueckgeben).
   const visiblePanelIds = DEFAULT_PANEL_ORDER.filter((id) => {
     if (id === 'battlemap') return !!partyMap;
+    if (id === 'handouts') return !!(handouts && handouts.length);
     if (id === 'npcs') return !!(partyNpcs && partyNpcs.length);
     if (id === 'group') return !!(partyGroup && partyGroup.some((m) => m.peerId !== myPeerId));
     if (id === 'log') return !!(partyLog && partyLog.shared);
@@ -323,6 +326,13 @@ export default function CharacterSheet({
       />
     ),
     battlemap: <PartyBattleMap map={partyMap} />,
+    handouts: (
+      <PartyHandouts
+        handouts={handouts}
+        onOpen={setHandoutViewId}
+        onRemove={(id) => onHandoutRemove?.(id)}
+      />
+    ),
     npcs: <PartyNpcs npcs={partyNpcs} />,
     group: <PartyGroup members={partyGroup} myPeerId={myPeerId} />,
     log: partyLog ? <PartyLog entries={partyLog.entries} shared={partyLog.shared} /> : null,
@@ -379,6 +389,10 @@ export default function CharacterSheet({
       </div>
 
       <DiceRoller character={character} onEvent={onEvent} external={externalRoll} />
+      <HandoutPopup
+        handout={(handouts || []).find((h) => h.id === (newHandoutId || handoutViewId))}
+        onClose={() => { setHandoutViewId(null); onHandoutSeen?.(); }}
+      />
     </div>
   );
 }

@@ -341,6 +341,10 @@ export default function App() {
             partyGroup={mp.role === 'player' ? mp.partyGroup : null}
             myPeerId={mp.role === 'player' ? mp.myPeerId : null}
             partyMap={mp.role === 'player' ? mp.partyMap : null}
+            handouts={mp.handouts}
+            newHandoutId={mp.role === 'player' ? mp.newHandoutId : null}
+            onHandoutSeen={mp.clearNewHandout}
+            onHandoutRemove={mp.removeHandout}
           />
         )}
       </main>

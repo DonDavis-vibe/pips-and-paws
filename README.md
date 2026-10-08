@@ -71,6 +71,25 @@ data passing through the operator's server.
   CC0 sounds from [Kenney.nl](https://kenney.nl/assets/interface-sounds), see
   `src/assets/sfx/CREDITS.txt`) plus your own uploaded ambience/music (stays on
   your device, sent live to whoever's connected).
+- **Handouts** — read-aloud texts and pictures in a library; show one to everyone
+  or a single player, who keeps it on their own device (popup + a "Handouts"
+  panel on their sheet).
+- **PenNodePaper bridge** — connects the dashboard with
+  [PenNodePaper](https://github.com/Rec0iL/PenNodePaper), the AI-assisted world and
+  story builder (dashboard → **PenNodePaper**: address and pairing token are in
+  PenNodePaper under ⚙ Settings → *VTT link*). Everything arrives with the GM
+  first; players only see what you show them.
+
+  | PenNodePaper sends … | … and Pips & Paws turns it into |
+  |---|---|
+  | **Handout** (text or picture) | entry in the **Handouts** library, optionally shown to everyone or one player right away |
+  | **Map** (image, square grid, tokens) | a new map on the **Battlemap** (grid, offset and tokens placed; optionally shown to the players). Hex grids are rejected |
+  | **Creature / NPC** | entry in **NPC & combat tracker** as a stat block (HP, armour, attack die, WIL); PenNodePaper knows the SRD creatures as presets. Pushing again updates it and keeps the current HP |
+  | **Music cue** | a built-in effect or one of your uploads on the **Soundboard** (no audio is sent) |
+  | *(other direction)* the **party** | PenNodePaper sees the connected mice and the table sheets you run (without notes) |
+
+  The bridge lives in `src/pnp/` (protocol: [vtt-bridge-spec](https://github.com/Rec0iL/PenNodePaper/blob/main/docs/vtt-bridge-spec.md)).
+  The pairing token stays on the device and is not part of a saved session.
 
 ## Playing together
 

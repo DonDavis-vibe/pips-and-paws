@@ -6,6 +6,8 @@ import { rollDie, rollSave } from '../rules/dice.js';
 import { CREATURES, CREATURE_BY_KEY } from '../data/creatures.js';
 import { Field, TextInput, Stepper } from './ui.jsx';
 import Panel from './Panel.jsx';
+import { usePnpHandler } from '../pnp/PnpBridge.jsx';
+import { slug } from '../pnp/party.js';
 
 const KEY = 'pips-paws-gm-combat';
 const fresh = () => ({ round: 0, npcs: [] });
@@ -36,6 +38,34 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
     if (!shareNpcs) return;
     shareNpcs(sRef.current.npcs.filter((n) => n.shown));
   }, [shareNpcs, shownKey]);
+
+  // PenNodePaper: Rolle "creature" -> Eintrag des Kampf-Trackers. Erneutes
+  // Pushen derselben id aktualisiert den Eintrag und behaelt den Live-Stand
+  // (aktuelle TP, sichtbar geschaltet).
+  usePnpHandler('character', (c) => {
+    if (!c || !c.id) throw new Error('character: id missing');
+    if (c.role !== 'creature') throw new Error(t('pnp.err.role', { role: String(c.role) }));
+    const sh = c.sheet || {};
+    const clampNum = (v, lo, hi, d) => (Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : d);
+    const id = `n_pnp_${slug(c.id)}`;
+    const dmg = [4, 6, 8, 10, 12].includes(Number(sh.dmg)) ? Number(sh.dmg) : 6;
+    const hpMax = clampNum(sh.hp, 1, 200, 3);
+    const stats = [sh.str && `${t('attr.abbr.str')} ${sh.str}`, sh.dex && `${t('attr.abbr.dex')} ${sh.dex}`].filter(Boolean).join(', ');
+    const note = [stats, sh.special, c.notes].filter(Boolean).join(' · ').slice(0, 600);
+    const name = String(c.name || '?').slice(0, 80);
+    const prev = sRef.current.npcs.find((n) => n.id === id);
+    const fields = {
+      base: name, name, dmg, armour: clampNum(sh.armour, 0, 3, 0), wil: clampNum(sh.wil, 1, 20, 8),
+      note, attack: String(sh.attack || '').slice(0, 120) || `W${dmg}`,
+    };
+    const npcs = prev
+      ? sRef.current.npcs.map((n) => (n.id === id
+        ? { ...n, ...fields, hp: { current: Math.min(n.hp.current, hpMax), max: hpMax } }
+        : n))
+      : [...sRef.current.npcs, { id, ...fields, hp: { current: hpMax, max: hpMax } }];
+    commit({ ...sRef.current, npcs });
+    return { npcList: prev ? 'updated' : 'added' };
+  });
 
   const nameWithNumber = (base) => {
     const same = sRef.current.npcs.filter((n) => n.base === base);

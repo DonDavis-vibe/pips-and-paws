@@ -5,6 +5,8 @@ import {
 import { useLang } from '../i18n/index.jsx';
 import Panel from './Panel.jsx';
 import { FX_KINDS } from '../utils/sound.js';
+import { usePnpHandler } from '../pnp/PnpBridge.jsx';
+import { fxForMood, isFxKind } from '../pnp/profile.js';
 import { listCustomSounds, addCustomSound, removeCustomSound, MAX_BYTES } from '../utils/customSounds.js';
 
 const FX_ICON_COLOR = {
@@ -25,6 +27,31 @@ export default function GmSoundboard({ mp, notify }) {
 
   const refresh = () => listCustomSounds().then(setCustoms).catch(() => setCustoms([]));
   useEffect(() => { refresh(); }, []);
+
+  // PenNodePaper: Titel = eingebaute Effekte + eigene Uploads (nie Audiodaten
+  // von PenNodePaper). Die Effekte sind kurz; langes Ambient kommt aus den Uploads.
+  usePnpHandler('tracks', async () => [
+    ...FX_KINDS.map((kind) => ({ id: kind, title: t(`gm.sound.fx.${kind}`), category: 'effect', uploaded: false })),
+    ...(await listCustomSounds().catch(() => [])).map((c) => ({ id: c.id, title: c.name, category: 'ambient', uploaded: true })),
+  ]);
+
+  usePnpHandler('music_cue', async (p) => {
+    if (!p) throw new Error('music_cue: payload missing');
+    if (p.action === 'stop') { mp.fadeOutSoundShared(); return { stopped: true }; }
+    if (p.action !== 'play') throw new Error(`music_cue: unknown action "${p.action}"`);
+    const sounds = await listCustomSounds().catch(() => []);
+    let id = p.trackId || '';
+    if (id && !isFxKind(id) && !sounds.some((c) => c.id === id)) throw new Error(t('pnp.err.track', { id }));
+    if (!id && p.mood) id = fxForMood(p.mood) || '';
+    if (!id) throw new Error(t('pnp.err.noTrack'));
+    if (isFxKind(id)) {
+      mp.sendSoundFx(id, vol);
+      return { playing: t(`gm.sound.fx.${id}`) };
+    }
+    const c = sounds.find((x) => x.id === id);
+    mp.sendCustomSound(c.name, c.blob, vol);
+    return { playing: c.name };
+  });
 
   const onVolume = (v) => {
     setVol(v);

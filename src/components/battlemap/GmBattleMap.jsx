@@ -9,12 +9,22 @@ import { BattleMap } from '../../battlemap/battlemap.js';
 import { TextInput, Stepper } from '../ui.jsx';
 import Panel from '../Panel.jsx';
 import BattleMapCanvas from './BattleMapCanvas.jsx';
+import { usePnpHandler } from '../../pnp/PnpBridge.jsx';
+import { upfToDataUrl } from '../../pnp/images.js';
 
 const KEY = 'pips-paws-gm-map';
 const nid = () => `t_${Math.random().toString(36).slice(2, 8)}`;
 const mid = () => `m_${Math.random().toString(36).slice(2, 8)}`;
 
-const emptyZustand = () => ({ raster: {}, figuren: [], formen: [], nebel: { aktiv: false, aufgedeckt: [], entwurf: [] } });
+// Vollstaendiges Raster fuer neue Karten: applyState() mischt nur ueber das
+// aktuelle Raster der Leinwand, eine leere {} wuerde also das Raster der
+// zuvor geladenen Karte (z. B. ausgeblendet, andere Feldgroesse) erben.
+const DEFAULT_RASTER = {
+  rasterGroesse: 50, rasterVersatzX: 0, rasterVersatzY: 0, rasterSichtbar: true, einheit: 1, einheitName: 'Feld',
+};
+const emptyNebel = () => ({ aktiv: false, aufgedeckt: [], entwurf: [] });
+const emptyZustand = () => ({ raster: { ...DEFAULT_RASTER }, figuren: [], formen: [], nebel: emptyNebel() });
+
 const freshMapData = (name) => ({ id: mid(), name, bild: null, zustand: emptyZustand() });
 
 const TOKEN_KINDS = {
@@ -23,11 +33,14 @@ const TOKEN_KINDS = {
   helfer: { besitzer: 'party', farbe: '#c2912f' },
 };
 
+// UPF-Token-Art (PenNodePaper) -> Token-Art der Karte
+const PNP_TOKENS = { pc: 'spieler', npc: 'helfer', enemy: 'gegner' };
+
 // SL-Battlemap: haelt mehrere Karten lokal (ueberlebt Reload wie der Kampf-
 // Tracker), zeigt genau eine davon in EINER Leinwand und spiegelt sie bei
 // Bedarf an die Spieler — Bild und haeufiger Zustand getrennt, siehe
 // broadcastMapState/broadcastMapImage in useMultiplayer.js.
-export default function GmBattleMap({ mp }) {
+export default function GmBattleMap({ mp, notify }) {
   const { t } = useLang();
   const [s, setS] = useState(() => {
     const loaded = readJSON(KEY);
@@ -48,7 +61,7 @@ export default function GmBattleMap({ mp }) {
   const commit = (next) => {
     sRef.current = next;
     setS(next);
-    writeJSON(KEY, next);
+    if (!writeJSON(KEY, next)) notify?.(t('pnp.err.storageFull'), 'bad');
   };
 
   const active = s.maps.find((m) => m.id === s.activeId) || s.maps[0];
@@ -74,7 +87,7 @@ export default function GmBattleMap({ mp }) {
   const loadIntoCanvas = (m) => {
     const api = apiRef.current;
     if (!api || !m) return;
-    api.applyState(m.zustand, m.bild);
+    api.applyState({ ...m.zustand, raster: { ...DEFAULT_RASTER, ...m.zustand.raster } }, m.bild);
     requestAnimationFrame(() => { api.einpassen(); refreshLive(); });
   };
 
@@ -144,6 +157,56 @@ export default function GmBattleMap({ mp }) {
   useEffect(() => {
     requestAnimationFrame(() => apiRef.current?.einpassen());
   }, [fullscreen]);
+
+  // PenNodePaper: { id, name, image, width, height, grid, tokens, activate }.
+  // Gleiche id ersetzt Bild, Raster und Token der Karte, laesst aber das
+  // Aufgedeckte (Nebel) und die Zeichnungen des SL stehen. Hex-Raster kann
+  // die Engine nicht (Profil meldet nur "square").
+  usePnpHandler('scene', async (p) => {
+    if (!p || !p.id) throw new Error('scene: id missing');
+    const grid = p.grid || {};
+    if (grid.type && grid.type !== 'square') throw new Error(t('pnp.err.hex'));
+    const { dataUrl, scale } = await upfToDataUrl(p.image, 'scene', 1800, 0.74);
+    const raster = {
+      rasterGroesse: Number(grid.size) > 0 ? Number(grid.size) * scale : DEFAULT_RASTER.rasterGroesse,
+      rasterVersatzX: (Number(grid.offsetX) || 0) * scale,
+      rasterVersatzY: (Number(grid.offsetY) || 0) * scale,
+      rasterSichtbar: !grid.hidden,
+      einheit: Number(grid.unitsPerCell) > 0 ? Number(grid.unitsPerCell) : 1,
+      einheitName: grid.unit ? String(grid.unit).slice(0, 8) : DEFAULT_RASTER.einheitName,
+    };
+    const base = `pnp-${p.id}`;
+    // UPF-Zellkoordinaten: (0,0) = linke obere Zelle; die Engine setzt Token auf den Zellmittelpunkt.
+    const figuren = (p.tokens || []).map((tk, i) => {
+      const def = TOKEN_KINDS[PNP_TOKENS[tk.kind] || 'helfer'];
+      return {
+        id: `${base}-t${i}`, name: String(tk.label || '?').slice(0, 24), farbe: def.farbe, besitzer: def.besitzer,
+        groesse: 1, x: (Number(tk.x) || 0) + 0.5, y: (Number(tk.y) || 0) + 0.5,
+      };
+    });
+    const cur = sRef.current;
+    const existing = cur.maps.find((m) => m.pnpId === p.id);
+    const zustand = {
+      raster,
+      figuren,
+      formen: existing?.zustand.formen || [],
+      nebel: existing?.zustand.nebel || emptyNebel(),
+    };
+    const name = String(p.name || '').slice(0, 60) || t('map.defaultName');
+    const rec = existing
+      ? { ...existing, name, bild: dataUrl, zustand }
+      : { id: mid(), pnpId: p.id, name, bild: dataUrl, zustand };
+    const maps = existing ? cur.maps.map((m) => (m.id === rec.id ? rec : m)) : [...cur.maps, rec];
+    const makeActive = !!p.activate || cur.activeId === rec.id;
+    commit({ activeId: makeActive ? rec.id : cur.activeId, maps });
+    if (makeActive) {
+      loadIntoCanvas(rec);
+      mp.broadcastMapImage(rec.name, rec.bild);
+      mp.broadcastMapState({ name: rec.name, ...BattleMap.fuerSpieler(rec.zustand) });
+    }
+    if (p.activate) mp.setMapShared(true);
+    return { map: existing ? 'updated' : 'added', shown: !!p.activate };
+  });
 
   const TOOLS = [
     { key: 'zeigen', icon: Hand, label: t('map.tool.hand') },

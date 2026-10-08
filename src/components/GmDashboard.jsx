@@ -15,6 +15,9 @@ import GmTimeTracker from './GmTimeTracker.jsx';
 import GmCombatTracker from './GmCombatTracker.jsx';
 import GmNotes from './GmNotes.jsx';
 import GmBattleMap from './battlemap/GmBattleMap.jsx';
+import GmHandouts from './GmHandouts.jsx';
+import GmPnpLink from './GmPnpLink.jsx';
+import { PnpProvider } from '../pnp/PnpBridge.jsx';
 import EmptyState from './EmptyState.jsx';
 import emptyLobby from '../assets/empty-lobby.jpg';
 import { ArtLantern } from './Art.jsx';
@@ -181,11 +184,22 @@ function GmDicePanel({ onLog, log, result, pushRoll }) {
   );
 }
 
+// Die PenNodePaper-Bruecke haengt als Provider UEBER dem eigentlichen Dashboard,
+// damit die Verbindung stehen bleibt, solange der SL im Dashboard ist (die
+// Panels melden ihre Handler beim Rendern an, siehe src/pnp/PnpBridge.jsx).
 export default function GmDashboard({ mp, notify }) {
+  const localApi = useLocalPlayers();
+  return (
+    <PnpProvider players={mp.players} localPlayers={localApi.players} notify={notify}>
+      <GmDashboardView mp={mp} notify={notify} localApi={localApi} />
+    </PnpProvider>
+  );
+}
+
+function GmDashboardView({ mp, notify, localApi }) {
   const { t, lang } = useLang();
   const entries = Object.entries(mp.players);
   const fileInput = useRef(null);
-  const localApi = useLocalPlayers();
   const [openLocalId, setOpenLocalId] = useState(null);
   const openLocal = localApi.players.find((p) => p.id === openLocalId);
 
@@ -249,6 +263,7 @@ export default function GmDashboard({ mp, notify }) {
             <Users size={18} /> {t('gm.dashboard')} · {t('mp.playersConnected', { n: entries.length })}
           </h2>
           <div className="stash-head-actions">
+            <GmPnpLink />
             <button type="button" className="btn btn-ghost btn-sm" onClick={exportGmSession}>
               <Save size={15} /> {t('gm.session.save')}
             </button>
@@ -329,7 +344,9 @@ export default function GmDashboard({ mp, notify }) {
         }}
       />
 
-      <GmBattleMap mp={mp} />
+      <GmBattleMap mp={mp} notify={notify} />
+
+      <GmHandouts mp={mp} notify={notify} />
 
       <SharedStash
         mode="gm"

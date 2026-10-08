@@ -97,3 +97,7 @@ export function peerConfig() {
   if (turn) iceServers.push(turn);
   return { config: { iceServers } };
 }
+
+// Handouts (PenNodePaper-Bruecke, siehe src/pnp): der SL zeigt einen Vorlesetext
+// oder ein Bild allen oder einzelnen Spielern. Der Spieler behaelt sie lokal.
+export const T_HANDOUT = 'handout'; // { handout: { id, title, kind: 'text'|'image', text, image } }

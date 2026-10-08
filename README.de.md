@@ -74,6 +74,25 @@ Betreibers laufen.
   freie CC0-Sounds von [Kenney.nl](https://kenney.nl/assets/interface-sounds),
   siehe `src/assets/sfx/CREDITS.txt`) plus eigene hochgeladene Ambient-/
   Musikdateien (bleiben auf dem Gerät, gehen live an die Verbundenen).
+- **Handouts** — Vorlesetexte und Bilder in einer Bibliothek; einzeln allen oder
+  einem Spieler zeigen, der sie auf dem eigenen Gerät behält (Popup + Panel
+  „Handouts" auf dem Bogen).
+- **PenNodePaper-Brücke** — verbindet das Dashboard mit
+  [PenNodePaper](https://github.com/Rec0iL/PenNodePaper), dem KI-gestützten Welten-
+  und Story-Baukasten (Dashboard → **PenNodePaper**: Adresse und Pairing-Token
+  stehen in PenNodePaper unter ⚙ Einstellungen → *VTT link*). Alles kommt zuerst
+  nur beim SL an — die Spieler sehen nur, was du zeigst.
+
+  | PenNodePaper schickt … | … und Pips & Paws macht daraus |
+  |---|---|
+  | **Handout** (Text oder Bild) | Eintrag in der **Handout**-Bibliothek, auf Wunsch sofort allen oder einem Spieler gezeigt |
+  | **Karte** (Bild, Quadratraster, Token) | neue Karte in der **Battlemap** (Raster, Versatz und Token gesetzt; auf Wunsch den Spielern gezeigt). Hex-Raster werden abgelehnt |
+  | **Kreatur / NSC** | Eintrag im **NSC- & Kampf-Tracker** als Statblock (TP, Rüstung, Angriffswürfel, WIL); die SRD-Kreaturen kennt PenNodePaper als Vorlagen. Erneutes Pushen aktualisiert und behält die aktuellen TP |
+  | **Musik-Stichwort** | eingebauter Effekt oder einer deiner Uploads im **Soundboard** (Audio wird nicht übertragen) |
+  | *(Gegenrichtung)* die **Gruppe** | PenNodePaper sieht die verbundenen Mäuse und die Tischbögen, die du führst (ohne Notizen) |
+
+  Die Brücke steckt in `src/pnp/` (Protokoll: [vtt-bridge-spec](https://github.com/Rec0iL/PenNodePaper/blob/main/docs/vtt-bridge-spec.md)).
+  Das Pairing-Token bleibt auf dem Gerät und ist nicht Teil einer gesicherten Sitzung.
 
 ## Zusammen spielen
 
