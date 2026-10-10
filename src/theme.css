@@ -1047,15 +1047,22 @@ summary,
 }
 
 /* ---- Resources ---- */
+/* Flex mit Umbruch statt festem 3-Spalten-Raster: Die Bloecke haben eine
+   Mindestbreite (Stepper, "Stufe/Mumm"). Ein Raster aus fr-Spalten haette sie
+   in schmalen Sheets ueber den Panel-Rahmen hinausgeschoben, so brechen sie um. */
 .resource-bar {
-  display: grid;
-  grid-template-columns: 2.1fr 1fr 1.15fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 12px;
 }
 
+.resource-bar > .res-block { flex: 1 1 145px; min-width: 0; }
+.resource-bar > .res-hp { flex: 2.1 1 280px; }
+.resource-bar > .res-block:nth-child(3) { flex-grow: 1.15; }
+
 .incap-banner {
-  grid-column: 1 / -1;
+  flex: 1 1 100%;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1063,7 +1070,7 @@ summary,
 }
 
 .levelup-banner {
-  grid-column: 1 / -1;
+  flex: 1 1 100%;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -3552,8 +3559,7 @@ summary,
 }
 
 @media (max-width: 640px) {
-  .attr-grid,
-  .resource-bar {
+  .attr-grid {
     grid-template-columns: 1fr;
   }
 }
