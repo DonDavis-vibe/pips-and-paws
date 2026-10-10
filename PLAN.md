@@ -1,6 +1,21 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-09-16 · v0.4.0
+Stand: 2026-10-10 · v0.5.1
+
+**Runde 2026-10-10 (v0.5.1: Stufenaufstieg, SL-Werkzeugkasten, Tusche-Grafik):** Folge der Luecken-
+analyse gegen foundry-mausritter. (1) Stufenaufstieg nach SRD (`rules/levelup.js`, Banner im
+Ressourcen-Block, `levelDone` am Bogen, alte Boegen bekommen keine rueckwirkende Aufforderung).
+(2) Generator-Panel im SL-Dashboard (`rules/generators.js`, Tabellen in `data/generators.js` und
+`data/sites.js`, zweisprachig): Wetter, NSC, Abenteuer-Idee, Hex, Siedlung, Abenteuerort, Raeume
+bestuecken, Schatz; Zeilen einzeln neu wuerfelbar, Ergebnis in Notizen/Handouts (`utils/gmBus.js`).
+(3) Fraktionen-Tracker (`rules/factions.js`, `GmFactions.jsx`, SRD-Beispielfraktionen, Teil der
+SL-Sitzung). (4) Battlemap: Hex-Raster (`rasterArt: 'hex'`, Feldkoordinaten unveraendert) und eine
+Raster-Oberflaeche (Art, Groesse, Versatz, sichtbar) im Werkzeugmenue; PNP-Szenen mit Hex bleiben
+abgelehnt. (5) Neue Grafik: Linolschnitt-Illustrationen (Krea 2 Turbo ueber ComfyUI, transparentes
+WebP in `assets/ink/`, im Dunkelmodus per CSS invertiert), neues Logo/OG-Bild, elf Kreatur-Portraits
+fuer Kampf-Tracker, Spielerliste und Battlemap-Token (`data/creatureArt.js`, `battlemap/tokenArt.js`).
+**Offen:** Lizenz der Krea-2-Ausgaben nicht geprueft (LICENSE.pdf gesperrt); Screenshots in
+`docs/screenshots/` zeigen noch den Stand vom 16.09.; Lagerbehaelter/Banking ungeklaert.
 
 **Runde 2026-09-16f (NSC-Angriffe auf der gemeinsamen Würfel-Bühne):** Letzten offenen Punkt aus der
 Notiz zu Runde 2026-09-14 nachgezogen: NSC-Angriffe im Kampf-Tracker landeten bisher nur im SL-Log,
