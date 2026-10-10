@@ -393,6 +393,7 @@
   "map.noTokens": "Noch keine Token auf dieser Karte.",
   "map.tokenSize": "Token-Größe",
   "map.tokenHide": "Vor Spielern verstecken (unabhängig vom Nebel)",
+  "map.tokenLinked": "Verknüpft mit dem Eintrag im Kampf-Tracker",
   "pnp.title": "PenNodePaper",
   "pnp.intro": "Verbindet dieses Dashboard mit dem KI-gestützten Welten- und Story-Baukasten",
   "pnp.url": "Adresse",

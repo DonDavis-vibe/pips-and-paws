@@ -37,7 +37,7 @@ export function buildProfile(t, lang) {
     protocol: PROTOCOL,
     push: {
       handout: { text: true, image: true, toPlayer: true },
-      scene: { grids: ['square'], tokens: true },
+      scene: { grids: ['square'], tokens: true, characterTokens: true },
       character: {},
       music_cue: { tracks: true, mood: true },
     },
