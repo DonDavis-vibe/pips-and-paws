@@ -20,7 +20,7 @@ const mid = () => `m_${Math.random().toString(36).slice(2, 8)}`;
 // aktuelle Raster der Leinwand, eine leere {} wuerde also das Raster der
 // zuvor geladenen Karte (z. B. ausgeblendet, andere Feldgroesse) erben.
 const DEFAULT_RASTER = {
-  rasterGroesse: 50, rasterVersatzX: 0, rasterVersatzY: 0, rasterSichtbar: true, einheit: 1, einheitName: 'Feld',
+  rasterGroesse: 50, rasterVersatzX: 0, rasterVersatzY: 0, rasterSichtbar: true, rasterArt: 'quadrat', einheit: 1, einheitName: 'Feld',
 };
 const emptyNebel = () => ({ aktiv: false, aufgedeckt: [], entwurf: [] });
 const emptyZustand = () => ({ raster: { ...DEFAULT_RASTER }, figuren: [], formen: [], nebel: emptyNebel() });
@@ -51,7 +51,7 @@ export default function GmBattleMap({ mp, notify }) {
   const sRef = useRef(s);
   sRef.current = s;
 
-  const [live, setLive] = useState({ figuren: [], offenNebel: 0, kannUndo: false });
+  const [live, setLive] = useState({ figuren: [], offenNebel: 0, kannUndo: false, raster: DEFAULT_RASTER });
   const [advanced, setAdvanced] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [addTokenKind, setAddTokenKind] = useState('gegner');
@@ -69,7 +69,9 @@ export default function GmBattleMap({ mp, notify }) {
   const refreshLive = () => {
     const api = apiRef.current;
     if (!api) return;
-    setLive({ figuren: api.figuren, offenNebel: api.offeneNebelBereiche(), kannUndo: api.kannRueckgaengig() });
+    setLive({
+      figuren: api.figuren, offenNebel: api.offeneNebelBereiche(), kannUndo: api.kannRueckgaengig(), raster: { ...api.raster },
+    });
   };
 
   // Engine meldet jede Aenderung (Zug, Zeichnung, Nebel) — hier landet sie in
@@ -334,6 +336,52 @@ export default function GmBattleMap({ mp, notify }) {
               <option value="kreis">{t('map.shape.circle')}</option>
               <option value="rechteck">{t('map.shape.rect')}</option>
             </select>
+          </div>
+
+          <div className="map-tool-row">
+            <span className="map-tool-label">{t('map.grid')}</span>
+            <select
+              value={live.raster.rasterArt || 'quadrat'}
+              aria-label={t('map.grid')}
+              onChange={(e) => { apiRef.current?.setRaster({ rasterArt: e.target.value }); refreshLive(); }}
+            >
+              <option value="quadrat">{t('map.grid.square')}</option>
+              <option value="hex">{t('map.grid.hex')}</option>
+            </select>
+            <label className="gm-share-log">
+              <input
+                type="checkbox"
+                checked={live.raster.rasterSichtbar !== false}
+                onChange={(e) => { apiRef.current?.setRaster({ rasterSichtbar: e.target.checked }); refreshLive(); }}
+              />
+              {t('map.grid.show')}
+            </label>
+          </div>
+          <div className="map-tool-row">
+            <span className="map-tool-label" title={t('map.grid.sizeHint')}>{t('map.grid.size')}</span>
+            <Stepper
+              value={Math.round(live.raster.rasterGroesse)}
+              min={8}
+              max={500}
+              label={t('map.grid.size')}
+              onChange={(v) => { apiRef.current?.setRaster({ rasterGroesse: v }); refreshLive(); }}
+            />
+            <span className="map-tool-label">{t('map.grid.offset')} X</span>
+            <Stepper
+              value={Math.round(live.raster.rasterVersatzX || 0)}
+              min={-500}
+              max={500}
+              label={`${t('map.grid.offset')} X`}
+              onChange={(v) => { apiRef.current?.setRaster({ rasterVersatzX: v }); refreshLive(); }}
+            />
+            <span className="map-tool-label">Y</span>
+            <Stepper
+              value={Math.round(live.raster.rasterVersatzY || 0)}
+              min={-500}
+              max={500}
+              label={`${t('map.grid.offset')} Y`}
+              onChange={(v) => { apiRef.current?.setRaster({ rasterVersatzY: v }); refreshLive(); }}
+            />
           </div>
 
           <div className="map-tool-row">

@@ -1,4 +1,5 @@
-// Portiert aus DonDavis-vibe/Dungeonslayers-pnp-tools (battlemap.js, MIT) — unveraendert bis auf den Export.
+// Portiert aus DonDavis-vibe/Dungeonslayers-pnp-tools (battlemap.js, MIT) — bis auf den Export
+// nur um das Hex-Raster erweitert (rasterArt 'hex', siehe unten).
 // ============================================================================
 // BattleMap — wiederverwendbares Karten-Modul für Pen-&-Paper-Tools
 // ============================================================================
@@ -28,6 +29,7 @@ export const BattleMap = (() => {
         rasterVersatzX: 0,
         rasterVersatzY: 0,
         rasterSichtbar: true,
+        rasterArt: 'quadrat',   // 'quadrat' | 'hex' (Sechsecke mit Spitze oben, Breite = 1 Feld)
         rasterFarbe: 'rgba(212,162,76,0.30)',  // Rasterlinien — vom SL umstellbar
         einheit: 1,             // wie viele Einheiten ein Feld entspricht
         einheitName: 'm',
@@ -35,6 +37,38 @@ export const BattleMap = (() => {
     };
 
     const FIGUR_RADIUS = 0.42;  // in Feldern
+
+    // --- Hex-Raster ---------------------------------------------------------
+    // Die Koordinaten bleiben Felder, Pixel-Umrechnung und Zoom aendern sich
+    // nicht: Ein Sechseck ist 1 Feld breit (Kante zu Kante), die Spitze zeigt
+    // nach oben, ungerade Reihen sind um ein halbes Feld nach rechts versetzt.
+    // Reihenabstand = 3/4 der Sechseckhoehe.
+    const HEX_R = 1 / Math.sqrt(3);          // Mitte -> Ecke
+    const HEX_ZEILE = Math.sqrt(3) / 2;      // Abstand zweier Reihen
+
+    function hexMitte(i, j) {
+        return { x: 0.5 + i + (j & 1) * 0.5, y: HEX_R + j * HEX_ZEILE };
+    }
+
+    // Das Sechseck, in dem ein Punkt liegt: { i, j, x, y } (Mitte in Feldern)
+    function naechstesHex(fx, fy) {
+        const j0 = Math.round((fy - HEX_R) / HEX_ZEILE);
+        let best = null;
+        for (let j = j0 - 1; j <= j0 + 1; j++) {
+            const i = Math.round(fx - 0.5 - (j & 1) * 0.5);
+            const m = hexMitte(i, j);
+            const d = (m.x - fx) * (m.x - fx) + (m.y - fy) * (m.y - fy);
+            if (!best || d < best.d) best = { i, j, x: m.x, y: m.y, d };
+        }
+        return best;
+    }
+
+    // Schritte zwischen zwei Sechsecken (odd-r-Versatz -> Würfelkoordinaten)
+    function hexAbstand(a, b) {
+        const q1 = a.i - (a.j - (a.j & 1)) / 2, q2 = b.i - (b.j - (b.j & 1)) / 2;
+        const dq = q2 - q1, dr = b.j - a.j;
+        return Math.max(Math.abs(dq), Math.abs(dr), Math.abs(dq + dr));
+    }
 
     // Liegt ein Feld in einem Nebel-/Aufgedeckt-Bereich? Rein rechnerisch, ohne
     // Zustand — daher auf Modulebene, damit auch `fuerSpieler` sie nutzen kann.
@@ -400,10 +434,42 @@ export const BattleMap = (() => {
             ctx.restore();
         }
 
+        function zeichneHexRaster(breite, hoehe) {
+            const r = zustand.raster;
+            const a = bildschirmZuFeld(0, 0), b = bildschirmZuFeld(breite, hoehe);
+            const j0 = Math.floor((Math.min(a.y, b.y) - HEX_R) / HEX_ZEILE) - 1;
+            const j1 = Math.ceil((Math.max(a.y, b.y) - HEX_R) / HEX_ZEILE) + 1;
+            const i0 = Math.floor(Math.min(a.x, b.x)) - 1, i1 = Math.ceil(Math.max(a.x, b.x)) + 1;
+
+            ctx.save();
+            ctx.strokeStyle = r.rasterFarbe || farbe.raster;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            // Je Sechseck nur die drei Kanten links oben, rechts oben und rechts:
+            // so wird jede gemeinsame Kante genau einmal gezogen (kein doppelter Strich).
+            for (let j = j0; j <= j1; j++) {
+                for (let i = i0; i <= i1; i++) {
+                    const m = hexMitte(i, j);
+                    const ecke = (k) => {
+                        const w = (-90 + 60 * k) * Math.PI / 180;
+                        return feldZuBildschirm(m.x + HEX_R * Math.cos(w), m.y + HEX_R * Math.sin(w));
+                    };
+                    const v5 = ecke(5), v0 = ecke(0), v1 = ecke(1), v2 = ecke(2);
+                    ctx.moveTo(v5.x, v5.y);
+                    ctx.lineTo(v0.x, v0.y);
+                    ctx.lineTo(v1.x, v1.y);
+                    ctx.lineTo(v2.x, v2.y);
+                }
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
         function zeichneRaster(breite, hoehe) {
             const r = zustand.raster;
             const schritt = r.rasterGroesse * ansicht.zoom;
             if (schritt < 6) return;   // zu fein, würde nur flimmern
+            if (r.rasterArt === 'hex') { zeichneHexRaster(breite, hoehe); return; }
 
             ctx.save();
             ctx.strokeStyle = r.rasterFarbe || farbe.raster;
@@ -518,6 +584,7 @@ export const BattleMap = (() => {
         // Entfernung nach der üblichen Tischregel: diagonale Schritte zählen wie
         // gerade, also der größere der beiden Achsabstände.
         function entfernungInFeldern(x1, y1, x2, y2) {
+            if (zustand.raster.rasterArt === 'hex') return hexAbstand(naechstesHex(x1, y1), naechstesHex(x2, y2));
             return Math.max(Math.abs(Math.round(x2) - Math.round(x1)), Math.abs(Math.round(y2) - Math.round(y1)));
         }
 
@@ -617,7 +684,10 @@ export const BattleMap = (() => {
             if (ziehen.art === 'figur') {
                 const f = ziehen.figur;
                 let zielX = f.x, zielY = f.y;
-                if (zustand.raster.einrasten) {
+                if (zustand.raster.rasterArt === 'hex') {
+                    const h = naechstesHex(zielX, zielY);
+                    zielX = h.x; zielY = h.y;
+                } else if (zustand.raster.einrasten) {
                     zielX = Math.round(zielX * 2) / 2;   // halbe Felder erlaubt
                     zielY = Math.round(zielY * 2) / 2;
                 }
@@ -873,6 +943,10 @@ export const BattleMap = (() => {
         // suchen und heranziehen müsste.
         function sichtbaresZentrum() {
             const feld = bildschirmZuFeld(canvas.clientWidth / 2, canvas.clientHeight / 2);
+            if (zustand.raster.rasterArt === 'hex' && Number.isFinite(feld.x) && Number.isFinite(feld.y)) {
+                const h = naechstesHex(Math.max(0.5, feld.x), Math.max(HEX_R, feld.y));
+                return { x: h.x, y: h.y };
+            }
             return {
                 x: Number.isFinite(feld.x) ? Math.max(1, Math.round(feld.x)) : 1,
                 y: Number.isFinite(feld.y) ? Math.max(1, Math.round(feld.y)) : 1

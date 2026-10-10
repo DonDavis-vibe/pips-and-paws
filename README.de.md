@@ -74,6 +74,8 @@ Betreibers laufen.
 - **Am Tisch spielen, ohne dass alle ein Gerät brauchen** — Boegen direkt im
   Dashboard anlegen oder laden, Schaden/Heilen/Rast/Gegenstände/Zustände direkt
   darauf anwenden, und den vollen Bogen im Vollbild zum Herumreichen öffnen.
+- **Battlemap** — eigenes Kartenbild mit Quadrat- oder Sechsecknetz (Feldgröße und
+  Versatz einstellbar), Token, Zeichnungen und Nebel des Krieges, live für die Spieler.
 - **Generatoren** — Zufallstabellen aus der SRD, deutsch und englisch: Wetter und
   Jahreszeitenereignisse, NSC, Abenteuer-Ideen, Hexfelder (Art, Wahrzeichen, Detail),
   Siedlungen (Größe, Verwaltung, Bräuche, Gewerbe, Name, Gasthaus), Abenteuerorte
