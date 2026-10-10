@@ -150,6 +150,13 @@ einzigen Datei.
 
 </details>
 
+<details>
+<summary>Battlemap mit Sechseck-Raster</summary>
+
+<img src="docs/screenshots/gm-battlemap.jpg" alt="Battlemap mit Sechseck-Raster und Kreatur-Token" width="50%" />
+
+</details>
+
 ## Entwickeln
 
 ```bash

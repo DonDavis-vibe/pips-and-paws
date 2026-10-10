@@ -142,6 +142,13 @@ screens · JSON export / import of the sheet · runs offline from a single file.
 
 </details>
 
+<details>
+<summary>Battlemap with hex grid</summary>
+
+<img src="docs/screenshots/gm-battlemap.jpg" alt="Battlemap with hex grid and creature tokens" width="50%" />
+
+</details>
+
 ## Develop
 
 ```bash
