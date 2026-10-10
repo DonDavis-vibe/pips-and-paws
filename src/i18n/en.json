@@ -393,6 +393,7 @@
   "map.noTokens": "No tokens on this map yet.",
   "map.tokenSize": "Token size",
   "map.tokenHide": "Hide from players (regardless of fog)",
+  "map.tokenLinked": "Linked to its entry in the combat tracker",
   "pnp.title": "PenNodePaper",
   "pnp.intro": "Connects this dashboard with the AI-assisted world and story builder",
   "pnp.url": "Address",

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Map, Plus, X, Pencil, Trash2, Undo2, Maximize2, Minimize2, ChevronDown, ChevronRight,
-  Hand, Ruler, Eraser, CloudFog, Eye, EyeOff, Upload,
+  Hand, Ruler, Eraser, CloudFog, Eye, EyeOff, Upload, Link2,
 } from 'lucide-react';
 import { useLang, loc } from '../../i18n/index.jsx';
 import { readJSON, writeJSON } from '../../utils/storage.js';
@@ -14,6 +14,7 @@ import { upfToDataUrl } from '../../pnp/images.js';
 import { CREATURES, CREATURE_BY_KEY } from '../../data/creatures.js';
 import { creatureArt } from '../../data/creatureArt.js';
 import { syncTokenArt } from './tokenArt.js';
+import { slug } from '../../pnp/party.js';
 
 const KEY = 'pips-paws-gm-map';
 const nid = () => `t_${Math.random().toString(36).slice(2, 8)}`;
@@ -192,10 +193,13 @@ export default function GmBattleMap({ mp, notify }) {
     // UPF-Zellkoordinaten: (0,0) = linke obere Zelle; die Engine setzt Token auf den Zellmittelpunkt.
     const figuren = (p.tokens || []).map((tk, i) => {
       const def = TOKEN_KINDS[PNP_TOKENS[tk.kind] || 'helfer'];
-      return {
+      const fig = {
         id: `${base}-t${i}`, name: String(tk.label || '?').slice(0, 24), farbe: def.farbe, besitzer: def.besitzer,
         groesse: 1, x: (Number(tk.x) || 0) + 0.5, y: (Number(tk.y) || 0) + 0.5,
       };
+      // Token == Kreatur: gleiche id wie der Kampf-Tracker-Eintrag, den der "character"-Push derselben Figur anlegt.
+      if (tk.character) fig.npcId = `n_pnp_${slug(tk.character)}`;
+      return fig;
     });
     const cur = sRef.current;
     const existing = cur.maps.find((m) => m.pnpId === p.id);
@@ -432,6 +436,7 @@ export default function GmBattleMap({ mp, notify }) {
             {live.figuren.map((f) => (
               <li key={f.id} className="map-token-row">
                 <span className="map-token-swatch" style={{ background: f.farbe }} />
+                {f.npcId ? <Link2 size={13} className="map-token-link" title={t('map.tokenLinked')} aria-label={t('map.tokenLinked')} /> : null}
                 <TextInput value={f.name} onChange={(v) => patchToken(f.id, { name: v })} className="map-token-name" />
                 <Stepper value={f.groesse} min={0.5} max={8} onChange={(v) => { apiRef.current?.setFigurGroesse(f.id, v); refreshLive(); }} label={t('map.tokenSize')} />
                 <button

@@ -385,6 +385,7 @@
   "map.noTokens": "Aún no hay tokens en este mapa.",
   "map.tokenSize": "Tamaño del token",
   "map.tokenHide": "Ocultar de los jugadores (sin importar la neblina)",
+  "map.tokenLinked": "Vinculado a su entrada del rastreador de combate",
   "gm.notes.title": "Notas del GM",
   "gm.notes.placeholder": "Campaña, preparación, NPCs, hilos abiertos ...",
   "gm.session.save": "Guardar sesión",
