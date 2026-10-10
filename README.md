@@ -43,6 +43,9 @@ data passing through the operator's server.
   it dies — the app never deletes or locks anything on its own, it just says so.
 - **Rest helper** — short / long / full, with ration use and attribute healing by
   the book; any rest also clears "incapacitated".
+- **Level-up helper** — reach a new level and a banner offers the advancement by the
+  book: d20 per attribute (higher than the score = +1) and the level's Hit Dice for
+  hit protection, rolled on the dice stage. Already did it by hand? One click clears it.
 - **Hirelings** — hire from the SRD's catalogue (torchbearer, mercenary, scholar, …),
   stats roll themselves on the spot, morale saves stay local to your sheet.
 - **Multiple mice per browser** — every mouse you've played is kept in a roster you
@@ -67,6 +70,11 @@ data passing through the operator's server.
 - **Play at the table without extra devices** — create or load characters right in
   the dashboard, run damage/heal/rest/items/conditions on them directly, and open
   the full sheet full-screen to hand the device around.
+- **Generators** — random tables from the SRD, in German and English: weather and
+  seasonal events, NPCs, adventure seeds, hexes (type, landmark, detail), settlements
+  (size, governance, customs, trade, name, tavern) and treasure (with magic and
+  cursed swords). Re-roll single lines, copy the result, add it to your notes or
+  save it as a handout.
 - **Soundboard** — built-in stingers (success/fail/critical/fumble/bell — free
   CC0 sounds from [Kenney.nl](https://kenney.nl/assets/interface-sounds), see
   `src/assets/sfx/CREDITS.txt`) plus your own uploaded ambience/music (stays on
@@ -107,8 +115,9 @@ data passing through the operator's server.
 
 The default look is a **printed sheet**: ink on paper, thick hand-drawn rules,
 flat spot colours, handwritten margin notes and a "negative print" dark mode.
-Every line drawing (the mouse, the portrait placeholder, the empty-state
-vignettes) is an inline SVG, no stock icons for the brand. The previous app
+The mouse is an inline SVG; the crest, portrait placeholder and empty-state
+vignettes are black-ink linocut illustrations (transparent WebP, inverted in
+dark mode), no stock icons for the brand. The previous app
 look is still there as **Classic** — the brush button in the header switches
 between the two, the choice is remembered.
 
@@ -164,9 +173,10 @@ machine translation. The flow and the steps for a new language are in
 Effect texts are summarised, not copied verbatim. The free PDFs under `reference/`
 are kept local only (their artwork is not CC BY, excluded via `.gitignore`).
 
-The crest, background images, vignettes and portrait placeholder are derived from
-my own AI generations (sources in `img/`) — **not** official Mausritter artwork
-and **not** a publisher logo.
+The crest, logo, social preview, vignettes and portrait placeholder are my own
+AI generations (Krea 2 Turbo via ComfyUI, black ink linocut style; older
+sources in `img/`) — **not** official Mausritter artwork and **not** a
+publisher logo.
 
 The GM soundboard's built-in stingers (`src/assets/sfx/`) are from Kenney's
 ["Music Jingles"](https://kenney.nl/assets/music-jingles) and

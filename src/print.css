@@ -203,13 +203,6 @@
     --art-paper: var(--mustard-l);
   }
 
-  .brand-mark-line {
-    display: block;
-    width: 50px;
-    height: auto;
-    margin-top: 2px;
-  }
-
   .brand-title {
     font-family: var(--f-display);
     font-size: 38px;
@@ -473,18 +466,6 @@
     box-shadow: none;
   }
 
-  .empty-state-art-line {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 150px;
-    height: 130px;
-    color: var(--ink);
-    --art-paper: var(--card);
-  }
-
-  .empty-state-art-line svg { width: 100%; height: 100%; }
-
   .empty-state-text {
     font-family: var(--f-hand);
     font-size: 18px;
@@ -494,16 +475,6 @@
   }
 
   .wizard-art { border-radius: 0; background: none; box-shadow: none; }
-
-  .wizard-art-line {
-    display: block;
-    width: 130px;
-    height: 100px;
-    margin: 2px auto 8px;
-    color: var(--ink);
-  }
-
-  .wizard-art-line svg { width: 100%; height: 100%; }
 
   /* ---- Felder ---- */
   .field-label {
@@ -604,16 +575,6 @@
   }
 
   .portrait-sm { border-width: 2.5px; box-shadow: 2px 2px 0 var(--hard); border-radius: var(--wob-a); }
-
-  .portrait-line {
-    display: block;
-    width: 100%;
-    height: 100%;
-    padding: 9px 7px 7px;
-  }
-
-  .portrait-sm .portrait-line { padding: 3px 2px 2px; }
-  .portrait-line svg { width: 100%; height: 100%; }
 
   .portrait-edit,
   .portrait-remove {

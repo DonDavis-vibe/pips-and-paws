@@ -2,8 +2,9 @@ import { Heart, Coins, Sparkles } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { Stepper, InfoHint } from './ui.jsx';
 import { levelForXp, gritForLevel } from '../rules/character.js';
+import { levelDoneOf, pendingLevels } from '../rules/levelup.js';
 
-export default function ResourceBar({ character, patch }) {
+export default function ResourceBar({ character, patch, onLevelUp, onLevelSkip }) {
   const { t } = useLang();
   const { hp, pips, xp } = character;
   const level = levelForXp(xp);
@@ -51,6 +52,20 @@ export default function ResourceBar({ character, patch }) {
         <Stepper value={xp} min={0} max={999999} label={t('res.xp')}
           onChange={(n) => patch({ xp: n, level: levelForXp(n), grit: gritForLevel(levelForXp(n)) })} />
       </div>
+
+      {pendingLevels(character) > 0 && onLevelUp ? (
+        <div className="levelup-banner">
+          <Sparkles size={16} />
+          <strong>{t('levelup.ready', { level: levelDoneOf(character) + 1 })}</strong>
+          <span className="hint">{t('levelup.hint')}</span>
+          <button type="button" className="btn btn-sm btn-primary" onClick={onLevelUp}>
+            {t('levelup.roll')}
+          </button>
+          <button type="button" className="btn btn-sm btn-ghost" onClick={onLevelSkip} title={t('levelup.manualHint')}>
+            {t('levelup.manual')}
+          </button>
+        </div>
+      ) : null}
 
       {character.incapacitated ? (
         <div className="incap-banner">

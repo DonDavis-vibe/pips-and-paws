@@ -16,11 +16,11 @@ import GmCombatTracker from './GmCombatTracker.jsx';
 import GmNotes from './GmNotes.jsx';
 import GmBattleMap from './battlemap/GmBattleMap.jsx';
 import GmHandouts from './GmHandouts.jsx';
+import GmGenerators from './GmGenerators.jsx';
 import GmPnpLink from './GmPnpLink.jsx';
 import { PnpProvider } from '../pnp/PnpBridge.jsx';
 import EmptyState from './EmptyState.jsx';
-import emptyLobby from '../assets/empty-lobby.jpg';
-import { ArtLantern } from './Art.jsx';
+import emptyLobby from '../assets/ink/lobby.webp';
 import { GM_BROADCAST, GM_SAVE } from '../multiplayer/protocol.js';
 import { rollDice, rollD66, rollReaction, rollTreasure } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
@@ -302,7 +302,7 @@ function GmDashboardView({ mp, notify, localApi }) {
         </label>
 
         {entries.length === 0 ? (
-          <EmptyState img={emptyLobby} art={ArtLantern} alt="">{t('gm.noPlayers')}</EmptyState>
+          <EmptyState img={emptyLobby} alt="">{t('gm.noPlayers')}</EmptyState>
         ) : (
           <div className="gm-grid">
             {entries.map(([peerId, player]) => (
@@ -333,6 +333,8 @@ function GmDashboardView({ mp, notify, localApi }) {
       <GmSoundboard mp={mp} notify={notify} />
 
       <GmTimeTracker onLog={gmLog} shareTime={mp.shareTime} />
+
+      <GmGenerators notify={notify} />
 
       <GmCombatTracker
         onLog={gmLog}

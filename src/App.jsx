@@ -21,7 +21,8 @@ import {
   GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK, GM_REST,
 } from './multiplayer/protocol.js';
 import { useMultiplayer } from './multiplayer/useMultiplayer.js';
-import brandMark from './assets/brand-mark.jpg';
+import brandMark from './assets/ink/brand.webp';
+import InkArt from './components/InkArt.jsx';
 import CharacterSheet from './components/CharacterSheet.jsx';
 import CharacterWizard from './components/CharacterWizard.jsx';
 import ConnectionBadge from './components/ConnectionBadge.jsx';
@@ -30,7 +31,6 @@ import GmDashboard from './components/GmDashboard.jsx';
 import HelpModal from './components/HelpModal.jsx';
 import RosterModal from './components/RosterModal.jsx';
 import Footer from './components/Footer.jsx';
-import { ArtMouse } from './components/Art.jsx';
 import VolumeControl from './components/VolumeControl.jsx';
 
 const STORAGE_KEY = 'pips-paws-character-v1';
@@ -236,8 +236,7 @@ export default function App() {
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">
-            <img className="skin-classic-only" src={brandMark} alt="" width="56" height="56" />
-            <ArtMouse className="brand-mark-line skin-print-only" size={46} />
+            <InkArt className="brand-mark-ink" src={brandMark} width="56" height="56" />
           </span>
           <div>
             <h1 className="brand-title">{t('app.title')}</h1>

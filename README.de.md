@@ -47,6 +47,10 @@ Betreibers laufen.
   selbst, sie sagt es nur unmissverständlich.
 - **Rast-Helfer** — kurz / lang / voll, mit Rationsverbrauch und Attributs-Heilung
   nach den Regeln; jede Rast hebt auch „kampfunfähig" wieder auf.
+- **Stufenaufstiegs-Helfer** — wer eine neue Stufe erreicht, bekommt einen Hinweis mit dem
+  Aufstieg nach Regelbuch: W20 je Attribut (höher als der Wert = +1) und die
+  Trefferwürfel der Stufe für die Trefferpunkte, gewürfelt auf der Würfelbühne.
+  Schon von Hand erledigt? Ein Klick blendet ihn aus.
 - **Miethelfer** — aus dem SRD-Katalog anheuern (Fackelträger, Söldner, Gelehrte, …),
   Werte würfeln sich beim Anheuern selbst, Moralwürfe bleiben lokal auf dem Bogen.
 - **Mehrere Mäuse pro Browser** — jede gespielte Maus landet in einer Liste, zu der
@@ -70,6 +74,11 @@ Betreibers laufen.
 - **Am Tisch spielen, ohne dass alle ein Gerät brauchen** — Boegen direkt im
   Dashboard anlegen oder laden, Schaden/Heilen/Rast/Gegenstände/Zustände direkt
   darauf anwenden, und den vollen Bogen im Vollbild zum Herumreichen öffnen.
+- **Generatoren** — Zufallstabellen aus der SRD, deutsch und englisch: Wetter und
+  Jahreszeitenereignisse, NSC, Abenteuer-Ideen, Hexfelder (Art, Wahrzeichen, Detail),
+  Siedlungen (Größe, Verwaltung, Bräuche, Gewerbe, Name, Gasthaus) und Schätze (mit
+  magischen und verfluchten Schwertern). Einzelne Zeilen neu würfeln, Ergebnis
+  kopieren, in die Notizen legen oder als Handout speichern.
 - **Soundboard** — eingebaute Kurz-Effekte (Erfolg/Fehlschlag/Krit/Patzer/Glocke —
   freie CC0-Sounds von [Kenney.nl](https://kenney.nl/assets/interface-sounds),
   siehe `src/assets/sfx/CREDITS.txt`) plus eigene hochgeladene Ambient-/
@@ -112,8 +121,10 @@ Betreibers laufen.
 
 Standard ist der **Druckbogen**: Tusche auf Papier, dicke handgezogene Linien,
 flache Schmuckfarben, handschriftliche Randnotizen und ein Dunkelmodus als
-„Negativdruck". Alle Zeichnungen (Maus, Bild-Platzhalter, Leerzustände) sind
-eingebettete SVGs, keine Stock-Icons für die Marke. Das frühere App-Design bleibt
+„Negativdruck". Die Maus ist ein eingebettetes SVG; Wappen,
+Bild-Platzhalter und Leerzustände sind Linolschnitt-Illustrationen in schwarzer
+Tusche (transparentes WebP, im Dunkelmodus invertiert), keine Stock-Icons für
+die Marke. Das frühere App-Design bleibt
 als **Klassisch** erhalten — der Pinsel-Knopf in der Kopfzeile schaltet um, die
 Wahl wird gemerkt.
 
@@ -174,8 +185,9 @@ Maschine vorbelegt zu werden. Ablauf und Schritte für eine neue Sprache:
 freien PDFs unter `reference/` liegen nur lokal (Artwork nicht CC BY, per
 `.gitignore` ausgeschlossen).
 
-Wappen, Hintergrundbilder, Vignetten und Bild-Platzhalter sind aus eigenen
-KI-Generierungen abgeleitet (Quellen in `img/`), **kein** offizielles
+Wappen, Logo, Social-Vorschau, Vignetten und Bild-Platzhalter sind eigene
+KI-Generierungen (Krea 2 Turbo über ComfyUI, Linolschnitt in schwarzer Tusche;
+ältere Quellen in `img/`), **kein** offizielles
 Mausritter-Artwork und **kein** Verlagslogo.
 
 Die eingebauten Kurz-Effekte des SL-Soundboards (`src/assets/sfx/`) stammen aus

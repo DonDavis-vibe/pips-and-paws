@@ -6,6 +6,7 @@ import { BattleMap } from '../battlemap/battlemap.js';
 import { upfToDataUrl } from '../pnp/images.js';
 import { partyId } from '../pnp/party.js';
 import { usePnpHandler } from '../pnp/PnpBridge.jsx';
+import { useGmEvent } from '../utils/gmBus.js';
 import { Field, TextInput } from './ui.jsx';
 import Panel from './Panel.jsx';
 
@@ -56,6 +57,11 @@ export default function GmHandouts({ mp, notify }) {
     notify?.(n > 0 ? t('handout.shown', { n }) : t('handout.nobody'), n > 0 ? 'ok' : 'warn');
     return n;
   };
+
+  // Von anderen Panels angelegt (z. B. Ergebnis eines Generators als Handout).
+  useGmEvent('handout:add', ({ title, text }) => {
+    upsert({ id: newId(), title: String(title).slice(0, 120), kind: 'text', text: String(text).slice(0, 8000), image: null, addedAt: Date.now() });
+  });
 
   // PenNodePaper: { id, title, kind, text, image, reveal, to }
   usePnpHandler('handout', async (p) => {

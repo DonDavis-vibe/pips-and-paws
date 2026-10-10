@@ -778,7 +778,6 @@ summary,
   display: block;
 }
 
-.portrait img.portrait-is-placeholder { opacity: 0.85; }
 
 .portrait-edit,
 .portrait-remove {
@@ -1062,6 +1061,20 @@ summary,
   gap: 10px;
   margin-top: 10px;
 }
+
+.levelup-banner {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--gold);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold) 14%, var(--bg-sunk));
+}
+
+.levelup-banner .hint { flex: 1 1 200px; margin: 0; }
 
 .res-block {
   border: 1px solid var(--line);
@@ -3860,5 +3873,88 @@ summary,
 }
 
 .handout-thumb { height: 40px; border-radius: var(--radius-sm); }
+
+/* --- Generatoren (GmGenerators.jsx) ------------------------------------ */
+
+.gen-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.gen-opts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.gen-opts select { width: auto; }
+.gen-bonus { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85em; color: var(--ink-dim); }
+
+.gen-result {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-sunk);
+  padding: 10px 12px;
+}
+
+.gen-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.gen-line {
+  display: grid;
+  grid-template-columns: 7.5em 1fr auto auto;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 5px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.gen-label {
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.gen-text { min-width: 0; overflow-wrap: anywhere; }
+.gen-dice { font-size: 0.78em; color: var(--ink-faint); white-space: nowrap; }
+.gen-poor { margin-left: 6px; background: color-mix(in srgb, var(--warn) 25%, transparent); }
+
+.gen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+@media (max-width: 520px) {
+  .gen-line { grid-template-columns: 1fr auto; }
+  .gen-label { grid-column: 1 / -1; }
+  .gen-dice { display: none; }
+}
+
+/* --- Tusche-Illustrationen (InkArt.jsx) ---------------------------------- */
+
+.ink-art {
+  object-fit: contain;
+  /* Die Karte, die .empty-state-art / .wizard-art im Dunkelmodus hinterlegen, brauchen Tusche-Bilder
+     nicht — und invert() wuerde sie mitkehren. */
+  background: none;
+  box-shadow: none;
+}
+
+/* Dunkelmodus ("Negativdruck"): schwarze Tusche -> helle Linien */
+:root[data-theme='dark'] .ink-art { filter: invert(1); }
+
+.brand-mark { background: var(--bg-raise); }
+.brand-mark .brand-mark-ink { object-fit: contain; padding: 4px; }
+.portrait img.portrait-ink { object-fit: contain; padding: 8px; }
 
 } /* @layer classic */

@@ -31,6 +31,7 @@ import { GRIT_SLOT_PREFIX } from '../rules/character.js';
 import { rollSave, rollDie } from '../rules/dice.js';
 import { shareSave, shareRoll } from '../utils/discord.js';
 import { useOrder } from '../useOrder.js';
+import { rollLevelUp } from '../rules/levelup.js';
 
 const PANEL_ORDER_KEY = 'pips-paws-panel-order';
 const DEFAULT_PANEL_ORDER = [
@@ -184,6 +185,36 @@ export default function CharacterSheet({
     shareSave(character.name || t('app.title'), attr, r.d, r.target, r.ok);
   };
 
+  // Stufenaufstieg (SRD): fuer die naechste offene Stufe d20 je Attribut und die
+  // Trefferwuerfel der Stufe. Gewuerfelt wird HIER, nicht im setCharacter-Updater
+  // (StrictMode ruft Updater doppelt auf).
+  const onLevelUp = () => {
+    const { patch: lv, report } = rollLevelUp(character);
+    setCharacter((c) => ({ ...c, ...lv }));
+    const attrText = report.attrs
+      .map((a) => `${t(`attr.abbr.${a.key}`)} ${a.up ? `${a.before}→${a.after}` : a.before}`)
+      .join(' · ');
+    const hpText = `${t('res.hpShort')} ${report.hd.before}→${report.hd.after}`;
+    const verdict = `${attrText} · ${hpText}`;
+    const label = t('levelup.stage', { level: report.level });
+    pushRoll(
+      {
+        label,
+        value: report.hd.total,
+        max: report.hd.count * 6,
+        verdict,
+        parts: [
+          ...report.attrs.map((a) => ({ value: a.roll, label: `${t(`attr.abbr.${a.key}`)}${a.up ? ' ↑' : ''}` })),
+          ...report.hd.dice.map((d) => ({ value: d, label: t('levelup.hd') })),
+        ],
+      },
+      { label, verdict },
+    );
+    notify(`${label}: ${verdict}`, 'ok');
+    if (onEvent) onEvent({ kind: 'roll', label, value: report.hd.total });
+  };
+  const onLevelSkip = () => setCharacter((c) => ({ ...c, levelDone: c.level }));
+
   // Miethelfer-Moral (SRD): WIL-Rettungswurf, bei Misserfolg flieht er/sie.
   // Bewusst nur lokal (Wuerfel-Panel + Toast) — kein onEvent/Discord, Mietlinge
   // sind Sache der Spielerin, nicht Teil des Party-weiten Ereignis-Feeds.
@@ -281,7 +312,7 @@ export default function CharacterSheet({
           <AttributeBox attrKey="wil" labelKey="attr.wil" value={character.wil}
             onChange={(v) => patch({ wil: v })} onSave={onSave} />
         </div>
-        <ResourceBar character={character} patch={patch} />
+        <ResourceBar character={character} patch={patch} onLevelUp={onLevelUp} onLevelSkip={onLevelSkip} />
         <RestControls character={character} setCharacter={setCharacter} notify={notify} locked={restLocked} />
       </section>
     ),

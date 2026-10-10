@@ -74,6 +74,7 @@ export function blankCharacter() {
     pips: 0,
     xp: 0,
     level: 1,
+    levelDone: 1, // Stufe, fuer die der Aufstieg (Attribute/TP wuerfeln) abgewickelt ist, siehe rules/levelup.js
     inventory: Object.fromEntries(ALL_SLOTS.map((s) => [s, null])),
     items: {}, // itemId -> Item
     notes: '',
@@ -115,6 +116,8 @@ export function normalizeCharacter(raw) {
   merged.items = raw.items && typeof raw.items === 'object' ? raw.items : {};
   merged.hirelings = Array.isArray(raw.hirelings) ? raw.hirelings : [];
   merged.gritConditions = Array.isArray(raw.gritConditions) ? raw.gritConditions : [];
+  // Alte Boegen kennen levelDone nicht: kein nachtraeglicher Aufstieg, sondern die aktuelle Stufe.
+  merged.levelDone = Number.isFinite(raw.levelDone) ? raw.levelDone : merged.level;
   merged.incapacitated = !!raw.incapacitated;
   merged.portrait = typeof raw.portrait === 'string' ? raw.portrait : '';
   merged.schemaVersion = SCHEMA_VERSION;
