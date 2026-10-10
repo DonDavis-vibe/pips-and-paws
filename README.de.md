@@ -76,9 +76,14 @@ Betreibers laufen.
   darauf anwenden, und den vollen Bogen im Vollbild zum Herumreichen öffnen.
 - **Generatoren** — Zufallstabellen aus der SRD, deutsch und englisch: Wetter und
   Jahreszeitenereignisse, NSC, Abenteuer-Ideen, Hexfelder (Art, Wahrzeichen, Detail),
-  Siedlungen (Größe, Verwaltung, Bräuche, Gewerbe, Name, Gasthaus) und Schätze (mit
+  Siedlungen (Größe, Verwaltung, Bräuche, Gewerbe, Name, Gasthaus), Abenteuerorte
+  (Geschichte, Bewohner, Geheimnis), zufällig bestückte Räume (leer, Hindernis, Falle,
+  Rätsel, Lager) und Schätze (mit
   magischen und verfluchten Schwertern). Einzelne Zeilen neu würfeln, Ergebnis
   kopieren, in die Notizen legen oder als Handout speichern.
+- **Fraktionen** — die SRD-Fraktionsregeln: Ressourcen, Ziele mit Fortschrittsmarken
+  und der W6-Wurf zwischen den Sitzungen (SRD-Beispielfraktionen dabei; Teil der
+  gesicherten SL-Sitzung).
 - **Soundboard** — eingebaute Kurz-Effekte (Erfolg/Fehlschlag/Krit/Patzer/Glocke —
   freie CC0-Sounds von [Kenney.nl](https://kenney.nl/assets/interface-sounds),
   siehe `src/assets/sfx/CREDITS.txt`) plus eigene hochgeladene Ambient-/

@@ -18,8 +18,9 @@ function resultTitle(result, t) {
 }
 
 function labelFor(key, t) {
-  const m = /^t(\d+)$/.exec(key);
-  return m ? t('gen.f.treasure', { n: Number(m[1]) + 1 }) : t(`gen.f.${key}`);
+  const m = /^([tr])(\d+)$/.exec(key);
+  if (m) return t(m[1] === 't' ? 'gen.f.treasure' : 'gen.f.room', { n: Number(m[2]) + 1 });
+  return t(`gen.f.${key}`);
 }
 
 // Ergebnis als Klartext (Zwischenablage, Notizen, Handout)
@@ -35,13 +36,13 @@ function resultText(result, lang, t) {
 // neu wuerfeln, das Ganze kopieren oder in die Notizen / Handout-Bibliothek legen.
 export default function GmGenerators({ notify }) {
   const { t, lang } = useLang();
-  const [state, setState] = useState(() => ({ active: 'weather', season: 'spring', split: false, bonus: 0, ...readJSON(KEY) }));
+  const [state, setState] = useState(() => ({ active: 'weather', season: 'spring', split: false, bonus: 0, rooms: 6, ...readJSON(KEY) }));
   const [results, setResults] = useState({});
   const letter = t('dice.dieLetter');
 
   const save = (patch) => setState((prev) => {
     const next = { ...prev, ...patch };
-    writeJSON(KEY, { active: next.active, season: next.season, split: next.split, bonus: next.bonus });
+    writeJSON(KEY, { active: next.active, season: next.season, split: next.split, bonus: next.bonus, rooms: next.rooms });
     return next;
   });
 
@@ -49,6 +50,7 @@ export default function GmGenerators({ notify }) {
     if (id === 'weather') return { season: state.season };
     if (id === 'seed') return { split: state.split };
     if (id === 'treasure') return { bonus: state.bonus };
+    if (id === 'rooms') return { rooms: state.rooms };
     return {};
   };
 
@@ -113,6 +115,12 @@ export default function GmGenerators({ notify }) {
           <span className="gen-bonus" title={t('gen.bonusHint')}>
             {t('gen.bonus')}
             <Stepper value={state.bonus} min={0} max={4} label={t('gen.bonus')} onChange={(n) => save({ bonus: n })} />
+          </span>
+        ) : null}
+        {state.active === 'rooms' ? (
+          <span className="gen-bonus">
+            {t('gen.roomCount')}
+            <Stepper value={state.rooms} min={1} max={20} label={t('gen.roomCount')} onChange={(n) => save({ rooms: n })} />
           </span>
         ) : null}
         <button type="button" className="btn btn-sm btn-primary" onClick={() => roll()}>

@@ -72,9 +72,14 @@ data passing through the operator's server.
   the full sheet full-screen to hand the device around.
 - **Generators** — random tables from the SRD, in German and English: weather and
   seasonal events, NPCs, adventure seeds, hexes (type, landmark, detail), settlements
-  (size, governance, customs, trade, name, tavern) and treasure (with magic and
+  (size, governance, customs, trade, name, tavern), adventure sites (history,
+  inhabitants, secret), randomly stocked rooms (empty, obstacle, trap, puzzle,
+  lair) and treasure (with magic and
   cursed swords). Re-roll single lines, copy the result, add it to your notes or
   save it as a handout.
+- **Factions** — the SRD faction rules: resources, goals with progress marks and
+  the between-sessions d6 roll (SRD example factions included; part of the saved
+  GM session).
 - **Soundboard** — built-in stingers (success/fail/critical/fumble/bell — free
   CC0 sounds from [Kenney.nl](https://kenney.nl/assets/interface-sounds), see
   `src/assets/sfx/CREDITS.txt`) plus your own uploaded ambience/music (stays on

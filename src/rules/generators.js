@@ -3,6 +3,10 @@ import {
   SEASONS, WEATHER, SEASONAL_EVENTS, SOCIAL_POSITION, NPC_DETAILS, ADVENTURE_SEEDS, HEX_TYPES, LANDMARKS,
   LANDMARK_DETAILS, SETTLEMENT, NAME_SEEDS, TAVERNS, TREASURE,
 } from '../data/generators.js';
+import {
+  CONSTRUCTION, RUINATION, INHABITANTS, SEEKING, SECRET, ROOM_TYPES, CREATURE_ON, TREASURE_ON, LAIRS,
+  EMPTY_ROOMS, OBSTACLES, TRAPS, PUZZLES,
+} from '../data/sites.js';
 import { NAMES, DETAILS, BIRTHSIGNS } from '../data/tables.js';
 import { SPELL_CATALOG } from '../data/items.js';
 
@@ -170,6 +174,61 @@ const settlement = {
   ],
 };
 
+// ---- Abenteuerort (Thema) --------------------------------------------------
+const site = {
+  id: 'site',
+  defaults: () => ({}),
+  fieldsFor: () => [
+    ['construction', CONSTRUCTION, 20], ['ruination', RUINATION, 12], ['inhabitants', INHABITANTS, 10],
+    ['seeking', SEEKING, 8], ['secret', SECRET, 6],
+  ].map(([k, table, sides]) => field(k, (ctx, o, rng) => {
+    const n = rng(sides);
+    const row = at(table, n);
+    return { text: bi(row.en, row.de), rolls: [{ die: `d${sides}`, value: n }] };
+  })),
+};
+
+// ---- Raeume bestuecken -----------------------------------------------------
+// Pro Raum: Typ (W6), Kreatur (W6), Schatz (W6), dazu Inhalt je Typ. Jeder Raum
+// ist ein Feld und laesst sich als Ganzes neu wuerfeln.
+const ROOM_CONTENT = { empty: [EMPTY_ROOMS, 20], obstacle: [OBSTACLES, 8], trap: [TRAPS, 8], puzzle: [PUZZLES, 6] };
+
+function stockRoom(rng) {
+  const t = rng(6);
+  const type = inRange(ROOM_TYPES, t);
+  const c = rng(6);
+  const tr = rng(6);
+  const hasCreature = c <= CREATURE_ON[type.key];
+  const hasTreasure = tr <= TREASURE_ON[type.key];
+  const rolls = [{ die: 'd6', value: t }, { die: 'd6', value: c }, { die: 'd6', value: tr }];
+  const parts = [bi(type.en, type.de)];
+  if (type.key === 'lair') {
+    const l = rng(6);
+    const lair = at(LAIRS, l);
+    parts[0] = bi(`${type.en} — ${lair.en}`, `${type.de} — ${lair.de}`);
+    rolls.push({ die: 'd6', value: l });
+  } else {
+    const [table, sides] = ROOM_CONTENT[type.key];
+    const n = rng(sides);
+    const row = at(table, n);
+    parts[0] = bi(`${type.en}: ${row.en}`, `${type.de}: ${row.de}`);
+    rolls.push({ die: `d${sides}`, value: n });
+  }
+  if (hasCreature) {
+    parts.push(type.key === 'lair'
+      ? bi('Creature at home', 'Kreatur zu Hause')
+      : bi('Creature present (needs a reason to be here)', 'Kreatur anwesend (braucht einen Grund, hier zu sein)'));
+  }
+  if (hasTreasure) parts.push(bi('Treasure (roll in Treasure)', 'Schatz (im Schatz-Generator würfeln)'));
+  return { text: join(parts, ' · '), rolls, kind: type.key };
+}
+
+const rooms = {
+  id: 'rooms',
+  defaults: () => ({ rooms: 6 }),
+  fieldsFor: (o) => Array.from({ length: o.rooms }, (_, i) => field(`r${i}`, (ctx, opts, rng) => stockRoom(rng))),
+};
+
 // ---- Schatz ----------------------------------------------------------------
 const PIP_LEAD = {
   100: [bi('Box containing', 'Kiste mit')], 50: [bi('Bag containing', 'Beutel mit')],
@@ -223,7 +282,7 @@ const treasure = {
   })),
 };
 
-export const GENERATORS = [weather, npc, seed, hex, settlement, treasure];
+export const GENERATORS = [weather, npc, seed, hex, settlement, site, rooms, treasure];
 export const GENERATOR_BY_ID = Object.fromEntries(GENERATORS.map((g) => [g.id, g]));
 export { SEASONS };
 

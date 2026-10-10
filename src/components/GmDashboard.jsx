@@ -17,6 +17,7 @@ import GmNotes from './GmNotes.jsx';
 import GmBattleMap from './battlemap/GmBattleMap.jsx';
 import GmHandouts from './GmHandouts.jsx';
 import GmGenerators from './GmGenerators.jsx';
+import GmFactions from './GmFactions.jsx';
 import GmPnpLink from './GmPnpLink.jsx';
 import { PnpProvider } from '../pnp/PnpBridge.jsx';
 import EmptyState from './EmptyState.jsx';
@@ -335,6 +336,8 @@ function GmDashboardView({ mp, notify, localApi }) {
       <GmTimeTracker onLog={gmLog} shareTime={mp.shareTime} />
 
       <GmGenerators notify={notify} />
+
+      <GmFactions notify={notify} />
 
       <GmCombatTracker
         onLog={gmLog}

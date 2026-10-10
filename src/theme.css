@@ -3940,6 +3940,72 @@ summary,
   .gen-dice { display: none; }
 }
 
+/* --- Fraktionen (GmFactions.jsx) ----------------------------------------- */
+
+.fac-add { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.fac-add select { width: auto; max-width: 100%; }
+
+.fac-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-sunk);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.fac-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.fac-name { font-family: var(--font-display); font-weight: 700; flex: 1; min-width: 0; }
+
+.fac-section {
+  margin: 8px 0 4px;
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.fac-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.fac-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-raise);
+  font-size: 0.9em;
+}
+.fac-chip-input { width: 15em; max-width: 100%; }
+
+.fac-goal {
+  display: grid;
+  grid-template-columns: auto minmax(8em, 1fr) auto auto auto;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 4px 0;
+}
+.fac-goal.done .fac-goal-text { text-decoration: line-through; opacity: 0.7; }
+.fac-dots { display: inline-flex; gap: 5px; }
+.fac-dot {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+.fac-dot.on { background: var(--ink); }
+
+.fac-roll { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 10px; }
+.fac-last { margin: 6px 0 0; font-size: 0.9em; }
+.fac-last.done { font-weight: 700; }
+
+@media (max-width: 520px) {
+  .fac-goal { grid-template-columns: auto 1fr auto; }
+  .fac-goal .fac-dots { grid-column: 2 / -1; }
+}
+
 /* --- Tusche-Illustrationen (InkArt.jsx) ---------------------------------- */
 
 .ink-art {
