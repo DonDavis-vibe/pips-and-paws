@@ -75,7 +75,8 @@ Betreibers laufen.
   Dashboard anlegen oder laden, Schaden/Heilen/Rast/Gegenstände/Zustände direkt
   darauf anwenden, und den vollen Bogen im Vollbild zum Herumreichen öffnen.
 - **Battlemap** — eigenes Kartenbild mit Quadrat- oder Sechsecknetz (Feldgröße und
-  Versatz einstellbar), Token, Zeichnungen und Nebel des Krieges, live für die Spieler.
+  Versatz einstellbar), Token, Zeichnungen und Nebel des Krieges, live für die Spieler. Tusche-Porträts
+  der SRD-Kreaturen für Token und Kampf-Tracker.
 - **Generatoren** — Zufallstabellen aus der SRD, deutsch und englisch: Wetter und
   Jahreszeitenereignisse, NSC, Abenteuer-Ideen, Hexfelder (Art, Wahrzeichen, Detail),
   Siedlungen (Größe, Verwaltung, Bräuche, Gewerbe, Name, Gasthaus), Abenteuerorte

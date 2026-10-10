@@ -1,5 +1,7 @@
 import { Eye } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
+import { creatureArt } from '../data/creatureArt.js';
+import InkArt from './InkArt.jsx';
 import Panel from './Panel.jsx';
 
 // Was der Spielleiter sichtbar geschaltet hat: WER am Tisch steht.
@@ -18,6 +20,7 @@ export default function PartyNpcs({ npcs }) {
       <div className="party-npc-list">
         {npcs.map((n) => (
           <div key={n.id} className="party-npc">
+            {n.key && creatureArt(n.key) ? <InkArt src={creatureArt(n.key)} className="npc-portrait" /> : null}
             <strong>{n.name}</strong>
             {n.note ? <span className="party-npc-note">{n.note}</span> : null}
           </div>

@@ -71,7 +71,8 @@ data passing through the operator's server.
   the dashboard, run damage/heal/rest/items/conditions on them directly, and open
   the full sheet full-screen to hand the device around.
 - **Battlemap** — your own map image with a square or hex grid (cell size and offset
-  adjustable), tokens, drawings and fog of war, shown live to the players.
+  adjustable), tokens, drawings and fog of war, shown live to the players. Ink portraits
+  of the SRD creatures for tokens and the combat tracker.
 - **Generators** — random tables from the SRD, in German and English: weather and
   seasonal events, NPCs, adventure seeds, hexes (type, landmark, detail), settlements
   (size, governance, customs, trade, name, tavern), adventure sites (history,

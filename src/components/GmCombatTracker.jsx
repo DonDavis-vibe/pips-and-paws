@@ -4,6 +4,8 @@ import { useLang, loc } from '../i18n/index.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { rollDie, rollSave } from '../rules/dice.js';
 import { CREATURES, CREATURE_BY_KEY } from '../data/creatures.js';
+import { creatureArt } from '../data/creatureArt.js';
+import InkArt from './InkArt.jsx';
 import { Field, TextInput, Stepper } from './ui.jsx';
 import Panel from './Panel.jsx';
 import { usePnpHandler } from '../pnp/PnpBridge.jsx';
@@ -33,7 +35,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
   }, []);
 
   // Nur die sichtbar geschalteten NSC an die Spieler spiegeln.
-  const shownKey = s.npcs.filter((n) => n.shown).map((n) => `${n.id}:${n.name}:${n.note || ''}`).join('|');
+  const shownKey = s.npcs.filter((n) => n.shown).map((n) => `${n.id}:${n.name}:${n.key || ''}:${n.note || ''}`).join('|');
   useEffect(() => {
     if (!shareNpcs) return;
     shareNpcs(sRef.current.npcs.filter((n) => n.shown));
@@ -79,7 +81,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
       ...s,
       npcs: [
         ...s.npcs,
-        { id: nid(), base, name: nameWithNumber(base), hp: { current: c.hp, max: c.hp }, dmg: c.dmg, armour: c.armour, wil: c.wil ?? 8, note: loc(c.note, lang), attack: loc(c.attack, lang) },
+        { id: nid(), key: c.key, base, name: nameWithNumber(base), hp: { current: c.hp, max: c.hp }, dmg: c.dmg, armour: c.armour, wil: c.wil ?? 8, note: loc(c.note, lang), attack: loc(c.attack, lang) },
       ],
     });
     setAddOpen(false);
@@ -200,6 +202,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
             return (
               <div key={n.id} className={`combat-npc${dead ? ' npc-dead' : ''}${n.shown ? ' npc-shown' : ''}`}>
                 <div className="combat-npc-top">
+                  {n.key && creatureArt(n.key) ? <InkArt src={creatureArt(n.key)} className="npc-portrait" /> : null}
                   <strong>
                     {dead ? <Skull size={13} /> : null} {n.name}
                   </strong>

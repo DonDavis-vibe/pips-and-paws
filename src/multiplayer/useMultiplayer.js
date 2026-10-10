@@ -168,9 +168,9 @@ export function useMultiplayer() {
 
   // SL schaltet NSC fuer die Spieler sichtbar (leere Liste = niemand zu sehen).
   const shareNpcs = useCallback((list) => {
-    // Bewusst NUR der Name: der Hinweistext aus dem Katalog ist der Statblock
+    // Bewusst nur Name und Kreatur-Schluessel (fuers Portrait): der Hinweistext aus dem Katalog ist der Statblock
     // (STR/DEX/WIL) und gehoert nicht auf den Spielertisch.
-    const safe = (list || []).map((n) => ({ id: n.id, name: n.name }));
+    const safe = (list || []).map((n) => ({ id: n.id, name: n.name, key: n.key || null }));
     setPartyNpcs(safe);
     partyNpcsRef.current = safe;
     if (roleRef.current === 'gm') {

@@ -3469,10 +3469,13 @@ summary,
   justify-content: space-between;
 }
 
+.combat-npc-top { gap: 8px; }
+
 .combat-npc-top strong {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  margin-right: auto;
 }
 
 .combat-npc-row {
@@ -3939,6 +3942,15 @@ summary,
   .gen-label { grid-column: 1 / -1; }
   .gen-dice { display: none; }
 }
+
+.npc-portrait {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  object-fit: contain;
+}
+.party-npc .npc-portrait { width: 28px; height: 28px; }
+.party-npc:has(.npc-portrait) { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
 
 /* --- Fraktionen (GmFactions.jsx) ----------------------------------------- */
 

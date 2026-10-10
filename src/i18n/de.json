@@ -389,6 +389,7 @@
   "map.token.spieler": "Spieler",
   "map.token.gegner": "Gegner",
   "map.token.helfer": "Helfer",
+  "map.token.creatures": "Kreaturen",
   "map.noTokens": "Noch keine Token auf dieser Karte.",
   "map.tokenSize": "Token-Größe",
   "map.tokenHide": "Vor Spielern verstecken (unabhängig vom Nebel)",

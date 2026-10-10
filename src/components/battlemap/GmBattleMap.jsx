@@ -3,7 +3,7 @@ import {
   Map, Plus, X, Pencil, Trash2, Undo2, Maximize2, Minimize2, ChevronDown, ChevronRight,
   Hand, Ruler, Eraser, CloudFog, Eye, EyeOff, Upload,
 } from 'lucide-react';
-import { useLang } from '../../i18n/index.jsx';
+import { useLang, loc } from '../../i18n/index.jsx';
 import { readJSON, writeJSON } from '../../utils/storage.js';
 import { BattleMap } from '../../battlemap/battlemap.js';
 import { TextInput, Stepper } from '../ui.jsx';
@@ -11,6 +11,9 @@ import Panel from '../Panel.jsx';
 import BattleMapCanvas from './BattleMapCanvas.jsx';
 import { usePnpHandler } from '../../pnp/PnpBridge.jsx';
 import { upfToDataUrl } from '../../pnp/images.js';
+import { CREATURES, CREATURE_BY_KEY } from '../../data/creatures.js';
+import { creatureArt } from '../../data/creatureArt.js';
+import { syncTokenArt } from './tokenArt.js';
 
 const KEY = 'pips-paws-gm-map';
 const nid = () => `t_${Math.random().toString(36).slice(2, 8)}`;
@@ -41,7 +44,7 @@ const PNP_TOKENS = { pc: 'spieler', npc: 'helfer', enemy: 'gegner' };
 // Bedarf an die Spieler — Bild und haeufiger Zustand getrennt, siehe
 // broadcastMapState/broadcastMapImage in useMultiplayer.js.
 export default function GmBattleMap({ mp, notify }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [s, setS] = useState(() => {
     const loaded = readJSON(KEY);
     if (loaded?.maps?.length) return loaded;
@@ -90,6 +93,7 @@ export default function GmBattleMap({ mp, notify }) {
     const api = apiRef.current;
     if (!api || !m) return;
     api.applyState({ ...m.zustand, raster: { ...DEFAULT_RASTER, ...m.zustand.raster } }, m.bild);
+    syncTokenArt(api, m.zustand.figuren);
     requestAnimationFrame(() => { api.einpassen(); refreshLive(); });
   };
 
@@ -146,11 +150,18 @@ export default function GmBattleMap({ mp, notify }) {
   };
 
   const addToken = () => {
-    const kind = TOKEN_KINDS[addTokenKind];
+    // 'creature:<key>' = Gegner-Token mit dem Tusche-Portrait der SRD-Kreatur
+    const creature = addTokenKind.startsWith('creature:') ? CREATURE_BY_KEY[addTokenKind.slice(9)] : null;
+    const kind = TOKEN_KINDS[creature ? 'gegner' : addTokenKind];
     const pos = apiRef.current.sichtbaresZentrum();
-    apiRef.current.addFigur({
-      id: nid(), name: t(`map.token.${addTokenKind}`), farbe: kind.farbe, besitzer: kind.besitzer, groesse: 1, ...pos,
-    });
+    const figur = {
+      id: nid(),
+      name: creature ? loc(creature.name, lang) : t(`map.token.${addTokenKind}`),
+      farbe: kind.farbe, besitzer: kind.besitzer, groesse: 1, ...pos,
+    };
+    if (creature && creatureArt(creature.key)) figur.bildKey = creature.key;
+    apiRef.current.addFigur(figur);
+    syncTokenArt(apiRef.current, [figur]);
   };
 
   const patchToken = (id, patch) => apiRef.current?.addFigur({ id, ...patch });
@@ -404,6 +415,11 @@ export default function GmBattleMap({ mp, notify }) {
             <option value="spieler">{t('map.token.spieler')}</option>
             <option value="gegner">{t('map.token.gegner')}</option>
             <option value="helfer">{t('map.token.helfer')}</option>
+            <optgroup label={t('map.token.creatures')}>
+              {CREATURES.filter((c) => creatureArt(c.key)).map((c) => (
+                <option key={c.key} value={`creature:${c.key}`}>{loc(c.name, lang)}</option>
+              ))}
+            </optgroup>
           </select>
           <button type="button" className="btn btn-sm" onClick={addToken}>
             <Plus size={14} /> {t('map.addToken')}

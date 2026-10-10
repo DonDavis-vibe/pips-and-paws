@@ -506,6 +506,9 @@ export const BattleMap = (() => {
                 ctx.beginPath();
                 ctx.arc(mitte.x, mitte.y, radius, 0, Math.PI * 2);
                 ctx.clip();
+                // Papiergrund: Tusche-Portraits sind transparent und brauchen hellen Untergrund
+                ctx.fillStyle = '#f3eee2';
+                ctx.fillRect(mitte.x - radius, mitte.y - radius, radius * 2, radius * 2);
                 const seite = radius * 2;
                 const skala = Math.max(seite / portrait.naturalWidth, seite / portrait.naturalHeight);
                 const bw = portrait.naturalWidth * skala, bh = portrait.naturalHeight * skala;

@@ -3,6 +3,7 @@ import { Map, Maximize2, Minimize2 } from 'lucide-react';
 import { useLang } from '../../i18n/index.jsx';
 import Panel from '../Panel.jsx';
 import BattleMapCanvas from './BattleMapCanvas.jsx';
+import { syncTokenArt } from './tokenArt.js';
 
 // Reine Anzeige fuer die Spieler: derselbe Leinwand-Motor wie beim SL, aber
 // ohne Werkzeugleiste und mit einem Besitzer-Tag, das niemals zu einer Figur
@@ -19,6 +20,7 @@ export default function PartyBattleMap({ map }) {
       { raster: map.raster, figuren: map.figuren, formen: map.formen, nebel: map.nebel },
       map.dataUrl,
     );
+    syncTokenArt(apiRef.current, map.figuren);
   }, [map]);
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export default function PartyBattleMap({ map }) {
                 { raster: map.raster, figuren: map.figuren, formen: map.formen, nebel: map.nebel },
                 map.dataUrl,
               );
+              syncTokenArt(api, map.figuren);
               api.einpassen();
             }
           }}
