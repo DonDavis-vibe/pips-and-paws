@@ -2,33 +2,33 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://dondavis-vibe.github.io/pips-and-paws/</loc>
+    <loc>https://mausritter.redneck-design.de/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://dondavis-vibe.github.io/pips-and-paws/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dondavis-vibe.github.io/pips-and-paws/" />
-    <xhtml:link rel="alternate" hreflang="de" href="https://dondavis-vibe.github.io/pips-and-paws/?lang=de" />
-    <xhtml:link rel="alternate" hreflang="fr" href="https://dondavis-vibe.github.io/pips-and-paws/?lang=fr" />
-    <xhtml:link rel="alternate" hreflang="it" href="https://dondavis-vibe.github.io/pips-and-paws/?lang=it" />
-    <xhtml:link rel="alternate" hreflang="ja" href="https://dondavis-vibe.github.io/pips-and-paws/?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mausritter.redneck-design.de/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mausritter.redneck-design.de/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://mausritter.redneck-design.de/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://mausritter.redneck-design.de/?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://mausritter.redneck-design.de/?lang=it" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://mausritter.redneck-design.de/?lang=ja" />
   </url>
   <url>
-    <loc>https://dondavis-vibe.github.io/pips-and-paws/?lang=de</loc>
+    <loc>https://mausritter.redneck-design.de/?lang=de</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dondavis-vibe.github.io/pips-and-paws/?lang=fr</loc>
+    <loc>https://mausritter.redneck-design.de/?lang=fr</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dondavis-vibe.github.io/pips-and-paws/?lang=it</loc>
+    <loc>https://mausritter.redneck-design.de/?lang=it</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dondavis-vibe.github.io/pips-and-paws/?lang=ja</loc>
+    <loc>https://mausritter.redneck-design.de/?lang=ja</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

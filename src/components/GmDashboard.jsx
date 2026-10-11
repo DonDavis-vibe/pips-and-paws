@@ -1,10 +1,18 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  DndContext, PointerSensor, TouchSensor, useSensor, useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import {
   Users, ScrollText, Megaphone, Dices, Save, FolderOpen, Handshake, Gem, Dice6,
+  Armchair, Music, Timer, Wand2, Crown, Swords, Map as MapIcon, FileText, PackageOpen, NotebookPen,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { RollButton, DiceStage } from './DiceKit.jsx';
 import Panel from './Panel.jsx';
+import SortableItem from './SortableItem.jsx';
+import SectionNav from './SectionNav.jsx';
+import { useOrder } from '../useOrder.js';
 import GmPlayerCard from './GmPlayerCard.jsx';
 import GmLocalPlayers from './GmLocalPlayers.jsx';
 import GmSoundboard from './GmSoundboard.jsx';
@@ -27,6 +35,7 @@ import { rollDice, rollD66, rollReaction, rollTreasure } from '../rules/dice.js'
 import { CONDITION_CATALOG } from '../data/items.js';
 import { exportGmSession, importGmSession } from '../utils/gmSession.js';
 import { shareEvent } from '../utils/discord.js';
+import { playDiceRoll } from '../utils/sound.js';
 import { formatLogEntry, logEntryTone } from '../multiplayer/logFormat.js';
 
 const SHARE_KEYS = new Set([
@@ -46,6 +55,26 @@ export function cmdVars(cmd, name, lang, t) {
 }
 
 const formatEntry = formatLogEntry;
+
+// Bereiche des Dashboards: Standardreihenfolge (frei umsortierbar, wird pro
+// Geraet gemerkt), Symbol fuer die Sprungleiste und welche auf breiten
+// Schirmen die volle Breite behalten (der Rest teilt sich zwei Spalten).
+const GM_ORDER_KEY = 'pips-paws-gm-panel-order';
+const GM_PANELS = [
+  { id: 'players', icon: Users, wide: true },
+  { id: 'local', icon: Armchair, wide: true },
+  { id: 'sound', icon: Music },
+  { id: 'time', icon: Timer },
+  { id: 'generators', icon: Wand2 },
+  { id: 'factions', icon: Crown },
+  { id: 'combat', icon: Swords },
+  { id: 'map', icon: MapIcon, wide: true },
+  { id: 'handouts', icon: FileText },
+  { id: 'stash', icon: PackageOpen },
+  { id: 'notes', icon: NotebookPen },
+  { id: 'livelog', icon: ScrollText },
+];
+const GM_DEFAULT_ORDER = GM_PANELS.map((p) => p.id);
 
 const stamp = () => `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -127,8 +156,21 @@ function GmDicePanel({ onLog, log, result, pushRoll }) {
 
   const rolls = log.filter(isRollEntry).slice(0, 20);
 
+  // Wuerfe der Spieler kommen nur als Log-Eintrag an (eigene Wuerfe vertont
+  // DiceStage selbst): neuester Eintrag von einem Spieler -> Klackern. Beim
+  // ersten Rendern nur merken, damit ein bestehendes Log nicht losrattert.
+  const newest = rolls[0];
+  const heardRef = useRef(undefined);
+  useEffect(() => {
+    const id = newest?.id ?? null;
+    if (heardRef.current !== undefined && id && id !== heardRef.current && newest.kind === 'event') {
+      playDiceRoll(id);
+    }
+    heardRef.current = id;
+  }, [newest?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <Panel id="gm-dice" icon={Dices} title={t('gm.diceTitle')} className="dice-panel">
+    <Panel id="gm-dice" anchorId="dice" icon={Dices} title={t('gm.diceTitle')} className="dice-panel">
       <DiceStage result={result} idleIcon={<Dices size={24} />} idleText={t('dice.stageIdle')} />
 
       <div className="dice-buttons">
@@ -251,13 +293,15 @@ function GmDashboardView({ mp, notify, localApi }) {
     );
   }
 
-  return (
-    <div className="gm-dash">
-      {/* Alles ausser dem Wuerfel-Panel steckt in EINEM Wrapper — siehe
-          Kommentar bei .sheet-main in CharacterSheet.jsx: sonst spannt die
-          gemeinsame Wuerfel-Spalte mehrere Grid-Zeilen, und WebKit/Safari
-          rechnet deren volle Hoehe komplett der ersten Zeile zu. */}
-      <div className="sheet-main">
+  const gmSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
+  );
+  const { order: panelOrder, reorder: reorderPanels } = useOrder(GM_ORDER_KEY, GM_DEFAULT_ORDER, GM_DEFAULT_ORDER);
+  const wideIds = new Set(GM_PANELS.filter((p) => p.wide).map((p) => p.id));
+
+  const PANELS = {
+    players: (
       <section className="panel">
         <div className="panel-head">
           <h2>
@@ -319,7 +363,8 @@ function GmDashboardView({ mp, notify, localApi }) {
           </div>
         )}
       </section>
-
+    ),
+    local: (
       <GmLocalPlayers
         players={localApi.players}
         addPlayer={localApi.addPlayer}
@@ -331,14 +376,20 @@ function GmDashboardView({ mp, notify, localApi }) {
         cmdVars={cmdVars}
       />
 
+    ),
+    sound: (
       <GmSoundboard mp={mp} notify={notify} />
-
+    ),
+    time: (
       <GmTimeTracker onLog={gmLog} shareTime={mp.shareTime} />
-
+    ),
+    generators: (
       <GmGenerators notify={notify} />
-
+    ),
+    factions: (
       <GmFactions notify={notify} />
-
+    ),
+    combat: (
       <GmCombatTracker
         onLog={gmLog}
         shareNpcs={mp.shareNpcs}
@@ -348,11 +399,14 @@ function GmDashboardView({ mp, notify, localApi }) {
           gmLog('combat.log.initiative', {});
         }}
       />
-
+    ),
+    map: (
       <GmBattleMap mp={mp} notify={notify} />
-
+    ),
+    handouts: (
       <GmHandouts mp={mp} notify={notify} />
-
+    ),
+    stash: (
       <SharedStash
         mode="gm"
         items={mp.stash}
@@ -362,9 +416,11 @@ function GmDashboardView({ mp, notify, localApi }) {
         onItemChange={mp.stashUpdateItem}
         onClear={mp.clearStash}
       />
-
+    ),
+    notes: (
       <GmNotes />
-
+    ),
+    livelog: (
       <Panel
         id="gm-livelog"
         icon={ScrollText}
@@ -405,9 +461,35 @@ function GmDashboardView({ mp, notify, localApi }) {
           )}
         </ul>
       </Panel>
+    ),
+  };
+
+  return (
+    <div className="gm-dash">
+      {/* Alles ausser dem Wuerfel-Panel steckt in EINEM Wrapper — siehe
+          Kommentar bei .sheet-main in CharacterSheet.jsx: sonst spannt die
+          gemeinsame Wuerfel-Spalte mehrere Grid-Zeilen, und WebKit/Safari
+          rechnet deren volle Hoehe komplett der ersten Zeile zu. */}
+      <div className="sheet-main gm-main">
+        <DndContext sensors={gmSensors} onDragEnd={({ active, over }) => { if (over) reorderPanels(active.id, over.id); }}>
+          <SortableContext items={panelOrder} strategy={rectSortingStrategy}>
+            {panelOrder.map((id) => (
+              <SortableItem key={id} id={id} anchor className={wideIds.has(id) ? 'sortable-wide' : ''}>
+                {PANELS[id]}
+              </SortableItem>
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       <GmDicePanel onLog={gmLog} log={mp.liveLog} result={diceResult} pushRoll={pushRoll} />
+      <SectionNav
+        items={[
+          ...GM_PANELS.filter((p) => panelOrder.includes(p.id)).sort((a, b) => panelOrder.indexOf(a.id) - panelOrder.indexOf(b.id))
+            .map((p) => ({ id: p.id, icon: p.icon, label: t(`nav.gm.${p.id}`) })),
+          { id: 'dice', icon: Dices, label: t('nav.dice') },
+        ]}
+      />
     </div>
   );
 }

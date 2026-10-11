@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { playDiceRoll } from '../utils/sound.js';
 
 // Wuerfel-Optik: SVG-Glyphen, Knoepfe mit Wurf-Animation und eine
 // Ergebnis-Buehne, in der die Zahl kurz "taumelt" und dann landet.
@@ -291,6 +292,7 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
 
   useEffect(() => {
     if (!result) return undefined;
+    playDiceRoll(result.id);
     const span = Math.max(6, result.max || 20);
     setRolling(true);
     setShown(1 + Math.floor(Math.random() * span));

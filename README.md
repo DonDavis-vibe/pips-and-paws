@@ -7,7 +7,7 @@
 **Character sheet · GM dashboard · serverless real-time multiplayer**
 for the **Mausritter** tabletop RPG — all in the browser, no sign-up.
 
-### ▶ [dondavis-vibe.github.io/pips-and-paws](https://dondavis-vibe.github.io/pips-and-paws/)
+### ▶ [mausritter.redneck-design.de](https://mausritter.redneck-design.de/)
 
 <sub>English · German · French · Italian · Japanese — everything stays local in your browser, no account, no server</sub>
 
@@ -38,6 +38,9 @@ data passing through the operator's server.
 - **Dice** — d6 and d66 roll as real tumbling 3D cubes; saves (d20 ≤ attribute) with
   advantage / disadvantage. Clicking a weapon's damage value rolls it (one-paw and
   two-paw separately). Every roll shows up in the dice panel.
+- **Jump bar** — a bottom bar jumps to profile, stats, inventory, map, dice … (on
+  the GM dashboard too). Panels can be reordered by their grip, the dashboard uses
+  wide monitors in two columns. Weapons and items can be renamed, rolls rattle.
 - **Automatic damage chain to SRD** — STR damage triggers a STR save on the spot;
   fail it and the mouse is Injured and incapacitated until it rests. Hit 0 STR and
   it dies — the app never deletes or locks anything on its own, it just says so.
@@ -159,7 +162,10 @@ npm run preview
 npm run lint       # oxlint
 ```
 
-A push to `main` builds and deploys via GitHub Actions to GitHub Pages.
+The site is hosted on its own web server (<https://mausritter.redneck-design.de/>), not on GitHub.
+`npm run release` lints, builds and injects the imprint contact block (from the local,
+git-ignored `KONTAKT.local.html`, template: `public/KONTAKT.beispiel.html`); upload the
+contents of `dist/` to the server by hand.
 
 **Stack:** Vite + React 19 (plain JS, no TypeScript), `@dnd-kit` for the inventory
 grid, `peerjs` for multiplayer, `lucide-react` for icons. No backend, no account.
@@ -171,7 +177,7 @@ and shadows, never grid/flex structure. Line art lives in `src/components/Art.js
 
 ## Contributing
 
-Pull requests are welcome — translations especially. The UI ships in English,
+Contributions are welcome — translations especially (reach out on [Discord](https://discord.gg/s6J6JqBQ8w)). The UI ships in English,
 German, Spanish, French, Italian and Japanese. Spanish was contributed by
 [@Salgraphics](https://github.com/Salgraphics); FR/IT/JA are machine-assisted, so
 corrections from native speakers are very welcome. Keys added after the Spanish
@@ -201,7 +207,7 @@ The GM soundboard's built-in stingers (`src/assets/sfx/`) are from Kenney's
 
 ## Legal
 
-The German [imprint &amp; privacy policy](https://dondavis-vibe.github.io/pips-and-paws/impressum.html)
+The German [imprint &amp; privacy policy](https://mausritter.redneck-design.de/impressum.html)
 is a single page (`public/impressum.html`), linked from the footer. The privacy
 part describes the actual technical setup; update it if external services or
 stored keys change. Anyone forking the code and hosting it themselves needs their

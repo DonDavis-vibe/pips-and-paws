@@ -17,6 +17,9 @@ img/*
 !img/keine-maus.jpeg
 !img/tisch-leer.jpeg
 
+# Lokaler Kontaktblock fuer das Impressum (siehe scripts/inject-kontakt.py)
+KONTAKT.local.html
+
 # Rechtstexte-Quellen (die fertigen Seiten liegen in public/)
 imp/
 

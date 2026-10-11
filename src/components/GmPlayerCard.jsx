@@ -7,7 +7,7 @@ import { useLang, loc } from '../i18n/index.jsx';
 import { REST_KINDS } from '../rules/rest.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { gritForLevel, ALL_SLOTS, PAW_SLOTS } from '../rules/character.js';
-import { CONDITION_CATALOG } from '../data/items.js';
+import { CONDITION_CATALOG, itemLabel } from '../data/items.js';
 import { HIRELING_CATALOG } from '../rules/hirelings.js';
 import AddItemMenu from './AddItemMenu.jsx';
 import Portrait from './Portrait.jsx';
@@ -250,7 +250,7 @@ export default function GmPlayerCard({
                 <div key={s} className={`gm-inv-slot${it ? '' : ' empty'}${cell?.cont ? ' cont' : ''}`}>
                   <span className="gm-inv-pos">{SLOT_LABELS[s]}</span>
                   <span>
-                    {it ? loc(it.name, lang) : cell?.cont ? '↑' : '—'}
+                    {it ? itemLabel(it, loc(it.name, lang)) : cell?.cont ? '↑' : '—'}
                     {it?.usage ? ` (${it.usage.current}/${it.usage.max})` : ''}
                   </span>
                 </div>
@@ -261,7 +261,7 @@ export default function GmPlayerCard({
           {gritIds.size ? (
             <div className="gm-player-notes">
               <span className="gm-mini-label">{t('res.grit')}</span>
-              <p>{[...gritIds].map((id) => loc(items[id]?.name, lang)).filter(Boolean).join(', ')}</p>
+              <p>{[...gritIds].map((id) => itemLabel(items[id], loc(items[id]?.name, lang))).filter(Boolean).join(', ')}</p>
             </div>
           ) : null}
 

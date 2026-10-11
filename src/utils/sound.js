@@ -110,3 +110,57 @@ export function fadeOutAllAudio(durationMs = 3500) {
     }, stepTime);
   });
 }
+
+// ---- Wuerfel-Geraeusch ---------------------------------------------------
+// Synthetisch (Web Audio) statt einer Datei: ein kurzes Klackern, das in ein
+// dumpfes Aufsetzen ausklingt. Keine Lizenz, keine Dateigroesse. Folgt dem
+// eigenen Pegel (VolumeControl) — Regler auf 0 schaltet es stumm.
+let diceCtx = null;
+let lastDiceSoundId = null;
+
+function noiseBuffer(ctx, seconds) {
+  const buf = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * seconds)), ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
+  return buf;
+}
+
+function clack(ctx, when, freq, gain, len) {
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer(ctx, len);
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = freq;
+  filter.Q.value = 1.4;
+  const amp = ctx.createGain();
+  amp.gain.setValueAtTime(gain, when);
+  amp.gain.exponentialRampToValueAtTime(0.001, when + len);
+  src.connect(filter).connect(amp).connect(ctx.destination);
+  src.start(when);
+}
+
+// `id` verhindert, dass dieselbe Wurfbuehne beim erneuten Einblenden (Panel
+// auf-/zuklappen, Neuaufbau) denselben Wurf noch einmal vertont.
+export function playDiceRoll(id) {
+  if (id != null) {
+    if (id === lastDiceSoundId) return;
+    lastDiceSoundId = id;
+  }
+  if (myVolume <= 0) return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!diceCtx) diceCtx = new Ctx();
+    if (diceCtx.state === 'suspended') diceCtx.resume().catch(() => { /* Autoplay blockiert */ });
+    const t0 = diceCtx.currentTime + 0.01;
+    const vol = 0.5 * myVolume;
+    // Klackern: abnehmende Abstaende und Lautstaerke, leicht variierende Tonhoehe.
+    let at = 0;
+    for (let i = 0; i < 7; i += 1) {
+      clack(diceCtx, t0 + at, 1800 + Math.random() * 1800, vol * (1 - i * 0.09), 0.05);
+      at += 0.045 + i * 0.012;
+    }
+    // Aufsetzen: tiefer, kurzer Schlag.
+    clack(diceCtx, t0 + at + 0.03, 420, vol * 1.2, 0.12);
+  } catch { /* ignorieren */ }
+}

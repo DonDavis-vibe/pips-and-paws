@@ -21,7 +21,17 @@ export default function BattleMapCanvas({ onReady, onChange, besitzer, bestaetig
     });
     if (besitzer) map.setBesitzer(besitzer);
     onReady?.(map);
-    return () => onReady?.(null);
+    // Die Engine zeichnet sonst nur bei Fenstergroessen-Aenderung neu — aendert
+    // sich die Buehne selbst (Vollbild, Werkzeugleiste ein-/ausgeklappt), muss
+    // sie nachziehen, sonst bleibt der Rest der Flaeche leer.
+    const observer = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(() => map.zeichnen());
+    observer?.observe(canvasRef.current);
+    return () => {
+      observer?.disconnect();
+      onReady?.(null);
+    };
     // Die Engine wird bewusst genau einmal erzeugt — Karten-, Token- und
     // Werkzeugwechsel laufen ueber die von `onReady` gereichte Instanz, nicht
     // ueber ein Neu-Erzeugen der Leinwand.

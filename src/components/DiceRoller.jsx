@@ -111,6 +111,7 @@ export default function DiceRoller({ character, onEvent, external }) {
 
   return (
     <Panel
+      anchorId="dice"
       id="dice"
       icon={Dices}
       title={t('dice.title')}

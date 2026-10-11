@@ -243,7 +243,12 @@ export default function GmBattleMap({ mp, notify }) {
             <input type="checkbox" checked={mp.mapShared} onChange={(e) => mp.setMapShared(e.target.checked)} />
             {t('map.share')}
           </label>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFullscreen((f) => !f)}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => {
+              // Im Vollbild liegen die Werkzeuge oben (siehe .battlemap-fullscreen in
+              // theme.css) — also gleich einblenden, statt erst "Werkzeuge" zu suchen.
+              if (!fullscreen) setAdvanced(true);
+              setFullscreen(!fullscreen);
+            }}>
             {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         </div>

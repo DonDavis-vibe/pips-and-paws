@@ -1,16 +1,17 @@
 # Mitmachen bei Pips & Paws
 
-Danke fürs Interesse! Pull Requests sind willkommen — vor allem Übersetzungen,
-Bugfixes und kleine Verbesserungen.
+Danke fürs Interesse! Beiträge sind willkommen — vor allem Übersetzungen,
+Bugfixes und kleine Verbesserungen. Pips & Paws liegt nicht mehr auf GitHub;
+Absprachen und Einsendungen laufen über den [Discord](https://discord.gg/s6J6JqBQ8w).
 
 ## Ablauf
 
-1. Repo forken, Branch anlegen.
+1. Quelltext-Kopie anlegen und Änderungen auf einem eigenen Stand vornehmen.
 2. `npm install`, `npm run dev` (Port 5173).
 3. Vor dem Commit: `npm run lint` und `npm run build` müssen grün sein.
-4. PR gegen `main` öffnen. Kurz beschreiben, was und warum.
+4. Änderung als Patch/Archiv über den Discord einreichen. Kurz beschreiben, was und warum.
 
-Der Code steht unter **MIT** (`LICENSE`). Mit einem PR stellst du deinen Beitrag
+Der Code steht unter **MIT** (`LICENSE`). Mit einer Einsendung stellst du deinen Beitrag
 unter dieselbe Lizenz. Ein CLA gibt es nicht.
 
 ## Eine Sprache hinzufügen
@@ -53,18 +54,19 @@ größerer Schritt und keine Voraussetzung dafür, die UI-Sprache freizuschalten
 ## Rechtliches (bitte lesen)
 
 - **Impressum / Datenschutz** (`public/impressum.html`) nennen den **Betreiber**
-  der Original-Seite. Wer per PR beiträgt, ist **kein Betreiber** und wird dort
+  der Original-Seite. Wer etwas beiträgt, ist **kein Betreiber** und wird dort
   **nicht** eingetragen — Übersetzungen und Code ändern daran nichts.
-- Wer den Fork **selbst deployt**, braucht ein **eigenes** Impressum und eine
+- Wer die Kopie **selbst deployt**, braucht ein **eigenes** Impressum und eine
   eigene Datenschutzerklärung (deutsche Rechtspflicht bei Betrieb aus DE). Der
-  Kontaktblock kommt nicht aus dem Code, sondern aus dem Repo-Secret
-  `IMPRESSUM_KONTAKT` (Vorlage: `public/KONTAKT.beispiel.html`, Einrichtung in
-  `.github/workflows/deploy.yml`). Ohne das Secret bricht der Deploy bewusst ab.
+  Kontaktblock kommt nicht aus dem Code, sondern aus der lokalen Datei
+  `KONTAKT.local.html` bzw. der Variable `IMPRESSUM_KONTAKT` (Vorlage:
+  `public/KONTAKT.beispiel.html`, Einsetzen via `npm run release` /
+  `scripts/inject-kontakt.py`). Ohne Kontaktblock bricht der Release-Build bewusst ab.
   Den Datenschutz-Text in `public/impressum.html` an das eigene Deployment anpassen.
-- Fügt ein PR einen **neuen externen Dienst** hinzu (CDN, API, Font-Anbieter,
-  Analytics, Fehler-Tracking …), bitte im PR ausdrücklich erwähnen. Die
+- Fügt eine Einsendung einen **neuen externen Dienst** hinzu (CDN, API, Font-Anbieter,
+  Analytics, Fehler-Tracking …), bitte ausdrücklich erwähnen. Die
   Datenschutzerklärung muss den tatsächlichen Aufbau abbilden und wird dann
-  vor dem Merge ergänzt.
+  vor der Übernahme ergänzt.
 
 ## Gestaltung ändern
 
@@ -85,4 +87,4 @@ Regeldaten-Korrekturen (mit SRD-Stelle).
 ## Was vorher abgesprochen werden sollte
 
 Größere Feature-Umbauten, neue Abhängigkeiten, alles, was den Multiplayer-
-oder Speicher-Aufbau ändert — vorher kurz ein Issue aufmachen.
+oder Speicher-Aufbau ändert — vorher kurz im Discord absprechen.

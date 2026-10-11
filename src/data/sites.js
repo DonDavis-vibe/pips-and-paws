@@ -165,7 +165,7 @@ export const TRAPS = rows([
   ['Circle of enchanted mushrooms, with a young mouse inside. Those within try desperately to get others to enter.',
     'Ring verzauberter Pilze mit einer jungen Maus darin. Wer darin steht, versucht verzweifelt, andere hineinzulocken.'],
   ['Floor is covered in sticky glue. Requires a STR save to break a foot loose.',
-    'Der Boden ist mit klebrigem Leim bedeckt. Einen Fuß zu lösen verlangt einen STR-Rettungswurf.'],
+    'Der Boden ist mit klebrigem Leim bedeckt. Einen Fuß zu lösen verlangt eine STR-Probe.'],
 ]);
 
 // d6

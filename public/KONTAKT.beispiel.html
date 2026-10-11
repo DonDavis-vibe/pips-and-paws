@@ -1,15 +1,14 @@
 <!--
-    VORLAGE fuer das Repo-Secret IMPRESSUM_KONTAKT.
+    VORLAGE fuer den lokalen Kontaktblock KONTAKT.local.html.
 
     Diese Datei enthaelt bewusst nur Platzhalter. Die echten Angaben werden NICHT
-    committet, sondern einmalig als Secret hinterlegt:
-        Settings > Secrets and variables > Actions > New repository secret
-        Name:  IMPRESSUM_KONTAKT
-        Wert:  der fertige Block unten, mit echten Daten (Markup unveraendert lassen)
+    committet, sondern in eine lokale Datei im Projektroot geschrieben (gitignored):
+        cp public/KONTAKT.beispiel.html KONTAKT.local.html
+        Inhalt: der fertige Block unten, mit echten Daten (Markup unveraendert lassen)
+    Alternativ geht die Umgebungsvariable IMPRESSUM_KONTAKT.
 
-    Der Deploy-Workflow (.github/workflows/deploy.yml) setzt den Secret-Inhalt an
-    die beiden Kontakt-Stellen in imp/impressum.html (Impressum und Datenschutz
-    Ziffer 1).
+    scripts/build-release.sh (npm run release) setzt den Inhalt an die beiden
+    Kontakt-Stellen in dist/impressum.html (Impressum und Datenschutz Ziffer 1).
 
     Verfremdung fuers Live-HTML:
       - Telefon: Ziffern paarweise mit schmalem geschuetztem Leerzeichen (&#8239;)

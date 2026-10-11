@@ -151,7 +151,7 @@ export const CONDITION_CATALOG = {
   },
   frightened: {
     name: { de: 'Ängstlich', en: 'Frightened', es: 'Asustado' },
-    effect: { de: 'WIL-Rettungswurf nötig, um sich der Quelle der Angst zu nähern.', en: 'WIL save to approach the source of fear.', es: 'Salvación de VOL para acercarse a la fuente del miedo.' },
+    effect: { de: 'WIL-Probe nötig, um sich der Quelle der Angst zu nähern.', en: 'WIL save to approach the source of fear.', es: 'Salvación de VOL para acercarse a la fuente del miedo.' },
     clear: { de: 'Nach einer kurzen Rast', en: 'After a short rest', es: 'Tras un descanso corto' },
   },
   hungry: {
@@ -161,17 +161,17 @@ export const CONDITION_CATALOG = {
   },
   injured: {
     name: { de: 'Verletzt', en: 'Injured', es: 'Herido' },
-    effect: { de: 'Nachteil auf STR- und DEX-Rettungswürfe. Bei kritischem Schaden oder schwerer Verletzung.', en: 'Disadvantage on STR & DEX saves. From critical damage or serious injury.', es: 'Desventaja en tiradas de FUE y DES. Por daño crítico o herida física grave.' },
+    effect: { de: 'Nachteil auf STR- und DEX-Proben. Bei kritischem Schaden oder schwerer Verletzung.', en: 'Disadvantage on STR & DEX saves. From critical damage or serious injury.', es: 'Desventaja en tiradas de FUE y DES. Por daño crítico o herida física grave.' },
     clear: { de: 'Nach einer vollen Rast', en: 'After a full rest', es: 'Después de un descanso completo' },
   },
   drained: {
     name: { de: 'Entkräftet', en: 'Drained', es: 'Agotado' },
-    effect: { de: 'Nachteil auf WIL-Rettungswürfe. Folge eines misslungenen Zaubers.', en: 'Disadvantage on WIL saves. From a failed spellcast.', es: 'Desventaja en tiradas de VOL. Por haber fallado un hechizo.' },
+    effect: { de: 'Nachteil auf WIL-Proben. Folge eines misslungenen Zaubers.', en: 'Disadvantage on WIL saves. From a failed spellcast.', es: 'Desventaja en tiradas de VOL. Por haber fallado un hechizo.' },
     clear: { de: 'Nach einer vollen Rast', en: 'After a full rest', es: 'Después de un descanso completo' },
   },
   encumbered: {
     name: { de: 'Belastet', en: 'Encumbered', es: 'Sobrecargado' },
-    effect: { de: 'Nachteil auf ALLE Rettungswürfe, kein Rennen. Wenn mehr getragen wird als Plätze frei sind.', en: 'Disadvantage on ALL saves, cannot run. When carrying more than your slots allow.', es: 'Desventaja en TODAS las tiradas, no puedes correr. Como resultado de llevar mas objetos de los que caben en tu inventario.' },
+    effect: { de: 'Nachteil auf ALLE Proben, kein Rennen. Wenn mehr getragen wird als Plätze frei sind.', en: 'Disadvantage on ALL saves, cannot run. When carrying more than your slots allow.', es: 'Desventaja en TODAS las tiradas, no puedes correr. Como resultado de llevar mas objetos de los que caben en tu inventario.' },
     clear: { de: 'Sobald genug Platz frei ist', en: 'Once enough slots are free', es: 'Una vez que has liberado espacio en el inventario' },
   },
 };
@@ -186,10 +186,10 @@ export const SPELL_CATALOG = {
   restore: { name: { de: 'Wiederherstellen', en: 'Restore', es: 'Restaurar' }, effect: { de: 'Entfernt "Erschöpft" oder "Ängstlich" von [WUERFEL]+1 Kreaturen.', en: 'Remove Exhausted or Frightened from [DICE]+1 creatures.', es: 'Despeja el Estado Asustado o Cansado de [DADOS +1] criaturas.' } },
   be_understood: { name: { de: 'Verstanden werden', en: 'Be Understood', es: 'Comprensión' }, effect: { de: 'Macht dich [WUERFEL] Kreaturen einer anderen Art für [WUERFEL] Züge verständlich.', en: 'Make your meaning clear to [DICE] creatures of another species for [DICE] Turns.', es: 'Hace que [DADOS] criaturas de otra especie entiendan tus palabras durante [DADOS] turnos.' } },
   ghost_beetle: { name: { de: 'Geisterkäfer', en: 'Ghost Beetle', es: 'Escarabajo fantasma' }, effect: { de: 'Illusorischer Käfer, trägt 6 Inventarplätze, für [WUERFEL] x 6 Züge.', en: 'Illusory beetle carrying 6 inventory slots for [DICE] x 6 Turns.', es: 'Crea un escarabajo ilusorio que puede cargar 6 espacios de inventario durante [DADOS x6] turnos.' } },
-  light: { name: { de: 'Licht', en: 'Light', es: 'Luz cegadora' }, effect: { de: '[WUERFEL] Kreaturen: WIL-Rettungswurf oder betäubt. Oder: Fackellicht für [SUMME] Züge.', en: '[DICE] creatures WIL save or stunned. Or: torch-bright light for [SUM] Turns.', es: 'Obliga a [DADOS] criaturas a pasar una salvación de VOL o quedar aturdidas. Además, puedes crear una luz que brilla como una antorcha durante [SUMA] turnos.' } },
+  light: { name: { de: 'Licht', en: 'Light', es: 'Luz cegadora' }, effect: { de: '[WUERFEL] Kreaturen: WIL-Probe oder betäubt. Oder: Fackellicht für [SUMME] Züge.', en: '[DICE] creatures WIL save or stunned. Or: torch-bright light for [SUM] Turns.', es: 'Obliga a [DADOS] criaturas a pasar una salvación de VOL o quedar aturdidas. Además, puedes crear una luz que brilla como una antorcha durante [SUMA] turnos.' } },
   invisible_ring: { name: { de: 'Unsichtbarer Ring', en: 'Invisible Ring', es: 'Anillo invisible' }, effect: { de: 'Unsichtbarer, unbeweglicher Kraftring ([WUERFEL] x 6") für [WUERFEL] Züge.', en: 'Invisible, immovable ring of force ([DICE] x 6") for [DICE] Turns.', es: 'Crea un círculo de fuerza de [DADOS x15] cm. Es invisible e inamovible. Dura [DADOS] turnos.' } },
-  knock: { name: { de: 'Öffnen', en: 'Knock', es: 'Apertura' }, effect: { de: 'Öffnet Tür/Behälter wie ein Rettungswurf mit STR 10 + [WUERFEL] x 4.', en: 'Open a door/container as a Save with STR 10 + [DICE] x 4.', es: 'Éxito automático en una salvación de FUE para abrir puertas u objetos a una distancia de [DADOS x15] cm.' } },
-  grease: { name: { de: 'Schmiere', en: 'Grease', es: 'Grasa' }, effect: { de: '[WUERFEL] x 6" Fläche mit rutschigem, brennbarem Fett. DEX-Rettungswurf oder hinfallen.', en: '[DICE] x 6" area of slippery, flammable grease. DEX save or fall prone.', es: 'Cubre [DADOS x15] cm de diámetro con grasa resbaladiza e inflamable. Obliga a las criaturas en el área a una salvación de DES o quedar tumbadas.' } },
+  knock: { name: { de: 'Öffnen', en: 'Knock', es: 'Apertura' }, effect: { de: 'Öffnet Tür/Behälter wie eine Probe mit STR 10 + [WUERFEL] x 4.', en: 'Open a door/container as a Save with STR 10 + [DICE] x 4.', es: 'Éxito automático en una salvación de FUE para abrir puertas u objetos a una distancia de [DADOS x15] cm.' } },
+  grease: { name: { de: 'Schmiere', en: 'Grease', es: 'Grasa' }, effect: { de: '[WUERFEL] x 6" Fläche mit rutschigem, brennbarem Fett. DEX-Probe oder hinfallen.', en: '[DICE] x 6" area of slippery, flammable grease. DEX save or fall prone.', es: 'Cubre [DADOS x15] cm de diámetro con grasa resbaladiza e inflamable. Obliga a las criaturas en el área a una salvación de DES o quedar tumbadas.' } },
   grow: { name: { de: 'Wachsen', en: 'Grow', es: 'Crecimiento' }, effect: { de: 'Vergrössert eine Kreatur auf das [WUERFEL]+1-fache für 1 Zug.', en: 'Grow a creature to [DICE]+1 times its size for 1 Turn.', es: 'Hace crecer a una criatura hasta [DADOS +1] veces su tamaño original durante 1 turno.' } },
   invisibility: { name: { de: 'Unsichtbarkeit', en: 'Invisibility', es: 'Invisibilidad' }, effect: { de: 'Kreatur unsichtbar für [WUERFEL] Züge. Bewegung verkürzt um 1 Zug.', en: 'Creature invisible for [DICE] Turns. Movement reduces duration by 1 Turn.', es: 'Hace a una criatura invisible durante [DADOS] turnos. Si se mueve, reduce la duración en 1 turno.' } },
   catnip: { name: { de: 'Katzenminze', en: 'Catnip', es: 'Catnip' }, effect: { de: 'Macht einen Gegenstand für [WUERFEL] Züge zum unwiderstehlichen Katzen-Köder.', en: 'Turn an object into an irresistible cat lure for [DICE] Turns.', es: 'Convierte un objeto en un premio irresistible para los gatos. Dura [DADOS] turnos.' } },
@@ -202,6 +202,16 @@ function baseFromKey(key) {
 }
 
 // Erzeugt eine frische Instanz aus einem Katalog-/Zauber-Eintrag oder einen Custom-Gegenstand.
+// Anzeigename eines Gegenstands: hat die Spielerin ihm einen eigenen Namen
+// gegeben (`customName`), steht der vorn und der Katalogname in Klammern —
+// so bleibt am Tisch erkennbar, was es ist (z. B. "Nadelstich (Schwert)").
+// `base` ist der bereits in die Sprache aufgeloeste Katalogname.
+export function itemLabel(item, base) {
+  const custom = typeof item?.customName === 'string' ? item.customName.trim() : '';
+  if (!custom) return base;
+  return base && base !== custom ? `${custom} (${base})` : custom;
+}
+
 export function makeItem(key, overrides = {}) {
   const spec = baseFromKey(key) || {
     key: null,

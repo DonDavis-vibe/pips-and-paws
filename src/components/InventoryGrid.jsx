@@ -1,3 +1,4 @@
+import { itemLabel } from '../data/items.js';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useLang, loc } from '../i18n/index.jsx';
@@ -36,7 +37,7 @@ function Slot({ slot, item, onChange, onRemove, onStash, onRollDamage, wide }) {
 function LinkedSlot({ item, lang }) {
   const { t } = useLang();
   return (
-    <div className="inv-slot slot-linked" title={t('inv.linkedBy', { name: loc(item?.name, lang) })}>
+    <div className="inv-slot slot-linked" title={t('inv.linkedBy', { name: itemLabel(item, loc(item?.name, lang)) })}>
       <span className="slot-linked-mark" aria-hidden="true">↑</span>
     </div>
   );

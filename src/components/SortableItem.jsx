@@ -8,7 +8,7 @@ import { useLang } from '../i18n/index.jsx';
 // nebeneinander statt uebereinander — kein Ueberlappen mit Panel-Kopf oder
 // -Knoepfen. So funktioniert Umordnen fuer jedes Panel gleich, auch fuer
 // die, die ihr eigenes <Panel> intern rendern (HirelingsPanel, PartyNpcs, ...).
-export default function SortableItem({ id, children, className = '' }) {
+export default function SortableItem({ id, children, className = '', anchor = false }) {
   const { t } = useLang();
   const {
     attributes, listeners, setNodeRef, transform, transition, isDragging,
@@ -22,6 +22,7 @@ export default function SortableItem({ id, children, className = '' }) {
   return (
     <div
       ref={setNodeRef}
+      id={anchor ? `sec-${id}` : undefined}
       style={style}
       className={`sortable-item${isDragging ? ' sortable-item-dragging' : ''}${className ? ` ${className}` : ''}`}
     >

@@ -1,9 +1,9 @@
 import {
-  Github, BookOpen, ExternalLink, Heart, Link as LinkIcon, MessagesSquare, Bug, CircleHelp, Coffee,
+  BookOpen, ExternalLink, Heart, Link as LinkIcon, MessagesSquare, Bug, CircleHelp, Coffee,
 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import {
-  PRODUCER, PRODUCER_URL, REPO_URL, SITE_URL, DISCORD_URL, KOFI_URL, APP_VERSION, LINKS, TRANSLATOR_ES_URL,
+  PRODUCER, PRODUCER_URL, SITE_URL, DISCORD_URL, KOFI_URL, APP_VERSION, LINKS, TRANSLATOR_ES_URL,
 } from '../config.js';
 import { ArtMouse } from './Art.jsx';
 
@@ -46,9 +46,6 @@ export default function Footer({ onHelp }) {
           <Ext href={SITE_URL} icon={LinkIcon}>
             {t('footer.liveApp')}
           </Ext>
-          <Ext href={REPO_URL} icon={Github}>
-            {t('footer.github')}
-          </Ext>
           <Ext href={LINKS.mausritter} icon={Heart}>
             {t('footer.mausritter')}
           </Ext>
@@ -69,7 +66,7 @@ export default function Footer({ onHelp }) {
           <Ext href={DISCORD_URL} icon={MessagesSquare}>
             {t('footer.discord')}
           </Ext>
-          <Ext href={`${REPO_URL}/issues/new`} icon={Bug}>
+          <Ext href={DISCORD_URL} icon={Bug}>
             {t('footer.reportBug')}
           </Ext>
           <Ext href={KOFI_URL} icon={Coffee}>

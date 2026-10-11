@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Setzt den Kontaktblock aus dem Secret IMPRESSUM_KONTAKT ins Impressum ein.
+"""Setzt den Kontaktblock ins Impressum des Builds (dist/) ein.
 
-Laeuft ausschliesslich im Deployment. Im Repo steht an den Kontakt-Stellen nur
-ein Platzhalter zwischen <!--KONTAKT:START--> / <!--KONTAKT:END-->, damit Name,
+Quelle des Blocks: Umgebungsvariable IMPRESSUM_KONTAKT oder, falls nicht gesetzt,
+die lokale Datei KONTAKT.local.html im Projektroot (gitignored, Vorlage:
+public/KONTAKT.beispiel.html). Im Repo steht an den Kontakt-Stellen nur ein
+Platzhalter zwischen <!--KONTAKT:START--> / <!--KONTAKT:END-->, damit Name,
 Anschrift und E-Mail nicht in Klons, Forks oder der Git-History landen.
 
-Bricht mit Exit-Code 1 ab, wenn das Secret fehlt oder nicht die erwartete Anzahl
-Platzhalter gefunden wird.
+Aufruf normalerweise ueber scripts/build-release.sh. Bricht mit Exit-Code 1 ab,
+wenn der Kontaktblock fehlt oder nicht die erwartete Anzahl Platzhalter gefunden
+wird.
 
 --- PRO PROJEKT ANPASSEN ---
 """
@@ -22,9 +25,13 @@ from pathlib import Path
 ZIEL = Path(ZIEL_PFAD)
 MARKER = re.compile(r"<!--KONTAKT:START-->.*?<!--KONTAKT:END-->", re.DOTALL)
 
+QUELLE = Path(__file__).resolve().parent.parent / "KONTAKT.local.html"
+
 kontakt = os.environ.get("IMPRESSUM_KONTAKT", "").strip()
+if not kontakt and QUELLE.exists():
+    kontakt = QUELLE.read_text(encoding="utf-8").strip()
 if not kontakt:
-    sys.exit("FEHLER: Secret IMPRESSUM_KONTAKT ist nicht gesetzt oder leer.")
+    sys.exit("FEHLER: Weder IMPRESSUM_KONTAKT noch KONTAKT.local.html vorhanden/gefuellt.")
 if not ZIEL.exists():
     sys.exit(f"FEHLER: {ZIEL} nicht gefunden.")
 

@@ -13,12 +13,12 @@
     WICHTIG FUER FORKS / EIGENE DEPLOYMENTS
     ================================================================
     Der Kontaktblock des Impressums (Name, Anschrift, Telefon, E-Mail)
-    steht NICHT im Quelltext. Er wird beim GitHub-Pages-Deployment aus
-    dem Repo-Secret IMPRESSUM_KONTAKT zwischen die KONTAKT-Marker
-    eingesetzt (siehe .github/workflows/deploy.yml).
+    steht NICHT im Quelltext. Er wird beim Release-Build aus
+    der lokalen Datei KONTAKT.local.html (oder der Variable IMPRESSUM_KONTAKT)
+    zwischen die KONTAKT-Marker eingesetzt (siehe scripts/inject-kontakt.py).
 
     Wer diesen Code forkt und selbst irgendwo veroeffentlicht, MUSS die
-    eigenen Angaben als Secret hinterlegen. Fuer eine aus Deutschland
+    eigenen Angaben lokal hinterlegen. Fuer eine aus Deutschland
     betriebene Website sind Impressum (Paragraf 5 DDG) und eine
     zutreffende Datenschutzerklaerung Pflicht.
 
@@ -144,10 +144,10 @@
         </div>
 
         <h2>2. Grundsätzliches</h2>
-        <p>Pips &amp; Paws läuft vollständig im Browser (clientseitig). Es gibt keinen eigenen Server, der Charakterdaten, Würfelergebnisse, Bilder oder Notizen empfängt, speichert oder auswertet. Die Seite wird kostenlos über GitHub Pages ausgeliefert. Es werden keine Analyse- oder Tracking-Dienste eingesetzt, keine Werbung eingebunden und keine Cookies zu Analyse- oder Marketingzwecken gesetzt.</p>
+        <p>Pips &amp; Paws läuft vollständig im Browser (clientseitig). Es gibt kein Backend, das Charakterdaten, Würfelergebnisse, Bilder oder Notizen empfängt, speichert oder auswertet. Die Seite wird als statische Dateien vom Webserver des Betreibers ausgeliefert. Es werden keine Analyse- oder Tracking-Dienste eingesetzt, keine Werbung eingebunden und keine Cookies zu Analyse- oder Marketingzwecken gesetzt.</p>
 
-        <h2>3. Hosting (GitHub Pages)</h2>
-        <p>Diese Seite wird über GitHub Pages ausgeliefert, einem Dienst der GitHub, Inc. / GitHub B.V. Beim Aufruf verarbeitet GitHub als Hosting-Anbieter automatisch technische Zugriffsdaten (u.a. IP-Adresse, Datum und Uhrzeit des Zugriffs, angeforderte Datei, verwendeter Browser) in Server-Logs. Das dient dem technischen Betrieb und der Absicherung der Auslieferung (Art. 6 Abs. 1 lit. f DSGVO, berechtigtes Interesse an einem funktionierenden und sicheren Betrieb). Näheres regelt die <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">Datenschutzerklärung von GitHub</a>.</p>
+        <h2>3. Hosting</h2>
+        <p>Diese Seite wird als statische Dateien über den Webserver des Betreibers (Domain <code>redneck-design.de</code>) ausgeliefert. Beim Aufruf verarbeitet der Webserver automatisch technische Zugriffsdaten (u.a. IP-Adresse, Datum und Uhrzeit des Zugriffs, angeforderte Datei, verwendeter Browser) in Server-Logs. Das dient dem technischen Betrieb und der Absicherung der Auslieferung (Art. 6 Abs. 1 lit. f DSGVO, berechtigtes Interesse an einem funktionierenden und sicheren Betrieb). Die Daten werden nicht mit anderen Daten zusammengeführt und nicht zur Profilbildung genutzt.</p>
 
         <h2>4. Externe Ressourcen</h2>
         <p>Der Programmcode und alle Symbole sind fest in die Seite eingebaut und werden nicht von Drittanbietern nachgeladen. Die einzige Ausnahme sind die Schriftarten:</p>

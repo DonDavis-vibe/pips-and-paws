@@ -1,4 +1,5 @@
 import { loc } from '../i18n/index.jsx';
+import { itemLabel } from '../data/items.js';
 
 // Stabile Gruppen-ID: bleibt ueber Sitzungen gleich (die PeerJS-ID tut das nicht).
 export function slug(s) {
@@ -10,7 +11,7 @@ export const partyId = (character, fallback) => `pc-${slug(character?.name) || s
 function sheetOf(character, lang) {
   const c = character || {};
   const items = Object.values(c.items || {});
-  const name = (it) => loc(it.name, lang);
+  const name = (it) => itemLabel(it, loc(it.name, lang));
   const sheet = {
     background: c.background, birthsign: c.birthsign, disposition: c.disposition, coat: c.coat, detail: c.detail,
     level: Number(c.level) || undefined,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import {
-  GripVertical, Trash2, Swords, Info, PackagePlus, Lock,
+  GripVertical, Trash2, Swords, Info, PackagePlus, Lock, Pencil,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { InfoHint } from './ui.jsx';
@@ -19,10 +19,26 @@ export default function ItemCard({
   const { t, lang } = useLang();
   const [showEffect, setShowEffect] = useState(false);
   const [pickerAnchor, setPickerAnchor] = useState(null);
+  const [renaming, setRenaming] = useState(false);
+  const [draftName, setDraftName] = useState('');
   const Icon = iconForItem(item);
   const dmgOptions = weaponDamageOptions(item);
   // Symbol wechseln darf, wer die Karte auch sonst aendern darf.
   const canPickIcon = !overlay && !!onChange;
+  // Umbenennen: eigener Name ueber dem Katalognamen (customName). Der Katalog-
+  // name bleibt darunter sichtbar, damit klar ist, ob es z. B. ein leichtes
+  // oder schweres Schwert ist. Zustaende behalten ihren festen Namen.
+  const canRename = !overlay && !!onChange && item.type !== 'condition';
+  const baseName = loc(item.name, lang);
+  const customName = typeof item.customName === 'string' ? item.customName.trim() : '';
+  const startRename = () => { setDraftName(customName); setRenaming(true); };
+  const commitRename = () => {
+    setRenaming(false);
+    const next = draftName.trim().slice(0, 40);
+    if (next === customName) return;
+    const { customName: _old, ...rest } = item;
+    onChange(next ? { ...rest, customName: next } : rest);
+  };
 
   const drag = useDraggable({ id: dragId ?? item.itemId, disabled: overlay || locked });
   // Bei aktivem Ziehen uebernimmt das DragOverlay die Bewegung — die Quelle
@@ -70,7 +86,32 @@ export default function ItemCard({
         ) : (
           <Icon size={14} className="item-type-icon" />
         )}
-        <span className="item-name">{loc(item.name, lang)}</span>
+        {renaming ? (
+          <input
+            className="item-name-input"
+            autoFocus
+            maxLength={40}
+            value={draftName}
+            placeholder={baseName}
+            aria-label={t('item.rename')}
+            onChange={(e) => setDraftName(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+              if (e.key === 'Escape') { setDraftName(customName); setRenaming(false); }
+            }}
+          />
+        ) : (
+          <span className="item-name">
+            {customName || baseName}
+            {customName ? <span className="item-subname">{baseName}</span> : null}
+          </span>
+        )}
+        {canRename && !renaming ? (
+          <button type="button" className="icon-btn" onClick={startRename} aria-label={t('item.rename')} title={t('item.rename')}>
+            <Pencil size={13} />
+          </button>
+        ) : null}
         {!overlay && onStash && item.type !== 'condition' ? (
           <button type="button" className="icon-btn" onClick={() => onStash(item)} aria-label={t('stash.send')} title={t('stash.send')}>
             <PackagePlus size={14} />

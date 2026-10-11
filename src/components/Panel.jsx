@@ -5,7 +5,7 @@ import { readJSON, writeJSON } from '../utils/storage.js';
 
 // Panel mit Kopf. Mit `id` ist es einklappbar; der Zustand wird pro id gemerkt.
 export default function Panel({
-  id, icon: Icon, title, right, defaultOpen = true, className = '', children,
+  id, anchorId, icon: Icon, title, right, defaultOpen = true, className = '', children,
 }) {
   const { t } = useLang();
   const key = id ? `pips-paws-panel-${id}` : null;
@@ -18,7 +18,7 @@ export default function Panel({
   };
 
   return (
-    <section className={`panel${open ? '' : ' panel-closed'}${className ? ` ${className}` : ''}`}>
+    <section id={anchorId ? `sec-${anchorId}` : undefined} className={`panel${open ? '' : ' panel-closed'}${className ? ` ${className}` : ''}`}>
       <div className="panel-head">
         <h2>
           {Icon ? <Icon size={18} /> : null}

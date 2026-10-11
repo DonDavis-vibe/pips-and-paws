@@ -7,7 +7,7 @@
 **Charakterbogen · Spielleiter-Dashboard · serverloser Echtzeit-Multiplayer**
 für das Pen-&-Paper-Rollenspiel **Mausritter** — alles im Browser, ohne Anmeldung.
 
-### ▶ [dondavis-vibe.github.io/pips-and-paws](https://dondavis-vibe.github.io/pips-and-paws/)
+### ▶ [mausritter.redneck-design.de](https://mausritter.redneck-design.de/)
 
 <sub>Deutsch · Englisch · Französisch · Italienisch · Japanisch — alles bleibt lokal im Browser, kein Konto, kein Server</sub>
 
@@ -37,12 +37,16 @@ Betreibers laufen.
 - **Inventar per Drag & Drop** — zwei Pfoten, zwei Körper, sechs Rucksack; 1- und
   2-Platz-Gegenstände, Tausch, Nutzungspunkte, Zustände als Kärtchen. Jeder
   Gegenstand hat ein Symbol, das sich austauschen lässt.
-- **Würfeln** — W6 und W66 als echte, taumelnde 3D-Würfel; Rettungswurf (W20 ≤
+- **Würfeln** — W6 und W66 als echte, taumelnde 3D-Würfel; Probe (W20 ≤
   Attribut) mit Vorteil / Nachteil. Ein Klick auf den Schadenswert einer Waffe
   würfelt den Schaden (ein- und zweihändig getrennt). Jeder Wurf landet sichtbar
   im Würfel-Panel.
-- **Automatische Schadenskette nach SRD** — STR-Schaden löst sofort einen
-  STR-Rettungswurf aus; misslingt er, ist die Maus verletzt und kampfunfähig, bis
+- **Sprungleiste** — am unteren Rand springst du mit einem Klick zu Steckbrief,
+  Werten, Inventar, Karte, Würfeln … (auch im SL-Dashboard); die Reihenfolge der
+  Bereiche lässt sich per Ziehgriff umsortieren, das Dashboard nutzt breite Monitore
+  in zwei Spalten. Waffen und Gegenstände lassen sich umbenennen, Würfe klackern.
+- **Automatische Schadenskette nach SRD** — STR-Schaden löst sofort eine
+  STR-Probe aus; misslingt er, ist die Maus verletzt und kampfunfähig, bis
   sie rastet. Bei 0 STR stirbt sie — die App löscht oder sperrt dabei nichts von
   selbst, sie sagt es nur unmissverständlich.
 - **Rast-Helfer** — kurz / lang / voll, mit Rationsverbrauch und Attributs-Heilung
@@ -60,7 +64,7 @@ Betreibers laufen.
 
 - **Dashboard** — alle Helden auf einen Blick: Bild, TP, Werte, Rüstung, belegte
   Plätze, Waffen, Zustände.
-- **Eingriffe pro Maus** — Schaden, Heilen, Pips, EP, Rast auslösen, Rettungswurf
+- **Eingriffe pro Maus** — Schaden, Heilen, Pips, EP, Rast auslösen, Probe
   oder Initiative fordern, flüstern, Ansage an alle, Gegenstand oder Zustand geben.
 - **Würfel-Panel** mit Ergebnis-Bühne, Reaktions- und Schatzwurf und einem
   Wurf-Protokoll, in dem auch die Würfe aller Spieler auftauchen.
@@ -167,7 +171,10 @@ npm run preview
 npm run lint       # oxlint
 ```
 
-Push auf `main` baut und deployt über GitHub Actions auf GitHub Pages.
+Die Seite läuft auf einem eigenen Webserver (<https://mausritter.redneck-design.de/>), nicht auf GitHub.
+`npm run release` führt Lint und Build aus und setzt den Kontaktblock des Impressums ein
+(aus der lokalen, nicht eingecheckten `KONTAKT.local.html`, Vorlage:
+`public/KONTAKT.beispiel.html`); den Inhalt von `dist/` danach manuell auf den Server hochladen.
 
 **Stack:** Vite + React 19 (plain JS, kein TypeScript), `@dnd-kit` fürs
 Inventar-Raster, `peerjs` für den Multiplayer, `lucide-react` für Icons.
@@ -181,7 +188,7 @@ Strichzeichnungen liegen in `src/components/Art.jsx`.
 
 ## Mitmachen
 
-Pull Requests sind willkommen — besonders Übersetzungen. Die Oberfläche gibt es
+Beiträge sind willkommen — besonders Übersetzungen (am besten über den [Discord](https://discord.gg/s6J6JqBQ8w)). Die Oberfläche gibt es
 auf Deutsch, Englisch, Spanisch, Französisch, Italienisch und Japanisch. Spanisch
 stammt von [@Salgraphics](https://github.com/Salgraphics); FR/IT/JA sind
 maschinell unterstützt, Korrekturen von Muttersprachler:innen sehr willkommen.
@@ -213,7 +220,7 @@ Lizenz [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.de) — sieh
 
 ## Rechtliches
 
-[Impressum &amp; Datenschutzerklärung](https://dondavis-vibe.github.io/pips-and-paws/impressum.html)
+[Impressum &amp; Datenschutzerklärung](https://mausritter.redneck-design.de/impressum.html)
 — eine Seite (`public/impressum.html`), im Footer verlinkt. Der Datenschutz-Teil
 beschreibt den tatsächlichen technischen Aufbau; bei Änderungen an externen
 Diensten oder gespeicherten Schlüsseln anpassen. Wer den Code forkt und selbst

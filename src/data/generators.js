@@ -6,7 +6,7 @@
 
 export const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
 
-// Wetter 2W6 je Jahreszeit; poor = schlechtes Wetter (SRD: STR-Rettungswurf oder Erschoepft beim Reisen).
+// Wetter 2W6 je Jahreszeit; poor = schlechtes Wetter (SRD: STR-Probe oder Erschoepft beim Reisen).
 export const WEATHER = {
   spring: [
     {"min": 2, "max": 2, "en": "Rain storm", "de": "Regensturm", "poor": true},
@@ -648,7 +648,7 @@ export const TREASURE = {
   ],
   // Magische Schwerter W10
   swords: [
-    {"name": {"en": "Wrought iron", "de": "Schmiedeeisen"}, "power": {"en": "While wielded: You roll critical damage Saves with Advantage", "de": "Solange geführt: Du würfelst Rettungswürfe gegen kritischen Schaden mit Vorteil"}},
+    {"name": {"en": "Wrought iron", "de": "Schmiedeeisen"}, "power": {"en": "While wielded: You roll critical damage Saves with Advantage", "de": "Solange geführt: Du würfelst Proben gegen kritischen Schaden mit Vorteil"}},
     {"name": {"en": "Intricate Fae design", "de": "Filigranes Feen-Design"}, "power": {"en": "While wielded: You may disguise yourself as any mouse-sized creature", "de": "Solange geführt: Du kannst dich als beliebiges mausgroßes Wesen verkleiden"}},
     {"name": {"en": "Rusty nail", "de": "Rostiger Nagel"}, "power": {"en": "Critical damage: Give a Frightened Condition", "de": "Kritischer Schaden: Verursacht den Zustand Ängstlich"}},
     {"name": {"en": "Snake fang", "de": "Schlangenzahn"}, "power": {"en": "Critical damage: Deal d6 additional damage to DEX", "de": "Kritischer Schaden: Zusätzlich W6 Schaden auf DEX"}},
@@ -661,9 +661,9 @@ export const TREASURE = {
   ],
   // Fluch W6 (1 von 6 magischen Schwertern ist verflucht) + wodurch er sich loest
   curses: [
-    {"curse": {"en": "Roll critical damage saves with Disadvantage", "de": "Rettungswürfe gegen kritischen Schaden mit Nachteil"}, "lifted": {"en": "Making a selfless sacrifice in a life or death situation", "de": "Ein selbstloses Opfer in einer Situation auf Leben und Tod bringen"}},
+    {"curse": {"en": "Roll critical damage saves with Disadvantage", "de": "Proben gegen kritischen Schaden mit Nachteil"}, "lifted": {"en": "Making a selfless sacrifice in a life or death situation", "de": "Ein selbstloses Opfer in einer Situation auf Leben und Tod bringen"}},
     {"curse": {"en": "When you gain an Exhausted Condition, gain another", "de": "Erhältst du den Zustand Erschöpft, erhältst du einen weiteren"}, "lifted": {"en": "Trading places with a poor farmer for a season", "de": "Eine Saison lang mit einem armen Bauern den Platz tauschen"}},
-    {"curse": {"en": "Make a WIL save to not attack when threatened", "de": "Bei Bedrohung ein WIL-Rettungswurf, um nicht anzugreifen"}, "lifted": {"en": "Making lasting peace with a mortal enemy", "de": "Dauerhaften Frieden mit einem Todfeind schließen"}},
+    {"curse": {"en": "Make a WIL save to not attack when threatened", "de": "Bei Bedrohung eine WIL-Probe, um nicht anzugreifen"}, "lifted": {"en": "Making lasting peace with a mortal enemy", "de": "Dauerhaften Frieden mit einem Todfeind schließen"}},
     {"curse": {"en": "Reaction rolls are made with -1 modifier", "de": "Reaktionswürfe mit Modifikator −1"}, "lifted": {"en": "Giving away everything you own, no cheating", "de": "Alles hergeben, was du besitzt, ohne zu schummeln"}},
     {"curse": {"en": "If you see an ally take damage, take a Frightened Condition", "de": "Siehst du, wie ein Verbündeter Schaden nimmt, erhältst du den Zustand Ängstlich"}, "lifted": {"en": "Fulfilling a mouse's dying wish", "de": "Den letzten Wunsch einer sterbenden Maus erfüllen"}},
     {"curse": {"en": "Spells cast in your presence always mark usage", "de": "In deiner Nähe gewirkte Zauber markieren immer Nutzung"}, "lifted": {"en": "Destroying an owl sorcerer's source of power", "de": "Die Kraftquelle eines Eulenzauberers zerstören"}}

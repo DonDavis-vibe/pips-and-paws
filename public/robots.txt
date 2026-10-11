@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dondavis-vibe.github.io/pips-and-paws/sitemap.xml
+Sitemap: https://mausritter.redneck-design.de/sitemap.xml

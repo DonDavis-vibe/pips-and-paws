@@ -12,6 +12,9 @@ import wizardArt from '../assets/ink/wizard.webp';
 import InkArt from './InkArt.jsx';
 
 const STEPS = 5;
+// Fernkampfwaffen brauchen Munition (SRD) — sie liegt der Waffe bei: Schleuder
+// -> Steine, Bogen/schwere Armbrust -> Pfeile.
+const WEAPON_AMMO = { w_light_ranged: 'ammo_stones', w_heavy_ranged: 'ammo_arrows' };
 const WEAPON_KEYS = ['w_light', 'w_medium', 'w_heavy', 'w_light_ranged', 'w_heavy_ranged', 'w_improvised'];
 
 function freshAttrs() {
@@ -76,6 +79,7 @@ export default function CharacterWizard({ onDone, onCancel }) {
       { item: makeItem('rations') },
       ...resolveEntries(bg.items),
       { item: makeItem(weaponKey) },
+      ...(WEAPON_AMMO[weaponKey] ? [{ item: makeItem(WEAPON_AMMO[weaponKey]) }] : []),
     ];
 
     if (extraMode === 'both') {
@@ -259,6 +263,7 @@ export default function CharacterWizard({ onDone, onCancel }) {
                   <span>
                     <strong>{loc(it.name, lang)}</strong> — {it.damage}
                     {it.size === 2 ? ` · ${t('item.twoSlots')}` : ''}
+                    {WEAPON_AMMO[k] ? ` · ${t('wizard.withAmmo', { ammo: loc(makeItem(WEAPON_AMMO[k]).name, lang) })}` : ''}
                   </span>
                 </label>
               );

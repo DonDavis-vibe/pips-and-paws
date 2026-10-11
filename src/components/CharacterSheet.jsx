@@ -3,7 +3,9 @@ import {
   DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors,
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Backpack, Timer } from 'lucide-react';
+import {
+  Backpack, Timer, User, Gauge, Users, Map as MapIcon, FileText, Contact, UsersRound, ScrollText, NotebookPen, Dices,
+} from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { Field, TextInput } from './ui.jsx';
 import AttributeBox from './AttributeBox.jsx';
@@ -21,9 +23,11 @@ import PartyBattleMap from './battlemap/PartyBattleMap.jsx';
 import PartyHandouts, { HandoutPopup } from './PartyHandouts.jsx';
 import HirelingsPanel from './HirelingsPanel.jsx';
 import Portrait from './Portrait.jsx';
+import { itemLabel } from '../data/items.js';
 import Panel from './Panel.jsx';
 import MouseIcon from './MouseIcon.jsx';
 import SortableItem from './SortableItem.jsx';
+import SectionNav from './SectionNav.jsx';
 import {
   tryMove, addItem, removeItem, firstFreeFit, placeInGrit,
 } from '../rules/inventory.js';
@@ -32,6 +36,12 @@ import { rollSave, rollDie } from '../rules/dice.js';
 import { shareSave, shareRoll } from '../utils/discord.js';
 import { useOrder } from '../useOrder.js';
 import { rollLevelUp } from '../rules/levelup.js';
+
+// Sprungleiste: Symbol + Kurzname je Panel (Label-Schluessel nav.*).
+const NAV_ICONS = {
+  identity: User, attributes: Gauge, inventory: Backpack, hirelings: Users, battlemap: MapIcon,
+  handouts: FileText, npcs: Contact, group: UsersRound, log: ScrollText, notes: NotebookPen,
+};
 
 const PANEL_ORDER_KEY = 'pips-paws-panel-order';
 const DEFAULT_PANEL_ORDER = [
@@ -146,7 +156,7 @@ export default function CharacterSheet({
   // Direkter Schadenswurf ueber die Waffenkarte (Discord-Feedback).
   const onRollDamage = (item, opt) => {
     const value = rollDie(opt.sides);
-    const weapon = loc(item.name, lang);
+    const weapon = itemLabel(item, loc(item.name, lang));
     const hands = opt.hands ? ` (${t(`item.hands.${opt.hands}`)})` : '';
     const label = `${weapon}${hands}`;
     const die = `${t('dice.dieLetter')}${opt.sides}`;
@@ -411,7 +421,7 @@ export default function CharacterSheet({
       <DndContext sensors={panelSensors} onDragEnd={onPanelDragEnd}>
         <SortableContext items={panelOrder} strategy={verticalListSortingStrategy}>
           {panelOrder.map((id) => (
-            <SortableItem key={id} id={id}>
+            <SortableItem key={id} id={id} anchor>
               {PANELS[id]}
             </SortableItem>
           ))}
@@ -420,6 +430,12 @@ export default function CharacterSheet({
       </div>
 
       <DiceRoller character={character} onEvent={onEvent} external={externalRoll} />
+      <SectionNav
+        items={[
+          ...panelOrder.map((id) => ({ id, icon: NAV_ICONS[id], label: t(`nav.${id}`) })),
+          { id: 'dice', icon: Dices, label: t('nav.dice') },
+        ]}
+      />
       <HandoutPopup
         handout={(handouts || []).find((h) => h.id === (newHandoutId || handoutViewId))}
         onClose={() => { setHandoutViewId(null); onHandoutSeen?.(); }}

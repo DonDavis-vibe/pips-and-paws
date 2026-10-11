@@ -4041,4 +4041,169 @@ summary,
 .brand-mark .brand-mark-ink { object-fit: contain; padding: 4px; }
 .portrait img.portrait-ink { object-fit: contain; padding: 8px; }
 
+
+/* ---- Sprungleiste (SectionNav.jsx) ---------------------------------------
+   Fest am unteren Rand, in den body gehaengt. Auf dem Handy nur Symbole mit
+   winziger Beschriftung und seitlich scrollbar, am Desktop mittig als Pille. */
+.section-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 0 8px;
+  pointer-events: none;
+}
+
+.section-nav-inner {
+  pointer-events: auto;
+  display: flex;
+  gap: 2px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg-panel) 94%, transparent);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(6px);
+}
+
+.section-nav-inner::-webkit-scrollbar { display: none; }
+
+.section-nav-btn {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 52px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.section-nav-btn:hover { color: var(--ink); background: var(--bg-sunk); }
+
+.section-nav-btn.active {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.section-nav-btn:focus-visible { outline: 0; box-shadow: var(--ring); }
+
+/* Platz fuer die Leiste, damit sie weder Fusszeile noch letztes Panel verdeckt. */
+.app:has(.section-nav-spacer) { padding-bottom: 84px; }
+
+body:has(.section-nav) .app { padding-bottom: 84px; }
+
+/* Ziel des Sprungs bleibt nicht unter dem oberen Rand kleben. */
+.sortable-item,
+.dice-panel { scroll-margin-top: 12px; }
+
+/* Die Karte im Vollbild braucht den ganzen Schirm samt eigener Werkzeugleiste. */
+@media print {
+  .section-nav { display: none; }
+}
+
+body:has(.battlemap-fullscreen) .section-nav { display: none; }
+
+/* ---- Umbenannte Gegenstaende (ItemCard.jsx) ---- */
+.item-subname {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--ink-dim);
+}
+
+.item-name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 6px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--bg-raise);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Breite Schirme ------------------------------------------------------
+   Der Bogen bekommt etwas mehr Luft, das SL-Dashboard nutzt die Monitorbreite:
+   Wuerfel-Spalte rechts, die Bereiche links in zwei Spalten (Spieler, lokale
+   Boegen und Karte behalten die volle Breite). Steht nach dem Block der
+   Wuerfelspalte, damit die Grid-Regeln dort nicht ueberschrieben werden. */
+@media (min-width: 1200px) {
+  .app { max-width: 1240px; }
+}
+
+@media (min-width: 1500px) {
+  .app:has(.gm-dash) { max-width: min(1760px, 100%); }
+
+  .gm-dash > .gm-main {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px;
+  }
+
+  .gm-main > .sortable-wide { grid-column: 1 / -1; }
+}
+
+/* ---- Karte im Vollbild: Werkzeuge oben, Karte fuellt den Rest ----------- */
+.battlemap-panel.battlemap-fullscreen {
+  overflow: hidden;
+  padding: 12px 16px;
+}
+
+.battlemap-panel.battlemap-fullscreen > .panel-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 8px;
+}
+
+.battlemap-fullscreen .map-list { order: 1; margin-bottom: 0; }
+.battlemap-fullscreen .map-quickbar { order: 2; margin-bottom: 0; }
+
+.battlemap-fullscreen .map-toolbar {
+  order: 3;
+  margin: 0;
+  padding: 0 0 8px;
+  border-top: 0;
+  border-bottom: 1px dashed var(--line);
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  row-gap: 6px;
+  max-height: 32vh;
+  overflow-y: auto;
+}
+
+.battlemap-fullscreen .battlemap-stage {
+  order: 4;
+  flex: 1 1 0;
+  min-height: 200px;
+  height: auto;
+}
+
+.battlemap-fullscreen .map-tokens {
+  order: 5;
+  max-height: 22vh;
+  overflow-y: auto;
+}
+
 } /* @layer classic */
