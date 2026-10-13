@@ -60,7 +60,8 @@ Betreibers laufen.
   Pip, gleichmäßig auf die Gruppe); Spenden an die Gemeinschaft gibt 1 EP je 10 Pips;
   aus dem Katalog kaufen und Waffen/Rüstung für 10 % je Nutzungspunkt reparieren.
 - **Miethelfer tragen eigene 6 Plätze** (2 Pfoten, 2 Körper, 2 Rucksack) — Dinge
-  übergeben und zurücknehmen.
+  übergeben und zurücknehmen. Ein Schatz-Anteil gibt ihnen 1 EP je Pip über dem
+  Tageslohn, aufsteigen wie Mäuse.
 - **Automatische Schadenskette nach SRD** — STR-Schaden löst sofort eine
   STR-Probe aus; misslingt er, ist die Maus verletzt und kampfunfähig, bis
   sie rastet. Bei 0 STR stirbt sie — die App löscht oder sperrt dabei nichts von

@@ -292,6 +292,14 @@ function GmDashboardView({ mp, notify, localApi }) {
     }
   };
 
+  // Hooks fuer das Umsortieren stehen VOR dem fruehen return unten (lokaler
+  // Bogen offen) — sonst aendert sich die Hook-Anzahl zwischen den Renders.
+  const gmSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
+  );
+  const { order: panelOrder, reorder: reorderPanels } = useOrder(GM_ORDER_KEY, GM_DEFAULT_ORDER, GM_DEFAULT_ORDER);
+
   // Ein lokaler Bogen ist "geoeffnet": das Geraet zeigt statt des Dashboards
   // den vollen, normalen Charakterbogen — zum Herumreichen am Tisch. Ersetzt
   // bewusst das ganze Dashboard (nicht nur den Lokale-Spieler-Block), damit
@@ -315,11 +323,6 @@ function GmDashboardView({ mp, notify, localApi }) {
     );
   }
 
-  const gmSensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
-  );
-  const { order: panelOrder, reorder: reorderPanels } = useOrder(GM_ORDER_KEY, GM_DEFAULT_ORDER, GM_DEFAULT_ORDER);
   const wideIds = new Set(GM_PANELS.filter((p) => p.wide).map((p) => p.id));
 
   const PANELS = {

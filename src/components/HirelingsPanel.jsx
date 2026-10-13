@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Dices, Plus, Trash2, UserPlus, Undo2, X } from 'lucide-react';
+import { Dices, Plus, Trash2, UserPlus, Undo2, X, Coins, Sparkles } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import Panel from './Panel.jsx';
 import { Stepper } from './ui.jsx';
 import {
-  HIRELING_CATALOG, HIRELING_SLOTS, newHireling, withHirelingInventory, hirelingAddItem, hirelingRemoveItem,
+  HIRELING_CATALOG, HIRELING_SLOTS, newHireling, withHirelingInventory, hirelingAddItem, hirelingRemoveItem, hirelingShare,
 } from '../rules/hirelings.js';
 import { addItem, removeItem } from '../rules/inventory.js';
+import { rollLevelUp, pendingLevels } from '../rules/levelup.js';
 import { itemLabel } from '../data/items.js';
 import AddItemMenu from './AddItemMenu.jsx';
 
@@ -138,6 +139,29 @@ export default function HirelingsPanel({ hirelings, onChange, onMoraleSave, char
     setPick('');
   };
 
+  // Schatz-Anteil (Regel S. 14): die Maus zahlt Pips, der Miethelfer bekommt
+  // 1 EP je Pip ueber dem Tageslohn.
+  const giveShare = (h) => {
+    const n = parseInt(window.prompt(t('hirelings.sharePrompt', { name: h.name || '?', wage: h.wage || 0, n: character?.pips ?? 0 })), 10);
+    if (!Number.isFinite(n) || n <= 0) return;
+    if (character && n > (character.pips || 0)) { notify?.(t('donate.tooMuch'), 'warn'); return; }
+    const { gain, hireling } = hirelingShare(h, n);
+    if (setCharacter) {
+      setCharacter((c) => ({ ...c, pips: (c.pips || 0) - n, hirelings: (c.hirelings || []).map((x) => (x.id === h.id ? hireling : x)) }));
+    } else {
+      update(h.id, hireling);
+    }
+    notify?.(t('hirelings.shareDone', { name: h.name || '?', n, xp: gain }), 'ok');
+  };
+
+  // Aufstieg wie bei der Maus (W20 je Wert, Trefferwuerfel) — gewuerfelt hier.
+  const levelUp = (h) => {
+    const { patch, report } = rollLevelUp(h);
+    update(h.id, patch);
+    const attrs = report.attrs.map((a) => `${t(`attr.abbr.${a.key}`)} ${a.up ? `${a.before}→${a.after}` : a.before}`).join(' · ');
+    notify?.(`${h.name || '?'} — ${t('levelup.stage', { level: report.level })}: ${attrs} · ${t('res.hpShort')} ${report.hd.before}→${report.hd.after}`, 'ok');
+  };
+
   return (
     <Panel
       id="hirelings"
@@ -215,6 +239,20 @@ export default function HirelingsPanel({ hirelings, onChange, onMoraleSave, char
                 <button type="button" className="btn btn-sm btn-ghost" onClick={() => onMoraleSave(h)}>
                   <Dices size={13} /> {t('hirelings.moraleSave')}
                 </button>
+              </div>
+
+              <div className="hireling-foot">
+                <span className="hireling-xp" title={t('hirelings.xpHint')}>
+                  {t('res.level')} {h.level || 1} · {t('res.xp')} {h.xp || 0}
+                </span>
+                <button type="button" className="btn btn-sm btn-ghost" onClick={() => giveShare(h)} title={t('hirelings.xpHint')}>
+                  <Coins size={13} /> {t('hirelings.share')}
+                </button>
+                {pendingLevels(h) > 0 ? (
+                  <button type="button" className="btn btn-sm btn-primary" onClick={() => levelUp(h)}>
+                    <Sparkles size={13} /> {t('levelup.roll')}
+                  </button>
+                ) : null}
               </div>
             </div>
           ))}

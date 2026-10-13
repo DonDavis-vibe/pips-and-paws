@@ -783,5 +783,9 @@
   "hirelings.inventory": "Inventory {n}/6",
   "hirelings.give": "Hand over …",
   "hirelings.addNew": "New",
-  "hirelings.takeBack": "Take back"
+  "hirelings.takeBack": "Take back",
+  "hirelings.share": "Give a share",
+  "hirelings.sharePrompt": "How many pips does {name} get as a share of treasure? (the {wage}p daily wage doesn't count, you have {n})",
+  "hirelings.shareDone": "{name} gets {n} pips — +{xp} XP.",
+  "hirelings.xpHint": "Hirelings advance like mice: 1 XP per pip of treasure share above their daily wage, Level 2 at 1000 XP."
 }

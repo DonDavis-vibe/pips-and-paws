@@ -4,7 +4,7 @@
 // Maus (rules/inventory.js), nur mit weniger Feldern.
 
 import { rollDie, rollDice } from './dice.js';
-import { newId, PAW_SLOTS, BODY_SLOTS } from './character.js';
+import { newId, PAW_SLOTS, BODY_SLOTS, levelForXp } from './character.js';
 import { firstFreeFit, cellsFor } from './inventory.js';
 
 // SRD-Empfehlungstabelle: Typ -> Tageslohn in Pips. Reine Vorbelegung beim
@@ -44,6 +44,9 @@ export function newHireling(catalogKey = '') {
     dex: { current: r.dex, max: r.dex },
     wil: { current: r.wil, max: r.wil },
     note: '',
+    xp: 0,
+    level: 1,
+    levelDone: 1,
     inventory: Object.fromEntries(HIRELING_SLOTS.map((sl) => [sl, null])),
     items: {},
   };
@@ -56,6 +59,15 @@ function hirelingOrder(item) {
   if (item.type === 'weapon' || item.pairKind === 'pawBody') return [...PAW_SLOTS, ...BODY_SLOTS, ...pack];
   if (item.type === 'armour' || item.type === 'ammo') return [...BODY_SLOTS, ...pack, ...PAW_SLOTS];
   return [...pack, ...BODY_SLOTS, ...PAW_SLOTS];
+}
+
+// Anteil am Schatz (Regel S. 14): 1 EP je Pip, den der Miethelfer UEBER seinem
+// Tageslohn bekommt. Ab 1000 EP Stufe 2 usw. — gleiche Tabelle wie bei Maeusen;
+// der Aufstieg selbst laeuft ueber rules/levelup.js#rollLevelUp (gleiche Felder).
+export function hirelingShare(hireling, pips) {
+  const gain = Math.max(0, Math.floor(pips) - (hireling.wage || 0));
+  const xp = (hireling.xp || 0) + gain;
+  return { gain, hireling: { ...hireling, xp, level: levelForXp(xp), levelDone: hireling.levelDone ?? hireling.level ?? 1 } };
 }
 
 // Alte Eintraege ohne Inventar auffuellen.

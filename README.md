@@ -56,7 +56,8 @@ data passing through the operator's server.
   equally); donating pips to the community gives 1 XP per 10; buy from the catalogue
   and repair weapons and armour for 10% per usage dot.
 - **Hirelings carry their own 6 slots** (2 paws, 2 body, 2 pack) — hand items over
-  and take them back.
+  and take them back. A share of treasure gives them 1 XP per pip above their daily
+  wage, and they level up like mice.
 - **Automatic damage chain to SRD** — STR damage triggers a STR save on the spot;
   fail it and the mouse is Injured and incapacitated until it rests. Hit 0 STR and
   it dies — the app never deletes or locks anything on its own, it just says so.

@@ -586,5 +586,9 @@
   "hirelings.inventory": "Inventario {n}/6",
   "hirelings.give": "Consegna …",
   "hirelings.addNew": "Nuovo",
-  "hirelings.takeBack": "Riprendi"
+  "hirelings.takeBack": "Riprendi",
+  "hirelings.share": "Dai una quota",
+  "hirelings.sharePrompt": "Quanti pip riceve {name} come quota del tesoro? (la paga di {wage}p/giorno non conta, ne hai {n})",
+  "hirelings.shareDone": "{name} riceve {n} pip — +{xp} PE.",
+  "hirelings.xpHint": "I seguaci avanzano come i topi: 1 PE per pip di quota oltre la paga giornaliera, livello 2 a 1000 PE."
 }

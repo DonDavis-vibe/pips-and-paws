@@ -586,5 +586,9 @@
   "hirelings.inventory": "持ち物 {n}/6",
   "hirelings.give": "渡す…",
   "hirelings.addNew": "新規",
-  "hirelings.takeBack": "返してもらう"
+  "hirelings.takeBack": "返してもらう",
+  "hirelings.share": "分け前を渡す",
+  "hirelings.sharePrompt": "{name} に宝の分け前として何ピップ渡す？（日給 {wage}p は含まない、所持 {n}）",
+  "hirelings.shareDone": "{name} に {n} ピップ — +{xp} XP。",
+  "hirelings.xpHint": "雇い人もネズミと同様に成長する：日給を超える分け前1ピップごとに1XP、1000XPでレベル2。"
 }

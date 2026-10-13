@@ -783,5 +783,9 @@
   "hirelings.inventory": "Inventar {n}/6",
   "hirelings.give": "Übergeben …",
   "hirelings.addNew": "Neu",
-  "hirelings.takeBack": "Zurücknehmen"
+  "hirelings.takeBack": "Zurücknehmen",
+  "hirelings.share": "Anteil geben",
+  "hirelings.sharePrompt": "Wie viele Pips bekommt {name} als Schatz-Anteil? (Lohn {wage}p/Tag zählt nicht, du hast {n})",
+  "hirelings.shareDone": "{name} bekommt {n} Pips — +{xp} EP.",
+  "hirelings.xpHint": "Miethelfer steigen wie Mäuse auf: 1 EP je Pip Schatz-Anteil über dem Tageslohn, ab 1000 EP Stufe 2."
 }
