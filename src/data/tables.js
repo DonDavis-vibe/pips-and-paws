@@ -3,7 +3,7 @@
 // Sternzeichen (1W6) -> Wesensart (Tugend / Laster)
 export const BIRTHSIGNS = [
   { sign: { de: 'Stern', en: 'Star', es: 'La Estrella' }, disposition: { de: 'Mutig / Leichtsinnig', en: 'Brave / Reckless', es: 'Valiente / Descuidado' } },
-  { sign: { de: 'Rad', en: 'Wheel', es: 'La Rueda' }, disposition: { de: 'Fleissig / Einfallslos', en: 'Industrious / Unimaginative', es: 'Diligente / Sin imaginación' } },
+  { sign: { de: 'Rad', en: 'Wheel', es: 'La Rueda' }, disposition: { de: 'Fleißig / Einfallslos', en: 'Industrious / Unimaginative', es: 'Diligente / Sin imaginación' } },
   { sign: { de: 'Eichel', en: 'Acorn', es: 'La Bellota' }, disposition: { de: 'Neugierig / Stur', en: 'Inquisitive / Stubborn', es: 'Inquisitivo / Terco' } },
   { sign: { de: 'Sturm', en: 'Storm', es: 'La Tormenta' }, disposition: { de: 'Großzügig / Jähzornig', en: 'Generous / Wrathful', es: 'Generoso / Iracundo' } },
   { sign: { de: 'Mond', en: 'Moon', es: 'La Luna' }, disposition: { de: 'Weise / Geheimnisvoll', en: 'Wise / Mysterious', es: 'Sabio / Misterioso' } },
@@ -14,7 +14,7 @@ export const BIRTHSIGNS = [
 export const COAT_COLORS = [
   { de: 'Schokoladenbraun', en: 'Chocolate', es: 'Chocolate' },
   { de: 'Schwarz', en: 'Black', es: 'Negro' },
-  { de: 'Weiss', en: 'White', es: 'Blanco' },
+  { de: 'Weiß', en: 'White', es: 'Blanco' },
   { de: 'Hellbraun', en: 'Tan', es: 'Café claro' },
   { de: 'Grau', en: 'Grey', es: 'Gris' },
   { de: 'Blaugrau', en: 'Blue', es: 'Azul' },

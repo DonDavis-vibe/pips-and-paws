@@ -41,6 +41,22 @@ data passing through the operator's server.
 - **Jump bar** — a bottom bar jumps to profile, stats, inventory, map, dice … (on
   the GM dashboard too). Panels can be reordered by their grip, the dashboard uses
   wide monitors in two columns. Weapons and items can be renamed, rolls rattle.
+- **Magic** — cast a spell held in a paw with power 1–3: the dice fill [SUM] and
+  [DICE] into the effect, every 4–6 marks usage, 6s miscast (d6 WIL damage each, WIL
+  save or Drained). Each spell card shows its recharge requirement.
+- **Combat by the book** — enhanced (d12) and impaired (d4) attacks, two light weapons
+  roll both and keep the best, and an "After the fight" button rolls d6 per used
+  weapon, armour and ammo (4–6 marks usage; improvised weapons always).
+- **Conditions & encumbrance** — Injured, Drained and Encumbered force Disadvantage
+  on the matching saves; a Condition without a free slot is still taken and the
+  mouse is encumbered; pips beyond 250 need pip purses; rests clear the Conditions
+  they should.
+- **Light, loot & pips** — light a torch or lantern and the GM's time tracker marks
+  its usage every 6 Turns; the GM shares out treasure as XP (1 XP per pip, divided
+  equally); donating pips to the community gives 1 XP per 10; buy from the catalogue
+  and repair weapons and armour for 10% per usage dot.
+- **Hirelings carry their own 6 slots** (2 paws, 2 body, 2 pack) — hand items over
+  and take them back.
 - **Automatic damage chain to SRD** — STR damage triggers a STR save on the spot;
   fail it and the mouse is Injured and incapacitated until it rests. Hit 0 STR and
   it dies — the app never deletes or locks anything on its own, it just says so.

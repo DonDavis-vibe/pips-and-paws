@@ -15,6 +15,9 @@ const KEY = 'pips-paws-gm-combat';
 const fresh = () => ({ round: 0, npcs: [] });
 const nid = () => `n_${Math.random().toString(36).slice(2, 8)}`;
 
+// Aeltere Eintraege kennen noch keine STR: aus dem Werteblock nachziehen.
+const npcStr = (n) => n.str || { current: CREATURE_BY_KEY[n.key]?.str ?? 10, max: CREATURE_BY_KEY[n.key]?.str ?? 10 };
+
 // NSC-/Kampf-Tracker fuer den Spielleiter. Rein lokal, ueberlebt einen Reload.
 export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRoll }) {
   const { t, lang } = useLang();
@@ -58,6 +61,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
     const prev = sRef.current.npcs.find((n) => n.id === id);
     const fields = {
       base: name, name, dmg, armour: clampNum(sh.armour, 0, 3, 0), wil: clampNum(sh.wil, 1, 20, 8),
+      str: prev?.str || { current: clampNum(sh.str, 1, 30, 10), max: clampNum(sh.str, 1, 30, 10) },
       note, attack: String(sh.attack || '').slice(0, 120) || `W${dmg}`,
     };
     const npcs = prev
@@ -81,7 +85,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
       ...s,
       npcs: [
         ...s.npcs,
-        { id: nid(), key: c.key, base, name: nameWithNumber(base), hp: { current: c.hp, max: c.hp }, dmg: c.dmg, armour: c.armour, wil: c.wil ?? 8, note: loc(c.note, lang), attack: loc(c.attack, lang) },
+        { id: nid(), key: c.key, base, name: nameWithNumber(base), hp: { current: c.hp, max: c.hp }, str: { current: c.str ?? 10, max: c.str ?? 10 }, dmg: c.dmg, armour: c.armour, wil: c.wil ?? 8, note: loc(c.note, lang), attack: loc(c.attack, lang) },
       ],
     });
     setAddOpen(false);
@@ -92,7 +96,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
     if (!base) return;
     commit({
       ...s,
-      npcs: [...s.npcs, { id: nid(), base, name: nameWithNumber(base), hp: { current: customHp, max: customHp }, dmg: customDmg, armour: 0, wil: customWil, note: '', attack: `W${customDmg}` }],
+      npcs: [...s.npcs, { id: nid(), base, name: nameWithNumber(base), hp: { current: customHp, max: customHp }, str: { current: 10, max: 10 }, dmg: customDmg, armour: 0, wil: customWil, note: '', attack: `W${customDmg}` }],
     });
     setCustomName('');
     setAddOpen(false);
@@ -103,10 +107,44 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
 
   const removeNpc = (id) => commit({ ...s, npcs: s.npcs.filter((n) => n.id !== id) });
 
-  const attack = (n) => {
-    const roll = rollDie(n.dmg);
-    onLog('combat.log.attack', { name: n.name, roll, die: `W${n.dmg}` });
-    pushRoll?.({ label: `${n.name} · ${t('dice.dieLetter')}${n.dmg}`, value: roll, max: n.dmg, die: n.dmg });
+  // Angriff mit dem eigenen Wuerfel, oder verstaerkt (W12) / geschwaecht (W4) — Regel S. 10.
+  const attack = (n, sides = n.dmg) => {
+    const roll = rollDie(sides);
+    onLog('combat.log.attack', { name: n.name, roll, die: `W${sides}` });
+    pushRoll?.({ label: `${n.name} · ${t('dice.dieLetter')}${sides}`, value: roll, max: sides, die: sides });
+  };
+
+  // Treffer auf einen NSC (Regel S. 10): minus Ruestung auf TP, Rest auf STR,
+  // dann STR-Probe — misslungen = kritischer Schaden (Moral-Anlass!). STR 0 = tot.
+  const [hitIn, setHitIn] = useState({});
+  const hit = (n) => {
+    const amount = parseInt(hitIn[n.id], 10);
+    if (!Number.isFinite(amount) || amount < 0) return;
+    const absorbed = Math.min(amount, n.armour || 0);
+    const dealt = amount - absorbed;
+    const str = npcStr(n);
+    let hp = n.hp.current - dealt;
+    let strCur = str.current;
+    let strHit = 0;
+    if (hp < 0) {
+      strHit = -hp;
+      strCur = Math.max(0, strCur - strHit);
+      hp = 0;
+    }
+    const parts = [t('dmg.taken', { n: dealt })];
+    if (absorbed) parts.push(t('dmg.armour', { n: absorbed }));
+    if (strHit) parts.push(`— ${t('dmg.toAttr', { n: strHit, attr: t('attr.abbr.str') })}`);
+    let crit = false;
+    if (strHit && strCur > 0) {
+      const r = rollSave(strCur);
+      crit = !r.ok;
+      parts.push(`· ${t('dice.saveVs', { attr: t('attr.abbr.str') })} ${r.d} ≤ ${strCur} ${r.ok ? '✓' : '✗'}`);
+      if (crit) parts.push(`· ${t('combat.crit')}`);
+    }
+    if (strCur <= 0) parts.push(`· ${t('combat.dead')}`);
+    onLog('gm.log.note', { name: n.name, text: parts.join(' ') });
+    patchNpc(n.id, { hp: { ...n.hp, current: hp }, str: { ...str, current: strCur }, crit: crit || n.crit });
+    setHitIn((h) => ({ ...h, [n.id]: '' }));
   };
 
   const morale = (n) => {
@@ -198,7 +236,8 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
       ) : (
         <div className="combat-list">
           {s.npcs.map((n) => {
-            const dead = n.hp.current <= 0;
+            const str = npcStr(n);
+            const dead = str.current <= 0;
             return (
               <div key={n.id} className={`combat-npc${dead ? ' npc-dead' : ''}${n.shown ? ' npc-shown' : ''}`}>
                 <div className="combat-npc-top">
@@ -228,10 +267,36 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
                     onChange={(v) => patchNpc(n.id, { hp: { ...n.hp, current: v } })}
                   />
                   <span className="time-dim">/ {n.hp.max}</span>
+                  <span className="time-dim">{t('attr.abbr.str')}</span>
+                  <Stepper
+                    value={str.current}
+                    min={0}
+                    max={str.max}
+                    onChange={(v) => patchNpc(n.id, { str: { ...str, current: v } })}
+                  />
                   {n.armour ? <span className="tag">{t('item.defense')} {n.armour}</span> : null}
+                  {n.crit && !dead ? <span className="chip chip-bad">{t('combat.crit')}</span> : null}
+                </div>
+                <div className="combat-npc-row">
                   <button type="button" className="btn btn-sm btn-danger" onClick={() => attack(n)}>
                     {t('combat.attack')} W{n.dmg}
                   </button>
+                  <button type="button" className="btn btn-sm btn-ghost" onClick={() => attack(n, 12)} title={t('item.enhancedHint')}>▲ W12</button>
+                  <button type="button" className="btn btn-sm btn-ghost" onClick={() => attack(n, 4)} title={t('item.impairedHint')}>▼ W4</button>
+                  <form className="combat-hit" onSubmit={(e) => { e.preventDefault(); hit(n); }}>
+                    <input
+                      type="number"
+                      min="0"
+                      inputMode="numeric"
+                      placeholder={t('combat.hitPlaceholder')}
+                      aria-label={t('combat.hit')}
+                      value={hitIn[n.id] ?? ''}
+                      onChange={(e) => setHitIn((h) => ({ ...h, [n.id]: e.target.value }))}
+                    />
+                    <button type="submit" className="btn btn-sm" disabled={!hitIn[n.id]} title={t('combat.hitHint')}>
+                      {t('combat.hit')}
+                    </button>
+                  </form>
                   <button type="button" className="btn btn-sm btn-ghost" onClick={() => morale(n)} title={t('combat.morale.hint')}>
                     <HeartCrack size={13} /> {t('combat.morale')}
                   </button>

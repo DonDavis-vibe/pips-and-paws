@@ -4,6 +4,7 @@ import { useLang } from '../i18n/index.jsx';
 import { rollDice, rollD66, rollSave } from '../rules/dice.js';
 import { shareRoll, shareSave } from '../utils/discord.js';
 import { RollButton, DiceStage } from './DiceKit.jsx';
+import { effectiveSaveMode, forcedDisadvantage } from '../rules/status.js';
 import Panel from './Panel.jsx';
 
 const SAVE_MODES = ['disadv', 'normal', 'adv'];
@@ -80,12 +81,15 @@ export default function DiceRoller({ character, onEvent, external }) {
     shareRoll(who, label, total, '');
   };
 
+  // Zustaende (Verletzt, Entkraeftet, Belastet) zwingen Nachteil auf — der
+  // gewaehlte Modus wird damit verrechnet (rules/status.js#effectiveSaveMode).
   const save = (attrKey) => {
-    const r = rollSave(character[attrKey].current, saveMode);
+    const mode = effectiveSaveMode(character, attrKey, saveMode);
+    const r = rollSave(character[attrKey].current, mode);
     const attr = t(`attr.${attrKey}`);
     const tone = r.ok ? 'ok' : 'bad';
     const verdict = r.ok ? t('dice.success') : t('dice.fail');
-    const modeTag = saveMode === 'normal' ? '' : ` (${t(`dice.mode.${saveMode}`)})`;
+    const modeTag = mode === 'normal' ? '' : ` (${t(`dice.mode.${mode}`)})`;
     const parts = r.dice.length === 2
       ? [
         { value: r.dice[0], label: t('dice.roll') },
@@ -105,7 +109,7 @@ export default function DiceRoller({ character, onEvent, external }) {
       },
       { label: `${t('dice.saveVs', { attr })}${modeTag}`, value: r.d, max: 20, tone, verdict, parts },
     );
-    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode: saveMode });
+    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode });
     shareSave(who, `${attr}${modeTag}`, r.d, r.target, r.ok);
   };
 
@@ -133,16 +137,21 @@ export default function DiceRoller({ character, onEvent, external }) {
         <RollButton sides={6} label={t('dice.d6')} kind="basic" onRoll={rollD6} />
         <RollButton d66 label={t('dice.d66')} kind="basic" onRoll={roll66} />
         <span className="dice-sep">{t('dice.save')}</span>
-        {['str', 'dex', 'wil'].map((k) => (
-          <RollButton
-            key={k}
-            sides={20}
-            label={t(`attr.abbr.${k}`)}
-            kind="save"
-            title={t('dice.saveVs', { attr: t(`attr.${k}`) })}
-            onRoll={() => save(k)}
-          />
-        ))}
+        {['str', 'dex', 'wil'].map((k) => {
+          const forced = forcedDisadvantage(character, k);
+          return (
+            <RollButton
+              key={k}
+              sides={20}
+              label={`${t(`attr.abbr.${k}`)}${forced.length ? ' ▼' : ''}`}
+              kind="save"
+              title={forced.length
+                ? `${t('dice.saveVs', { attr: t(`attr.${k}`) })} — ${t('dice.forcedDisadv', { why: forced.map((w) => t(`dice.why.${w}`)).join(', ') })}`
+                : t('dice.saveVs', { attr: t(`attr.${k}`) })}
+              onRoll={() => save(k)}
+            />
+          );
+        })}
       </div>
 
       <form className="dice-custom" onSubmit={rollCustom}>

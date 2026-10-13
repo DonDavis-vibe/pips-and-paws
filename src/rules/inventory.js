@@ -17,6 +17,8 @@ function preferredOrder(item) {
   if (item.pairKind === 'pawBody') return [...PAW_SLOTS, ...BODY_SLOTS, ...PACK_SLOTS];
   if (item.type === 'weapon') return [...PAW_SLOTS, ...PACK_SLOTS, ...BODY_SLOTS];
   if (item.type === 'armour') return [...BODY_SLOTS, ...PACK_SLOTS, ...PAW_SLOTS];
+  // Munition wird laut Regel (S. 9) in einem Koerperplatz getragen.
+  if (item.type === 'ammo') return [...BODY_SLOTS, ...PACK_SLOTS, ...PAW_SLOTS];
   return [...PACK_SLOTS, ...BODY_SLOTS, ...PAW_SLOTS];
 }
 

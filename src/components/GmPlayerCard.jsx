@@ -9,6 +9,7 @@ import { readJSON, writeJSON } from '../utils/storage.js';
 import { gritForLevel, ALL_SLOTS, PAW_SLOTS } from '../rules/character.js';
 import { CONDITION_CATALOG, itemLabel } from '../data/items.js';
 import { HIRELING_CATALOG } from '../rules/hirelings.js';
+import { armourValue, encumbrance, zeroStates } from '../rules/status.js';
 import AddItemMenu from './AddItemMenu.jsx';
 import Portrait from './Portrait.jsx';
 import {
@@ -33,6 +34,10 @@ export default function GmPlayerCard({
   const inv = c.inventory || {};
   const [open, setOpen] = useState(false);
   const [condOpen, setCondOpen] = useState(false);
+  // Schadens-Eingabe: Menge, Zielattribut (Spinne/Geist treffen DEX/WIL),
+  // Ruestung abziehen (Regel: Angriffe "minus their armour").
+  const [dmgOpen, setDmgOpen] = useState(false);
+  const [dmg, setDmg] = useState({ amount: '', attr: 'str', armour: true });
   const [note, setNote] = useState(() => readJSON(NOTE_KEY(c.id), '') || '');
 
   const hpPct = c.hp?.max > 0 ? Math.max(0, Math.min(100, (c.hp.current / c.hp.max) * 100)) : 0;
@@ -45,9 +50,11 @@ export default function GmPlayerCard({
   const conditions = Object.values(items).filter((i) => i.type === 'condition' && !i.cleared && !gritIds.has(i.itemId));
   const grit = gritForLevel(c.level || 1);
   const usedSlots = ALL_SLOTS.filter((s) => inv[s]).length;
-  const defence = Object.values(items)
-    .filter((i) => i.type === 'armour')
-    .reduce((sum, i) => sum + (i.defense || 0), 0);
+  // Status-Ableitungen brauchen den Bogen samt Gegenstaenden in einem Objekt.
+  const full = { ...c, items };
+  const defence = armourValue(full);
+  const enc = encumbrance(full);
+  const zero = zeroStates(full);
   const pawItems = PAW_SLOTS
     .map((s) => inv[s] && !inv[s].cont && items[inv[s].itemId])
     .filter((i) => i && (i.type === 'weapon' || i.damage));
@@ -135,8 +142,12 @@ export default function GmPlayerCard({
         </div>
       ) : null}
 
-      {conditions.length || c.incapacitated ? (
+      {conditions.length || c.incapacitated || enc.encumbered || zero.immobile || zero.insensible || zero.dead ? (
         <div className="gm-conditions">
+          {zero.dead ? <span className="chip chip-bad">{t('zero.deadShort')}</span> : null}
+          {zero.immobile ? <span className="chip chip-bad" title={t('zero.immobile')}>{t('zero.immobileShort')}</span> : null}
+          {zero.insensible ? <span className="chip chip-bad" title={t('zero.insensible')}>{t('zero.insensibleShort')}</span> : null}
+          {enc.encumbered ? <span className="chip chip-bad" title={t('enc.hint')}>{t('enc.label')}</span> : null}
           {c.incapacitated ? (
             <span className="chip chip-bad" title={t('incap.hint')}>
               {t('incap.label')}
@@ -151,9 +162,54 @@ export default function GmPlayerCard({
       ) : null}
 
       <div className="gm-actions">
-        <button type="button" className="btn btn-sm btn-danger" onClick={() => ask('gm.prompt.damage', (n) => ({ cmd: GM_DAMAGE, amount: n, target: 'hp' }))}>
-          {t('gm.action.damage')}
-        </button>
+        <span className="gm-cond-picker">
+          <button type="button" className="btn btn-sm btn-danger" onClick={() => setDmgOpen((v) => !v)}>
+            {t('gm.action.damage')}
+          </button>
+          {dmgOpen ? (
+            <form
+              className="gm-dmg-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const n = parseInt(dmg.amount, 10);
+                if (!Number.isFinite(n) || n < 0) return;
+                onCommand({ cmd: GM_DAMAGE, amount: n, attr: dmg.attr, armour: dmg.armour && defence > 0 });
+                setDmg((d) => ({ ...d, amount: '' }));
+                setDmgOpen(false);
+              }}
+            >
+              <label className="gm-dmg-row">
+                <span>{t('dmg.amount')}</span>
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  autoFocus
+                  value={dmg.amount}
+                  onChange={(e) => setDmg((d) => ({ ...d, amount: e.target.value }))}
+                />
+              </label>
+              <label className="gm-dmg-row" title={t('dmg.attrHint')}>
+                <span>{t('dmg.attrLabel')}</span>
+                <select value={dmg.attr} onChange={(e) => setDmg((d) => ({ ...d, attr: e.target.value }))}>
+                  {['str', 'dex', 'wil'].map((k) => <option key={k} value={k}>{t(`attr.abbr.${k}`)}</option>)}
+                </select>
+              </label>
+              <label className="gm-dmg-check">
+                <input
+                  type="checkbox"
+                  checked={dmg.armour && defence > 0}
+                  disabled={defence === 0}
+                  onChange={(e) => setDmg((d) => ({ ...d, armour: e.target.checked }))}
+                />
+                {t('dmg.useArmour', { n: defence })}
+              </label>
+              <button type="submit" className="btn btn-sm btn-danger" disabled={!dmg.amount}>
+                {t('gm.action.damage')}
+              </button>
+            </form>
+          ) : null}
+        </span>
         <button type="button" className="btn btn-sm" onClick={() => ask('gm.prompt.heal', (n) => ({ cmd: GM_HEAL, amount: n, target: 'hp' }))}>
           {t('gm.action.heal')}
         </button>

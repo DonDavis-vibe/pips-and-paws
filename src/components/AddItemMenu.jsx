@@ -8,7 +8,9 @@ import { Modal, Field, TextInput } from './ui.jsx';
 
 const TABS = ['catalog', 'spell', 'condition', 'custom'];
 
-export default function AddItemMenu({ onAdd, triggerLabel, triggerClass = 'btn' }) {
+// onBuy(item, price) + pips: Katalog-Gegenstaende auf Wunsch kaufen (Preis wird
+// abgezogen) — nur auf dem Spielerbogen; der SL gibt Dinge immer kostenlos.
+export default function AddItemMenu({ onAdd, onBuy, pips = 0, triggerLabel, triggerClass = 'btn' }) {
   const { t, lang } = useLang();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('catalog');
@@ -16,6 +18,7 @@ export default function AddItemMenu({ onAdd, triggerLabel, triggerClass = 'btn' 
   const [customType, setCustomType] = useState('standard');
   const [customSize, setCustomSize] = useState(1);
   const [customUses, setCustomUses] = useState(0);
+  const [buying, setBuying] = useState(false);
 
   const add = (item) => {
     onAdd(item);
@@ -44,18 +47,38 @@ export default function AddItemMenu({ onAdd, triggerLabel, triggerClass = 'btn' 
             ))}
           </div>
 
+          {tab === 'catalog' && onBuy ? (
+            <label className="gm-dmg-check catalog-buy">
+              <input type="checkbox" checked={buying} onChange={(e) => setBuying(e.target.checked)} />
+              {t('buy.toggle', { n: pips })}
+            </label>
+          ) : null}
+
           {tab === 'catalog' ? (
             <div className="catalog-grid">
               {CATALOG_KEYS.map((key) => {
                 const c = ITEM_CATALOG[key];
+                const tooDear = buying && c.cost > pips;
                 return (
-                  <button key={key} type="button" className="catalog-item" onClick={() => add(makeItem(key))}>
+                  <button
+                    key={key}
+                    type="button"
+                    className="catalog-item"
+                    disabled={tooDear}
+                    onClick={() => {
+                      if (buying && onBuy) {
+                        onBuy(makeItem(key), c.cost || 0);
+                        setOpen(false);
+                      } else add(makeItem(key));
+                    }}
+                  >
                     <span className="catalog-name">{loc(c.name, lang)}</span>
                     <span className="catalog-tags">
                       {t(`type.${c.type}`)}
                       {c.size === 2 ? ` · ${t('item.twoSlots')}` : ''}
                       {c.damage ? ` · ${c.damage}` : ''}
                       {c.defense ? ` · ${t('item.defense')} ${c.defense}` : ''}
+                      {Number.isFinite(c.cost) ? ` · ${c.cost}p` : ''}
                     </span>
                   </button>
                 );

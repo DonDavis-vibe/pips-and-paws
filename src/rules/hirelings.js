@@ -1,10 +1,11 @@
-// Miethelfer (SRD "Recruiting help — Hirelings"). Bewusst schlank: Name, Art,
-// TP/STR/GES/WIL, Tageslohn, Moral-Rettungswurf — kein eigenes Inventarraster
-// (die SRD gibt ihnen 6 Plaetze wie einer Maus, das wuerde den Bogen aber
-// sprengen; wer das braucht, traegt es in die Notiz ein).
+// Miethelfer (SRD "Recruiting help — Hirelings"): Name, Art, TP/STR/GES/WIL,
+// Tageslohn, Moral-Probe und ein eigenes Inventar mit 6 Plaetzen (Regel S. 14:
+// zwei Pfoten, zwei Koerper, zwei Rucksack). Gleiche Platz-Logik wie bei der
+// Maus (rules/inventory.js), nur mit weniger Feldern.
 
 import { rollDie, rollDice } from './dice.js';
-import { newId } from './character.js';
+import { newId, PAW_SLOTS, BODY_SLOTS } from './character.js';
+import { firstFreeFit, cellsFor } from './inventory.js';
 
 // SRD-Empfehlungstabelle: Typ -> Tageslohn in Pips. Reine Vorbelegung beim
 // Anlegen — Name/Lohn bleiben danach frei editierbar.
@@ -43,5 +44,48 @@ export function newHireling(catalogKey = '') {
     dex: { current: r.dex, max: r.dex },
     wil: { current: r.wil, max: r.wil },
     note: '',
+    inventory: Object.fromEntries(HIRELING_SLOTS.map((sl) => [sl, null])),
+    items: {},
   };
+}
+
+export const HIRELING_SLOTS = [...PAW_SLOTS, ...BODY_SLOTS, 'pack_1', 'pack_2'];
+
+function hirelingOrder(item) {
+  const pack = ['pack_1', 'pack_2'];
+  if (item.type === 'weapon' || item.pairKind === 'pawBody') return [...PAW_SLOTS, ...BODY_SLOTS, ...pack];
+  if (item.type === 'armour' || item.type === 'ammo') return [...BODY_SLOTS, ...pack, ...PAW_SLOTS];
+  return [...pack, ...BODY_SLOTS, ...PAW_SLOTS];
+}
+
+// Alte Eintraege ohne Inventar auffuellen.
+export function withHirelingInventory(h) {
+  return {
+    ...h,
+    inventory: { ...Object.fromEntries(HIRELING_SLOTS.map((sl) => [sl, null])), ...h.inventory },
+    items: h.items || {},
+  };
+}
+
+// -> { ok, hireling } ; ok:false = kein Platz
+export function hirelingAddItem(hireling, item) {
+  const h = withHirelingInventory(hireling);
+  const size = item.size === 2 ? 2 : 1;
+  const slot = firstFreeFit(h.inventory, size, hirelingOrder(item), item.pairKind);
+  if (!slot) return { ok: false, hireling: h };
+  const cells = cellsFor(slot, size, item.pairKind);
+  if (!cells.every((c) => HIRELING_SLOTS.includes(c))) return { ok: false, hireling: h };
+  const inventory = { ...h.inventory, [cells[0]]: { itemId: item.itemId } };
+  if (cells[1]) inventory[cells[1]] = { itemId: item.itemId, cont: true };
+  return { ok: true, hireling: { ...h, inventory, items: { ...h.items, [item.itemId]: item } } };
+}
+
+export function hirelingRemoveItem(hireling, itemId) {
+  const h = withHirelingInventory(hireling);
+  const items = { ...h.items };
+  delete items[itemId];
+  const inventory = Object.fromEntries(
+    Object.entries(h.inventory).map(([sl, v]) => [sl, v?.itemId === itemId ? null : v]),
+  );
+  return { ...h, items, inventory };
 }

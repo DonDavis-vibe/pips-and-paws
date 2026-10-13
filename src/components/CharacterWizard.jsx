@@ -5,7 +5,8 @@ import { Modal, Field, TextInput } from './ui.jsx';
 import { rollDie, rollAttribute } from '../rules/dice.js';
 import { blankCharacter, gritForLevel } from '../rules/character.js';
 import { addItem } from '../rules/inventory.js';
-import { makeItem } from '../data/items.js';
+import { makeItem, SPELL_CATALOG } from '../data/items.js';
+import { newHireling } from '../rules/hirelings.js';
 import { backgroundAt } from '../data/backgrounds.js';
 import { BIRTHSIGNS, COAT_COLORS, COAT_PATTERNS, DETAILS, NAMES, pick, rollDetailIndex } from '../data/tables.js';
 import wizardArt from '../assets/ink/wizard.webp';
@@ -55,8 +56,26 @@ export default function CharacterWizard({ onDone, onCancel }) {
     setAttrs((a) => ({ ...a, [swapA]: a[swapB], [swapB]: a[swapA] }));
   };
 
-  const resolveEntries = (entries) =>
-    entries.map((e) => (e.k ? { item: makeItem(e.k) } : { text: loc(e.t, lang) }));
+  // Ein Hintergrund-Eintrag -> genau ein Ding (siehe data/backgrounds.js):
+  // Gegenstand (ggf. mit eigenem Namen), Zauberkarte, eigener Gegenstand oder Miethelfer.
+  const resolveEntry = (e) => {
+    if (e.hire) return { hire: { ...newHireling(e.kind), name: loc(e.hire, lang) } };
+    if (e.spell) return { item: makeItem(e.spell) };
+    if (e.k) return { item: e.as ? { ...makeItem(e.k), customName: loc(e.as, lang) } : makeItem(e.k) };
+    return { item: makeItem(null, { name: e.t }) };
+  };
+  const resolveEntries = (entries) => entries.map(resolveEntry);
+
+  // Anzeigename eines Eintrags fuer die Vorschau im Wizard.
+  const entryLabel = (e) => {
+    if (e.hire) return `${t('wizard.hireling')}: ${loc(e.hire, lang)}`;
+    if (e.spell) return `${t('wizard.spell')}: ${loc(SPELL_CATALOG[e.spell].name, lang)}`;
+    if (e.k) {
+      const base = loc(makeItem(e.k).name, lang);
+      return e.as ? `${loc(e.as, lang)} (${base})` : base;
+    }
+    return loc(e.t, lang);
+  };
 
   const finish = () => {
     let c = blankCharacter();
@@ -88,18 +107,15 @@ export default function CharacterWizard({ onDone, onCancel }) {
       grant.push(resolveEntries([extraBg.items[extraChoice]])[0]);
     }
 
-    const freeTexts = [];
+    // Passt etwas nicht mehr ins Raster, bleibt es trotzdem beim Bogen (ohne
+    // Platz) — die Maus ist dann belastet, bis sie etwas ablegt (Regel S. 8).
     for (const g of grant) {
-      if (g.item) {
+      if (g.hire) {
+        c.hirelings = [...(c.hirelings || []), g.hire];
+      } else if (g.item) {
         const res = addItem(c, g.item);
-        if (res.ok) c = res.character;
-        else freeTexts.push(loc(g.item.name, lang));
-      } else if (g.text) {
-        freeTexts.push(g.text);
+        c = res.ok ? res.character : { ...c, items: { ...c.items, [g.item.itemId]: g.item } };
       }
-    }
-    if (freeTexts.length) {
-      c.notes = `${t('wizard.startingGear')}: ${freeTexts.join(', ')}`;
     }
 
     onDone(c);
@@ -206,7 +222,7 @@ export default function CharacterWizard({ onDone, onCancel }) {
             </span>
             <ul>
               {bg.items.map((e, i) => (
-                <li key={i}>{e.k ? loc(makeItem(e.k).name, lang) : loc(e.t, lang)}</li>
+                <li key={i}>{entryLabel(e)}</li>
               ))}
             </ul>
           </div>
@@ -227,14 +243,14 @@ export default function CharacterWizard({ onDone, onCancel }) {
                         checked={extraChoice === i}
                         onChange={() => setExtraChoice(i)}
                       />
-                      {e.k ? loc(makeItem(e.k).name, lang) : loc(e.t, lang)}
+                      {entryLabel(e)}
                     </label>
                   ))}
                 </div>
               ) : (
                 <ul>
                   {extraBg.items.map((e, i) => (
-                    <li key={i}>{e.k ? loc(makeItem(e.k).name, lang) : loc(e.t, lang)}</li>
+                    <li key={i}>{entryLabel(e)}</li>
                   ))}
                 </ul>
               )}

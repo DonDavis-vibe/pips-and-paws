@@ -124,15 +124,21 @@ export function normalizeCharacter(raw) {
   return merged;
 }
 
-// XP -> Stufe (SRD "Level"-Tabelle: 0 / 1000 / 3000 / 6000, danach je +5000).
-export const XP_THRESHOLDS = [0, 1000, 3000, 6000, 11000, 16000, 21000, 26000, 31000, 36000];
+// XP -> Stufe (Regel S. 11): 0 / 1000 / 3000 / 6000, danach je +5000 — ohne
+// Obergrenze.
+export function xpForLevel(level) {
+  if (level <= 1) return 0;
+  if (level === 2) return 1000;
+  if (level === 3) return 3000;
+  return 6000 + (level - 4) * 5000;
+}
 
 export function levelForXp(xp) {
-  let lvl = 1;
-  for (let i = 1; i < XP_THRESHOLDS.length; i += 1) {
-    if (xp >= XP_THRESHOLDS[i]) lvl = i + 1;
-  }
-  return lvl;
+  const x = Math.max(0, Number(xp) || 0);
+  if (x < 1000) return 1;
+  if (x < 3000) return 2;
+  if (x < 6000) return 3;
+  return 4 + Math.floor((x - 6000) / 5000);
 }
 
 // Grit je Stufe (SRD): Stufe 1 = 0, 2 = 1, 3–4 = 2, 5+ = 3.

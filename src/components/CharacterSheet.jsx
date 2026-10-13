@@ -23,7 +23,7 @@ import PartyBattleMap from './battlemap/PartyBattleMap.jsx';
 import PartyHandouts, { HandoutPopup } from './PartyHandouts.jsx';
 import HirelingsPanel from './HirelingsPanel.jsx';
 import Portrait from './Portrait.jsx';
-import { itemLabel } from '../data/items.js';
+import { itemLabel, CONDITION_CATALOG } from '../data/items.js';
 import Panel from './Panel.jsx';
 import MouseIcon from './MouseIcon.jsx';
 import SortableItem from './SortableItem.jsx';
@@ -31,10 +31,14 @@ import SectionNav from './SectionNav.jsx';
 import {
   tryMove, addItem, removeItem, firstFreeFit, placeInGrit,
 } from '../rules/inventory.js';
-import { GRIT_SLOT_PREFIX } from '../rules/character.js';
+import { GRIT_SLOT_PREFIX, PAW_SLOTS } from '../rules/character.js';
 import { rollSave, rollDie } from '../rules/dice.js';
 import { shareSave, shareRoll } from '../utils/discord.js';
 import { useOrder } from '../useOrder.js';
+import { castSpell, spellEffectText } from '../rules/magic.js';
+import { repairItem } from '../rules/economy.js';
+import AfterFight from './AfterFight.jsx';
+import { effectiveSaveMode } from '../rules/status.js';
 import { rollLevelUp } from '../rules/levelup.js';
 
 // Sprungleiste: Symbol + Kurzname je Panel (Label-Schluessel nav.*).
@@ -153,16 +157,32 @@ export default function CharacterSheet({
   const pushRoll = (stage, logEntry) =>
     setExternalRoll({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, stage, logEntry });
 
-  // Direkter Schadenswurf ueber die Waffenkarte (Discord-Feedback).
+  // Direkter Schadenswurf ueber die Waffenkarte. Regeln S. 9/10:
+  //  - opt.mode 'enhanced' -> W12, 'impaired' -> W4 (unabhaengig von der Waffe)
+  //  - zwei leichte Waffen in den Pfoten: beide Wuerfel, das bessere Ergebnis
   const onRollDamage = (item, opt) => {
-    const value = rollDie(opt.sides);
     const weapon = itemLabel(item, loc(item.name, lang));
+    const otherLight = !opt.mode && item.key === 'w_light'
+      ? PAW_SLOTS.map((s) => character.inventory[s]).find((v) => v && !v.cont && v.itemId !== item.itemId
+        && character.items[v.itemId]?.key === 'w_light')
+      : null;
+    const rolls = otherLight ? [rollDie(opt.sides), rollDie(opt.sides)] : [rollDie(opt.sides)];
+    const value = Math.max(...rolls);
     const hands = opt.hands ? ` (${t(`item.hands.${opt.hands}`)})` : '';
-    const label = `${weapon}${hands}`;
+    const tag = opt.mode ? ` · ${t(`item.${opt.mode}`)}` : otherLight ? ` · ${t('item.dualWield')}` : '';
+    const label = `${weapon}${hands}${tag}`;
     const die = `${t('dice.dieLetter')}${opt.sides}`;
     const verdict = `${t('item.damage')} ${value}`;
     pushRoll(
-      { label: `${label} ${die}`, value, max: opt.sides, die: opt.sides, tone: 'bad', verdict },
+      {
+        label: `${label} ${die}`,
+        value,
+        max: opt.sides,
+        die: rolls.length === 1 ? opt.sides : undefined,
+        tone: 'bad',
+        verdict,
+        parts: rolls.length > 1 ? rolls.map((r) => ({ value: r, label: die })) : undefined,
+      },
       { label: `${label} ${die}`, verdict },
     );
     notify(`${label} ${die} — ${verdict}`, 'bad');
@@ -170,10 +190,68 @@ export default function CharacterSheet({
     shareRoll(character.name || t('app.title'), `${label} ${die}`, value);
   };
 
+  // Reparieren (Regel S. 8): ein Nutzungspunkt fuer 10 % des Preises.
+  const onRepair = (item) => {
+    const res = repairItem(character, item.itemId);
+    const name = itemLabel(item, loc(item.name, lang));
+    if (!res.ok) {
+      notify(res.reason === 'tooPoor' ? t('repair.tooPoor', { n: res.cost }) : t('repair.no'), 'warn');
+      return;
+    }
+    setCharacter(res.character);
+    notify(t('repair.done', { name, n: res.cost }), 'ok');
+  };
+
+  // Kaufen aus dem Katalog: Preis von den Pips abziehen, dann einlegen.
+  const onBuy = (item, price) => {
+    if ((character.pips || 0) < price) { notify(t('buy.tooPoor', { n: price }), 'warn'); return; }
+    setCharacter((c) => {
+      const res = addItem({ ...c, pips: c.pips - price }, item);
+      return res.ok ? res.character : { ...c, pips: c.pips - price, items: { ...c.items, [item.itemId]: item } };
+    });
+    notify(t('buy.done', { name: loc(item.name, lang), n: price }), 'ok');
+  };
+
+  // Zauber wirken (rules/magic.js). Gewuerfelt wird hier, nicht im Updater.
+  const onCast = (item, power) => {
+    const res = castSpell(character, item.itemId, power);
+    setCharacter(res.character);
+    const name = itemLabel(item, loc(item.name, lang));
+    const effect = spellEffectText(loc(item.effect, lang), res.power, res.sum);
+    const label = t('spell.castLabel', { name, n: res.power });
+    const verdict = `${t('spell.sumDice', { sum: res.sum, dice: res.power })}${res.marks ? ` · ${t('spell.marked', { n: res.marks })}` : ''}`;
+    pushRoll(
+      {
+        label,
+        value: res.sum,
+        max: res.power * 6,
+        tone: res.sixes ? 'bad' : 'ok',
+        verdict,
+        parts: res.dice.map((d) => ({ value: d, label: d >= 4 ? t('spell.markShort') : t('dice.roll') })),
+      },
+      { label, verdict: `${verdict} — ${effect}` },
+    );
+    notify(`${label}: ${effect}`, 'ok');
+    if (res.depleted) notify(t('spell.nowDepleted', { name }), 'warn');
+    if (res.sixes) {
+      notify(t('spell.miscast', { n: res.sixes, dmg: res.wilDamage }), 'bad');
+      if (res.saveRoll) {
+        const r = res.saveRoll;
+        notify(`${t('dice.saveVs', { attr: t('attr.wil') })} — d20 ${r.d} ≤ ${r.target} · ${r.ok ? t('dice.success') : t('dice.fail')}`, r.ok ? 'ok' : 'bad');
+      }
+      if (res.drained) notify(t('player.gm.condition', { name: loc(CONDITION_CATALOG.drained.name, lang) }), 'bad');
+      if (res.drainedOverflow) notify(t('player.gm.conditionOverflow', { name: loc(CONDITION_CATALOG.drained.name, lang) }), 'warn');
+      if (res.zero.insensible) notify(t('zero.insensible'), 'bad');
+    }
+    if (onEvent) onEvent({ kind: 'roll', label: `${label} (${res.dice.join(', ')})`, value: res.sum });
+    shareRoll(character.name || t('app.title'), `${label} (${res.dice.join(', ')})`, res.sum, res.sixes ? `⚠ ${t('spell.miscastShort')}` : '');
+  };
+
   const onSave = (attrKey) => {
-    const r = rollSave(character[attrKey].current);
+    const mode = effectiveSaveMode(character, attrKey);
+    const r = rollSave(character[attrKey].current, mode);
     const attr = t(`attr.${attrKey}`);
-    const label = t('dice.saveVs', { attr });
+    const label = `${t('dice.saveVs', { attr })}${mode === 'normal' ? '' : ` (${t(`dice.mode.${mode}`)})`}`;
     const tone = r.ok ? 'ok' : 'bad';
     const verdict = r.ok ? t('dice.success') : t('dice.fail');
     pushRoll(
@@ -184,14 +262,14 @@ export default function CharacterSheet({
         tone,
         verdict,
         parts: [
-          { value: r.d, label: t('dice.roll') },
+          ...r.dice.map((d) => ({ value: d, label: t('dice.roll') })),
           { value: `≤ ${r.target}`, label: t('dice.target') },
         ],
       },
       { label, verdict: `${r.d} · ${verdict}`, ok: r.ok, tone },
     );
     notify(`${label} — d20 ${r.d} ≤ ${r.target} · ${verdict}`, tone);
-    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok });
+    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode });
     shareSave(character.name || t('app.title'), attr, r.d, r.target, r.ok);
   };
 
@@ -322,7 +400,7 @@ export default function CharacterSheet({
           <AttributeBox attrKey="wil" labelKey="attr.wil" value={character.wil}
             onChange={(v) => patch({ wil: v })} onSave={onSave} />
         </div>
-        <ResourceBar character={character} patch={patch} onLevelUp={onLevelUp} onLevelSkip={onLevelSkip} />
+        <ResourceBar character={character} patch={patch} onLevelUp={onLevelUp} onLevelSkip={onLevelSkip} notify={notify} />
         <RestControls character={character} setCharacter={setCharacter} notify={notify} locked={restLocked} />
       </section>
     ),
@@ -336,13 +414,25 @@ export default function CharacterSheet({
         onDragCancel={() => setActiveId(null)}
         onDragEnd={onDragEnd}
       >
-        <Panel id="inventory" icon={Backpack} title={t('inv.title')} right={<AddItemMenu onAdd={onAdd} />}>
+        <Panel
+          id="inventory"
+          icon={Backpack}
+          title={t('inv.title')}
+          right={(
+            <div className="stash-head-actions">
+              <AfterFight character={character} setCharacter={setCharacter} notify={notify} pushRoll={pushRoll} />
+              <AddItemMenu onAdd={onAdd} onBuy={onBuy} pips={character.pips} />
+            </div>
+          )}
+        >
           <InventoryGrid
             character={character}
             onItemChange={onItemChange}
             onItemRemove={onItemRemove}
             onItemStash={stash ? onItemStash : undefined}
             onRollDamage={onRollDamage}
+            onCast={onCast}
+            onRepair={onRepair}
             groupOrder={groupOrder}
           />
         </Panel>
@@ -364,6 +454,9 @@ export default function CharacterSheet({
         hirelings={character.hirelings || []}
         onChange={(next) => patch({ hirelings: next })}
         onMoraleSave={onHirelingSave}
+        character={character}
+        setCharacter={setCharacter}
+        notify={notify}
       />
     ),
     battlemap: <PartyBattleMap map={partyMap} />,

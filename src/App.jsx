@@ -10,15 +10,18 @@ import { blankCharacter, isBlank, normalizeCharacter } from './rules/character.j
 import {
   applyDamage, applyHeal, applyPips, applyXp, applyGive, applyCondition,
 } from './rules/gmActions.js';
-import { CONDITION_CATALOG } from './data/items.js';
+import { CONDITION_CATALOG, itemLabel } from './data/items.js';
 import { readJSON, writeJSON } from './utils/storage.js';
 import { downloadCharacter, readCharacterFile } from './utils/exportImport.js';
 import { rollSave } from './rules/dice.js';
 import { applyRest } from './rules/rest.js';
+import { effectiveSaveMode } from './rules/status.js';
+import { burnLights } from './rules/light.js';
+import { damageMessages, restText } from './utils/ruleText.js';
 import { shareEvent, setWebhook } from './utils/discord.js';
 import {
   GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER, GM_BROADCAST,
-  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK, GM_REST,
+  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK, GM_REST, GM_LIGHT,
 } from './multiplayer/protocol.js';
 import { useMultiplayer } from './multiplayer/useMultiplayer.js';
 import brandMark from './assets/ink/brand.webp';
@@ -127,40 +130,20 @@ export default function App() {
     } else if (cmd === GM_DAMAGE) {
       // applyDamage() einmal direkt aufrufen (nicht in der setCharacter-Updater-
       // Funktion) — deren Rueckgabe wuerde erst beim naechsten Commit ausgewertet,
-      // also NACH dem synchronen Code hier unten (strHit/saveRoll waeren dann
-      // noch auf ihren Anfangswerten). Ausserdem wuerde ein zweiter Aufruf wegen
-      // des Rettungswurfs eine ANDERE Zufallszahl liefern als die gespeicherte.
-      const { character: nextChar, strHit, saveRoll, dead, injuredOk } = applyDamage(character, gmCommand.amount);
-      setCharacter(nextChar);
-      notify(
-        strHit > 0 ? t('player.gm.strDamage', { n: gmCommand.amount, s: strHit }) : t('player.gm.damage', { n: gmCommand.amount }),
-        'bad',
-      );
-      shareEvent(cn, `🩸 ${gmCommand.amount} ${t('item.damage')}${strHit > 0 ? ` (${strHit} → STR)` : ''}`, 'bad');
-      // SRD-Schadenskette: STR-Schaden verlangt sofort einen automatischen
-      // STR-Rettungswurf; misslingt er, gibt's kritischen Schaden (Verletzt +
-      // kampfunfaehig). Sinkt STR auf 0, ist die Maus tot. Siehe gmActions.js.
-      if (saveRoll) {
-        sendEvent({ kind: 'save', attr: 'str', roll: saveRoll.d, target: saveRoll.target, ok: saveRoll.ok, reason: 'damage' });
-        notify(
-          `${t('dice.saveVs', { attr: t('attr.str') })} — d20 ${saveRoll.d} ≤ ${saveRoll.target} · ${saveRoll.ok ? t('dice.success') : t('dice.fail')}`,
-          saveRoll.ok ? 'ok' : 'bad',
-        );
-        shareEvent(cn, `🎲 ${t('dice.saveVs', { attr: t('attr.str') })} — W20 ${saveRoll.d} ≤ ${saveRoll.target} · ${saveRoll.ok ? '✅' : '❌'}`, saveRoll.ok ? 'ok' : 'bad');
-        if (!saveRoll.ok && !dead) {
-          notify(t('player.gm.critDamage'), 'bad');
-          shareEvent(cn, `💥 ${t('player.gm.critDamage')}`, 'bad');
-        }
-        if (injuredOk === false) {
-          notify(t('player.gm.conditionNoRoom', { name: loc(CONDITION_CATALOG.injured.name, lang) }), 'warn');
-        }
-      }
-      if (dead) {
-        notify(t('player.gm.dead'), 'bad');
-        shareEvent(cn, `☠ ${t('player.gm.dead')}`, 'bad');
+      // also NACH dem synchronen Code hier unten. Ausserdem wuerde ein zweiter
+      // Aufruf wegen der Probe eine ANDERE Zufallszahl liefern als die gespeicherte.
+      // Schadenskette nach Regel S. 10, siehe gmActions.js.
+      const res = applyDamage(character, gmCommand.amount, { attr: gmCommand.attr, armour: !!gmCommand.armour });
+      setCharacter(res.character);
+      const lines = damageMessages(res, t, loc(CONDITION_CATALOG.injured.name, lang));
+      lines.forEach((l) => notify(l.text, l.tone));
+      shareEvent(cn, `🩸 ${lines.map((l) => l.text).join(' · ')}`, 'bad');
+      if (res.saveRoll) {
+        const r = res.saveRoll;
+        sendEvent({ kind: 'save', attr: res.attr, roll: r.d, target: r.target, ok: r.ok, mode: r.mode, reason: 'damage' });
       }
     } else if (cmd === GM_SAVE) {
-      const r = rollSave(character[gmCommand.attr]?.current ?? 0);
+      const r = rollSave(character[gmCommand.attr]?.current ?? 0, effectiveSaveMode(character, gmCommand.attr));
       const prefix = gmCommand.reason === 'initiative' ? `${t('combat.initiative')}: ` : '';
       notify(
         `${prefix}${t('dice.saveVs', { attr: t(`attr.${gmCommand.attr}`) })} — d20 ${r.d} ≤ ${r.target} · ${r.ok ? t('dice.success') : t('dice.fail')}`,
@@ -168,11 +151,21 @@ export default function App() {
       );
       sendEvent({ kind: 'save', attr: gmCommand.attr, roll: r.d, target: r.target, ok: r.ok, reason: gmCommand.reason });
       shareEvent(cn, `${prefix}🎲 ${t('dice.saveVs', { attr: t(`attr.${gmCommand.attr}`) })} — W20 ${r.d} ≤ ${r.target} · ${r.ok ? '✅' : '❌'}`, r.ok ? 'ok' : 'bad');
+    } else if (cmd === GM_LIGHT) {
+      // Zeit-Tracker des SL: 6 Zuege vorbei -> jede brennende Lichtquelle markiert eine Nutzung.
+      const { character: next, burned } = burnLights(character);
+      if (burned.length) {
+        setCharacter(next);
+        burned.forEach(({ item, out }) => {
+          const name = itemLabel(item, loc(item.name, lang));
+          notify(out ? t('light.out', { name }) : t('light.burned', { name }), out ? 'warn' : 'info');
+          if (out) shareEvent(cn, `🕯 ${t('light.out', { name })}`, 'info');
+        });
+      }
     } else if (cmd === GM_REST) {
-      const { character: next, msg, noRation } = applyRest(character, gmCommand.kind);
-      setCharacter(next);
-      const vars = msg.vars.attrKey ? { ...msg.vars, attr: t(`attr.${msg.vars.attrKey}`) } : msg.vars;
-      const text = t(msg.key, vars) + (noRation && gmCommand.kind === 'long' ? ` — ${t('rest.noRation')}` : '');
+      const rest = applyRest(character, gmCommand.kind);
+      setCharacter(rest.character);
+      const text = restText(rest, gmCommand.kind, t, lang);
       notify(`${t(`rest.${gmCommand.kind}`)}: ${text}`, 'ok');
       shareEvent(cn, `🌙 ${t(`rest.${gmCommand.kind}`)} — ${text}`, 'ok');
     } else if (cmd === GM_XP) {
@@ -196,15 +189,13 @@ export default function App() {
       }
       shareEvent(cn, `🎁 ${t('player.gm.give', { item: label })}`, 'info');
     } else if (cmd === GM_CONDITION) {
-      const { ok, cond } = applyCondition(character, gmCommand.key);
+      // Zustaende muessen immer genommen werden; ohne freien Platz ist die Maus belastet.
+      const { overflow, cond } = applyCondition(character, gmCommand.key);
       const label = loc(cond.name, lang);
-      if (ok) {
-        setCharacter((c) => applyCondition(c, gmCommand.key, cond).character);
-        notify(t('player.gm.condition', { name: label }), 'bad');
-        shareEvent(cn, `⚠️ ${t('player.gm.condition', { name: label })}`, 'bad');
-      } else {
-        notify(t('player.gm.conditionNoRoom', { name: label }), 'warn');
-      }
+      setCharacter((c) => applyCondition(c, gmCommand.key, cond).character);
+      notify(t('player.gm.condition', { name: label }), 'bad');
+      if (overflow) notify(t('player.gm.conditionOverflow', { name: label }), 'warn');
+      shareEvent(cn, `⚠️ ${t('player.gm.condition', { name: label })}`, 'bad');
     } else if (cmd === GM_STASH_DENY) {
       notify(t('player.gm.stashGone'), 'warn');
     } else if (cmd === GM_WEBHOOK && gmCommand.url) {

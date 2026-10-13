@@ -4206,4 +4206,130 @@ body:has(.battlemap-fullscreen) .section-nav { display: none; }
   overflow-y: auto;
 }
 
+
+/* ---- Regel-Status (rules/status.js) ---- */
+.res-note {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: var(--ink-dim);
+}
+
+.res-note-bad { color: var(--bad); font-weight: 600; }
+
+.incap-banner .hint { flex: 1 1 220px; margin: 0; }
+
+.inv-overflow {
+  padding: 8px;
+  border: 1.5px dashed var(--bad);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--bad) 7%, transparent);
+}
+
+.inv-overflow .inv-group-title { color: var(--bad); }
+
+/* SL-Schadenseingabe (GmPlayerCard): kleines Formular im Aufklapp-Menue. */
+.gm-dmg-form {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  min-width: 210px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+}
+
+.gm-dmg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.gm-dmg-row input,
+.gm-dmg-row select {
+  width: 80px;
+}
+
+.gm-dmg-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+/* "Nach dem Kampf" sitzt rechts im Panel-Kopf: Menue nach links aufklappen. */
+.fight-form { left: auto; right: 0; min-width: 240px; }
+.fight-form .hint { margin: 0; font-size: 11.5px; }
+
+/* Zauber wirken (ItemCard) */
+.spell-cast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.spell-cast-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-dim);
+}
+
+.spell-cast .tag-roll:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.spell-depleted { font-size: 11px; font-weight: 700; color: var(--bad); }
+
+.spell-recharge { font-size: 12px; color: var(--ink-dim); }
+
+.tag-enhanced, .tag-impaired { font-size: 10.5px; }
+
+/* Kampf-Tracker: Treffer-Eingabe je NSC */
+.combat-hit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.combat-hit input { width: 64px; }
+
+/* Licht / Reparatur (ItemCard) */
+.item-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.tag-lit { background: var(--gold); border-color: var(--gold); color: var(--accent-ink); }
+.item-flags { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; }
+.item-flags label { display: inline-flex; align-items: center; gap: 4px; }
+.res-donate { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 12px; }
+.catalog-buy { margin-bottom: 10px; }
+.catalog-item:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Miethelfer-Inventar: 6 Plaetze (2 Pfoten, 2 Koerper, 2 Rucksack) */
+.hireling-inv { margin-top: 10px; }
+.hireling-inv-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+.hireling-inv-head select { flex: 1 1 140px; min-width: 0; }
+.hireling-inv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.hireling-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 3px 6px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+}
+.hireling-slot.filled { border-style: solid; background: var(--bg-raise); }
+.hireling-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hireling-slot .usage-dots { display: inline-flex; gap: 2px; }
+
 } /* @layer classic */

@@ -27,10 +27,12 @@ import GmHandouts from './GmHandouts.jsx';
 import GmGenerators from './GmGenerators.jsx';
 import GmFactions from './GmFactions.jsx';
 import GmPnpLink from './GmPnpLink.jsx';
+import GmLootXp from './GmLootXp.jsx';
 import { PnpProvider } from '../pnp/PnpBridge.jsx';
 import EmptyState from './EmptyState.jsx';
 import emptyLobby from '../assets/ink/lobby.webp';
-import { GM_BROADCAST, GM_SAVE } from '../multiplayer/protocol.js';
+import { GM_BROADCAST, GM_SAVE, GM_DAMAGE, GM_LIGHT } from '../multiplayer/protocol.js';
+import { burnLights } from '../rules/light.js';
 import { rollDice, rollD66, rollReaction, rollTreasure } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
 import { exportGmSession, importGmSession } from '../utils/gmSession.js';
@@ -51,6 +53,12 @@ export function cmdVars(cmd, name, lang, t) {
   if (cmd.key && CONDITION_CATALOG[cmd.key]) v.cond = loc(CONDITION_CATALOG[cmd.key].name, lang);
   if (cmd.kind) v.kind = t(`rest.${cmd.kind}`);
   if (cmd.attr) v.attr = t(`attr.abbr.${cmd.attr}`);
+  // Schaden: Zielattribut (falls nicht STR) und ob die Ruestung abgezogen wird.
+  v.extra = '';
+  if (cmd.cmd === GM_DAMAGE) {
+    if (cmd.attr && cmd.attr !== 'str') v.extra += ` → ${v.attr}`;
+    if (cmd.armour) v.extra += ` (${t('dmg.minusArmour')})`;
+  }
   return v;
 }
 
@@ -259,6 +267,20 @@ function GmDashboardView({ mp, notify, localApi }) {
     }
   };
 
+  // Zeit-Tracker: 6 Zuege vorbei -> brennende Lichtquellen aller Maeuse markieren
+  // eine Nutzung (verbundene per Befehl, lokale Boegen direkt).
+  const onLightBurn = () => {
+    mp.sendGmCommand(null, { cmd: GM_LIGHT });
+    localApi.players.forEach((p) => {
+      const { burned } = burnLights(p);
+      if (!burned.length) return;
+      localApi.updatePlayer(p.id, (c) => burnLights(c).character);
+      burned.filter((b) => b.out).forEach(({ item }) => {
+        mp.logGmAction({ key: 'gm.log.note', vars: { name: p.name || '?', text: t('light.out', { name: loc(item.name, lang) }) } });
+      });
+    });
+  };
+
   const onLoadSession = async (file) => {
     if (!file) return;
     try {
@@ -309,6 +331,7 @@ function GmDashboardView({ mp, notify, localApi }) {
           </h2>
           <div className="stash-head-actions">
             <GmPnpLink />
+            <GmLootXp mp={mp} localApi={localApi} gmLog={gmLog} />
             <button type="button" className="btn btn-ghost btn-sm" onClick={exportGmSession}>
               <Save size={15} /> {t('gm.session.save')}
             </button>
@@ -381,7 +404,7 @@ function GmDashboardView({ mp, notify, localApi }) {
       <GmSoundboard mp={mp} notify={notify} />
     ),
     time: (
-      <GmTimeTracker onLog={gmLog} shareTime={mp.shareTime} />
+      <GmTimeTracker onLog={gmLog} shareTime={mp.shareTime} onLightBurn={onLightBurn} />
     ),
     generators: (
       <GmGenerators notify={notify} />

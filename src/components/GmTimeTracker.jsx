@@ -31,7 +31,7 @@ export function clockFromTurn(turn) {
 
 // Zeit-, Licht- und Begegnungs-Tracker fuer den Spielleiter (SRD S. "Time" / SL-Bogen).
 // Rein lokal beim SL, ueberlebt einen Reload; Meldungen laufen ins Live-Log.
-export default function GmTimeTracker({ onLog, shareTime }) {
+export default function GmTimeTracker({ onLog, shareTime, onLightBurn }) {
   const { t } = useLang();
   const [s, setS] = useState(() => ({ ...fresh(), ...readJSON(KEY) }));
   // Begegnung/Vorzeichen sollen dem SL nicht nur im Log auffallen, sondern als
@@ -77,10 +77,12 @@ export default function GmTimeTracker({ onLog, shareTime }) {
           });
         }
         if (lightOn) {
-          lightLeft -= 1;
-          if (lightLeft <= 0) {
+          // Auch beim Sprung zur naechsten Wache: jede volle 6-Zuege-Spanne zaehlt.
+          lightLeft -= delta;
+          while (lightLeft <= 0) {
             onLog('time.log.light', {});
-            lightLeft = 6;
+            onLightBurn?.();
+            lightLeft += 6;
           }
         }
         if (encMode === 'dungeon') {
@@ -93,7 +95,7 @@ export default function GmTimeTracker({ onLog, shareTime }) {
       }
       commit({ ...cur, turn, lightLeft, encLeft });
     },
-    [commit, onLog, rollEncounter],
+    [commit, onLog, rollEncounter, onLightBurn],
   );
 
   const watch = Math.floor(s.turn / TURNS_PER_WATCH);

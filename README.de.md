@@ -45,6 +45,22 @@ Betreibers laufen.
   Werten, Inventar, Karte, Würfeln … (auch im SL-Dashboard); die Reihenfolge der
   Bereiche lässt sich per Ziehgriff umsortieren, das Dashboard nutzt breite Monitore
   in zwei Spalten. Waffen und Gegenstände lassen sich umbenennen, Würfe klackern.
+- **Magie** — einen Zauber in der Pfote mit Kraft 1–3 wirken: die Würfel setzen
+  [SUMME] und [WÜRFEL] in den Wirkungstext ein, jede 4–6 markiert eine Nutzung,
+  Sechsen sind Patzer (je W6 WIL-Schaden, WIL-Probe oder Entkräftet). Jede Zauberkarte
+  zeigt ihre Aufladebedingung.
+- **Kampf nach Regeln** — verstärkte (W12) und geschwächte (W4) Angriffe, zwei leichte
+  Waffen würfeln beide und nehmen das bessere Ergebnis, und „Nach dem Kampf“ würfelt
+  W6 je benutzter Waffe, Rüstung und Munition (4–6 markiert; Improvisiertes immer).
+- **Zustände & Belastung** — Verletzt, Entkräftet und Belastet geben Nachteil auf die
+  passenden Proben; ein Zustand ohne freien Platz wird trotzdem genommen und die Maus
+  ist belastet; Pips über 250 brauchen Pip-Beutel; Rasten legen die passenden Zustände ab.
+- **Licht, Beute & Pips** — Fackel oder Laterne anzünden, dann markiert der
+  Zeit-Tracker des SL alle 6 Züge eine Nutzung; der SL verteilt Beute als EP (1 EP je
+  Pip, gleichmäßig auf die Gruppe); Spenden an die Gemeinschaft gibt 1 EP je 10 Pips;
+  aus dem Katalog kaufen und Waffen/Rüstung für 10 % je Nutzungspunkt reparieren.
+- **Miethelfer tragen eigene 6 Plätze** (2 Pfoten, 2 Körper, 2 Rucksack) — Dinge
+  übergeben und zurücknehmen.
 - **Automatische Schadenskette nach SRD** — STR-Schaden löst sofort eine
   STR-Probe aus; misslingt er, ist die Maus verletzt und kampfunfähig, bis
   sie rastet. Bei 0 STR stirbt sie — die App löscht oder sperrt dabei nichts von

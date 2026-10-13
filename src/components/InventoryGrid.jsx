@@ -6,6 +6,7 @@ import {
   PAW_SLOTS, BODY_SLOTS, PACK_SLOTS, GRIT_SLOT_PREFIX, gritForLevel,
 } from '../rules/character.js';
 import { cellsFor, anchorSlotOfItem } from '../rules/inventory.js';
+import { overflowIds } from '../rules/status.js';
 import ItemCard from './ItemCard.jsx';
 import { InfoHint } from './ui.jsx';
 import SortableItem from './SortableItem.jsx';
@@ -13,7 +14,7 @@ import SortableItem from './SortableItem.jsx';
 export const GROUP_ORDER_KEY = 'pips-paws-inv-group-order';
 export const DEFAULT_GROUP_ORDER = ['paws', 'body', 'pack'];
 
-function Slot({ slot, item, onChange, onRemove, onStash, onRollDamage, wide }) {
+function Slot({ slot, item, onChange, onRemove, onStash, onRollDamage, onCast, onRepair, wide }) {
   const { t } = useLang();
   const { setNodeRef, isOver } = useDroppable({ id: slot });
   return (
@@ -22,7 +23,16 @@ function Slot({ slot, item, onChange, onRemove, onStash, onRollDamage, wide }) {
       className={`inv-slot${isOver ? ' slot-over' : ''}${wide ? ' slot-wide' : ''}${item ? ' slot-filled' : ''}`}
     >
       {item ? (
-        <ItemCard item={item} onChange={onChange} onRemove={onRemove} onStash={onStash} onRollDamage={onRollDamage} />
+        <ItemCard
+          item={item}
+          onChange={onChange}
+          onRemove={onRemove}
+          onStash={onStash}
+          onRollDamage={onRollDamage}
+          onCast={onCast}
+          onRepair={onRepair}
+          inPaw={PAW_SLOTS.includes(slot)}
+        />
       ) : (
         <span className="slot-empty">{t('inv.empty')}</span>
       )}
@@ -43,7 +53,7 @@ function LinkedSlot({ item, lang }) {
   );
 }
 
-function Group({ title, slots, inventory, items, onItemChange, onItemRemove, onItemStash, onRollDamage, lang }) {
+function Group({ title, slots, inventory, items, onItemChange, onItemRemove, onItemStash, onRollDamage, onCast, onRepair, lang }) {
   const cells = [];
   for (let i = 0; i < slots.length; i += 1) {
     const slot = slots[i];
@@ -73,6 +83,8 @@ function Group({ title, slots, inventory, items, onItemChange, onItemRemove, onI
         onRemove={() => onItemRemove(val.itemId)}
         onStash={onItemStash && item ? onItemStash : undefined}
         onRollDamage={onRollDamage}
+        onCast={onCast}
+        onRepair={onRepair}
       />,
     );
     if (wide) i += 1; // das gepaarte Feld in DERSELBEN Gruppe ueberspringen
@@ -141,18 +153,46 @@ function GritGroup({ character, onItemChange, onItemRemove }) {
   );
 }
 
+// Dinge ohne Platz (Regel S. 8: Zustaende muessen immer genommen werden; auch
+// Startausruestung, die nicht mehr passt). Solange hier etwas liegt, ist die
+// Maus belastet. Die Karten lassen sich auf ein freies Feld (oder einen
+// Zustand ins Mumm-Feld) ziehen oder loeschen.
+function OverflowGroup({ character, onItemChange, onItemRemove }) {
+  const { t } = useLang();
+  const ids = overflowIds(character);
+  if (!ids.length) return null;
+  return (
+    <div className="inv-group inv-overflow">
+      <div className="inv-group-title">
+        {t('inv.overflow')}
+        <InfoHint text={t('hint.overflow')} />
+      </div>
+      <div className="inv-cells">
+        {ids.map((id) => {
+          const item = character.items[id];
+          return (
+            <div key={id} className={`inv-slot slot-filled${item.size === 2 ? ' slot-wide' : ''}`}>
+              <ItemCard item={item} onChange={onItemChange} onRemove={() => onItemRemove(id)} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // `groupOrder`: vom Elternteil verwaltete Reihenfolge (siehe useOrder in
 // CharacterSheet.jsx) — lebt bewusst NICHT hier drin. Das Umsortieren teilt
 // sich den ohnehin vorhandenen DndContext ums Inventar (Karten aus der
 // Tischmitte, zwischen Feldern); ein zweiter, hier verschachtelter
 // DndContext wuerde dessen Drag-Ziele kapern und Tischmitte->Inventar bricht.
 export default function InventoryGrid({
-  character, onItemChange, onItemRemove, onItemStash, onRollDamage, groupOrder,
+  character, onItemChange, onItemRemove, onItemStash, onRollDamage, onCast, onRepair, groupOrder,
 }) {
   const { t, lang } = useLang();
   const { inventory, items } = character;
   const shared = {
-    inventory, items, onItemChange, onItemRemove, onItemStash, onRollDamage, lang,
+    inventory, items, onItemChange, onItemRemove, onItemStash, onRollDamage, onCast, onRepair, lang,
   };
   const isEmpty = Object.keys(items || {}).length === 0;
 
@@ -166,6 +206,7 @@ export default function InventoryGrid({
   return (
     <div className="inventory">
       {isEmpty ? <p className="hint inv-empty-hint">{t('inv.emptyHint')}</p> : null}
+      <OverflowGroup character={character} onItemChange={onItemChange} onItemRemove={onItemRemove} />
       <SortableContext items={order} strategy={verticalListSortingStrategy}>
         {order.map((key) => (
           <SortableItem key={key} id={key} className="sortable-item-inv-group">

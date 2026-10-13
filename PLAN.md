@@ -1,6 +1,17 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-10-10 · v0.5.1
+Stand: 2026-10-13 · v0.6.3
+
+**Runde 2026-10-13 (v0.6.3: Regelabgleich gegen Mausritter 2.3):** Hosting auf eigenem
+Webserver (mausritter.redneck-design.de, `npm run release`), Sprungleiste fuer Bogen und
+SL-Dashboard, umsortierbares SL-Dashboard. Regeln: Hintergrund-Ausruestung landet im
+Inventar (Zauberkarten, Miethelfer, benannte Waffen), Zustaende ohne Platz = belastet
+(`rules/status.js`), Nachteil durch Verletzt/Entkraeftet/Belastet, Rast legt Zustaende ab,
+Ruestung nur angelegt, Schaden auf STR/DEX/WIL mit Ruestungsabzug, DEX/WIL 0, Pips ueber
+250 brauchen Beutel, Stufen ohne Obergrenze. Neu: Zauber wirken (`rules/magic.js`),
+W12/W4-Angriffe und Doppelwaffe, "Nach dem Kampf" (`rules/usage.js`), Licht gekoppelt an den
+Zeit-Tracker (`rules/light.js`), Beute→EP und Spenden, Kaufen/Reparieren
+(`rules/economy.js`), Miethelfer mit 6-Platz-Inventar, NSC mit STR und Treffer-Kette.
 
 **Runde 2026-10-10 (v0.5.1: Stufenaufstieg, SL-Werkzeugkasten, Tusche-Grafik):** Folge der Luecken-
 analyse gegen foundry-mausritter. (1) Stufenaufstieg nach SRD (`rules/levelup.js`, Banner im

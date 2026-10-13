@@ -7,6 +7,9 @@ import CharacterWizard from './CharacterWizard.jsx';
 import { downloadCharacter, readCharacterFile } from '../utils/exportImport.js';
 import { rollSave } from '../rules/dice.js';
 import { applyRest } from '../rules/rest.js';
+import { effectiveSaveMode } from '../rules/status.js';
+import { CONDITION_CATALOG } from '../data/items.js';
+import { damageMessages, restText } from '../utils/ruleText.js';
 import {
   applyDamage, applyHeal, applyPips, applyXp, applyGive, applyCondition,
 } from '../rules/gmActions.js';
@@ -32,20 +35,14 @@ export default function GmLocalPlayers({
   const onCommand = (player, cmd) => {
     const name = player.name || '?';
     if (cmd.cmd === GM_DAMAGE) {
-      const { character, strHit, saveRoll, dead } = applyDamage(player, cmd.amount);
-      updatePlayer(player.id, character);
+      // Gleiche Schadenskette wie beim Fern-Spieler (gmActions.js#applyDamage).
+      const res = applyDamage(player, cmd.amount, { attr: cmd.attr, armour: !!cmd.armour });
+      updatePlayer(player.id, res.character);
       gmLog('gm.log.damage', cmdVars(cmd, name, lang, t));
-      if (strHit > 0) notify?.(t('player.gm.strDamage', { n: cmd.amount, s: strHit }), 'bad');
-      // SRD-Schadenskette (siehe gmActions.js#applyDamage): STR-Schaden loest
-      // sofort einen automatischen STR-Rettungswurf aus.
-      if (saveRoll) {
-        gmLog('gm.log.saveLocal', {
-          name, attr: t('attr.abbr.str'), d: saveRoll.d, target: saveRoll.target,
-          result: t(saveRoll.ok ? 'dice.success' : 'dice.fail'),
-        });
-        if (!saveRoll.ok && !dead) gmLog('gm.log.critDamage', { name });
-      }
-      if (dead) gmLog('gm.log.dead', { name });
+      damageMessages(res, t, loc(CONDITION_CATALOG.injured.name, lang)).slice(1).forEach((l) => {
+        gmLog('gm.log.note', { name, text: l.text });
+        if (l.tone !== 'ok') notify?.(`${name}: ${l.text}`, l.tone);
+      });
     } else if (cmd.cmd === GM_HEAL) {
       updatePlayer(player.id, (c) => applyHeal(c, cmd.amount));
       gmLog('gm.log.heal', cmdVars(cmd, name, lang, t));
@@ -57,7 +54,7 @@ export default function GmLocalPlayers({
       gmLog('gm.log.xp', cmdVars(cmd, name, lang, t));
     } else if (cmd.cmd === GM_SAVE) {
       // Kein Draht noetig: der SL hat den Bogen vor sich und wuerfelt gleich mit.
-      const r = rollSave(player[cmd.attr]?.current ?? 0);
+      const r = rollSave(player[cmd.attr]?.current ?? 0, effectiveSaveMode(player, cmd.attr));
       gmLog('gm.log.saveLocal', {
         ...cmdVars(cmd, name, lang, t),
         d: r.d,
@@ -65,10 +62,9 @@ export default function GmLocalPlayers({
         result: t(r.ok ? 'dice.success' : 'dice.fail'),
       });
     } else if (cmd.cmd === GM_REST) {
-      const { character: next, msg, noRation } = applyRest(player, cmd.kind);
-      updatePlayer(player.id, next);
-      const vars = msg.vars.attrKey ? { ...msg.vars, attr: t(`attr.${msg.vars.attrKey}`) } : msg.vars;
-      const result = t(msg.key, vars) + (noRation && cmd.kind === 'long' ? ` — ${t('rest.noRation')}` : '');
+      const rest = applyRest(player, cmd.kind);
+      updatePlayer(player.id, rest.character);
+      const result = restText(rest, cmd.kind, t, lang);
       gmLog('gm.log.rest', { ...cmdVars(cmd, name, lang, t), result });
     } else if (cmd.cmd === GM_GIVE && cmd.item) {
       const { character, ok } = applyGive(player, cmd.item);
@@ -79,13 +75,10 @@ export default function GmLocalPlayers({
         notify?.(t('player.gm.giveNoRoom', { item: loc(cmd.item.name, lang) }), 'warn');
       }
     } else if (cmd.cmd === GM_CONDITION) {
-      const { character, ok, cond } = applyCondition(player, cmd.key);
-      if (ok) {
-        updatePlayer(player.id, character);
-        gmLog('gm.log.condition', cmdVars(cmd, name, lang, t));
-      } else {
-        notify?.(t('player.gm.conditionNoRoom', { name: loc(cond.name, lang) }), 'warn');
-      }
+      const { character, overflow, cond } = applyCondition(player, cmd.key);
+      updatePlayer(player.id, character);
+      gmLog('gm.log.condition', cmdVars(cmd, name, lang, t));
+      if (overflow) notify?.(`${name}: ${t('player.gm.conditionOverflow', { name: loc(cond.name, lang) })}`, 'warn');
     }
   };
 

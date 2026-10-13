@@ -5,7 +5,7 @@ export const SITE_URL = 'https://mausritter.redneck-design.de/';
 export const PRODUCER_URL = SITE_URL;
 export const DISCORD_URL = 'https://discord.gg/s6J6JqBQ8w';
 export const KOFI_URL = 'https://ko-fi.com/don_davis';
-export const APP_VERSION = '0.5.1';
+export const APP_VERSION = '0.6.3';
 
 // Spanische Uebersetzung: Community-Beitrag, im Footer verlinkt (siehe PLAN.md).
 export const TRANSLATOR_ES_URL = 'https://github.com/salgraphics';

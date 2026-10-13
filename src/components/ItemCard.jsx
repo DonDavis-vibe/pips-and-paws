@@ -1,20 +1,26 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import {
-  GripVertical, Trash2, Swords, Info, PackagePlus, Lock, Pencil,
+  GripVertical, Trash2, Swords, Info, PackagePlus, Lock, Pencil, Sparkles, Flame, Hammer,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { InfoHint } from './ui.jsx';
 import { weaponDamageOptions } from '../rules/dice.js';
 import { iconForItem } from '../data/icons.js';
+import { SPELL_CATALOG } from '../data/items.js';
+import { spellUsesLeft } from '../rules/magic.js';
+import { repairCost } from '../rules/economy.js';
 import IconPicker from './IconPicker.jsx';
 
 // overlay  = statische, nicht bedienbare Karte (z.B. in der Tischmitte)
 // dragging = die Karte, die gerade am Mauszeiger haengt (bekommt die Schraeglage)
 // locked   = darf nicht gezogen werden (z.B. ein Zustand im Mumm-Feld — SRD:
 //            "cannot be removed until cleared")
+// onCast(item, power) = Zauber wirken; `inPaw`: Regel — die Tafel muss in einer
+// Pfote gehalten werden, sonst ist der Knopf gesperrt.
+// onRepair(item) = einen Nutzungspunkt gegen Pips loeschen (rules/economy.js).
 export default function ItemCard({
-  item, onChange, onRemove, onStash, onRollDamage, dragId, overlay, dragging, locked,
+  item, onChange, onRemove, onStash, onRollDamage, onCast, onRepair, inPaw, dragId, overlay, dragging, locked,
 }) {
   const { t, lang } = useLang();
   const [showEffect, setShowEffect] = useState(false);
@@ -46,6 +52,9 @@ export default function ItemCard({
   const style = overlay ? undefined : { opacity: drag.isDragging ? 0.3 : 1 };
 
   const effectText = loc(item.effect, lang);
+  const isSpell = item.type === 'spell';
+  const recharge = isSpell ? loc(SPELL_CATALOG[item.key]?.recharge, lang) : '';
+  const usesLeft = isSpell ? spellUsesLeft(item) : 0;
 
   return (
     <div
@@ -145,6 +154,18 @@ export default function ItemCard({
             </span>
           )
         ) : null}
+        {/* Verstaerkter (W12) / geschwaechter (W4) Angriff — Regel S. 10, gilt
+            unabhaengig von der Waffe. */}
+        {item.damage && onRollDamage && !overlay && dmgOptions.length ? (
+          <>
+            <button type="button" className="tag tag-roll tag-enhanced" onClick={() => onRollDamage(item, { sides: 12, mode: 'enhanced' })} title={t('item.enhancedHint')}>
+              ▲ {t('dice.dieLetter')}12
+            </button>
+            <button type="button" className="tag tag-roll tag-impaired" onClick={() => onRollDamage(item, { sides: 4, mode: 'impaired' })} title={t('item.impairedHint')}>
+              ▼ {t('dice.dieLetter')}4
+            </button>
+          </>
+        ) : null}
         {item.defense ? (
           <span className="tag">
             {t('item.defense')} {item.defense}
@@ -171,12 +192,81 @@ export default function ItemCard({
         </div>
       ) : null}
 
+      {/* Licht (Regel S. 9): brennt es, markiert der Zeit-Tracker des SL alle 6 Zuege
+          eine Nutzung (rules/light.js). Reparatur: 10 % des Preises je Punkt. */}
+      {!overlay && onChange && (item.type === 'light' || (onRepair && repairCost(item) != null)) ? (
+        <div className="item-actions">
+          {item.type === 'light' ? (
+            <button
+              type="button"
+              className={`tag tag-roll${item.lit ? ' tag-lit' : ''}`}
+              disabled={!item.lit && item.usage && item.usage.current >= item.usage.max}
+              onClick={() => onChange({ ...item, lit: !item.lit })}
+              title={t('light.hint')}
+            >
+              <Flame size={11} /> {item.lit ? t('light.lit') : t('light.light')}
+            </button>
+          ) : null}
+          {onRepair && repairCost(item) != null ? (
+            <button type="button" className="tag tag-roll" onClick={() => onRepair(item)} title={t('repair.hint')}>
+              <Hammer size={11} /> {t('repair.button', { n: repairCost(item) })}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isSpell && onCast && !overlay ? (
+        <div className="spell-cast">
+          {usesLeft > 0 ? (
+            <>
+              <span className="spell-cast-label" title={inPaw ? t('spell.castHint') : t('spell.needPaw')}>
+                <Sparkles size={12} /> {t('spell.cast')}
+              </span>
+              {Array.from({ length: Math.min(3, usesLeft) }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className="tag tag-roll"
+                  disabled={!inPaw}
+                  onClick={() => onCast(item, n)}
+                  title={inPaw ? t('spell.powerHint', { n }) : t('spell.needPaw')}
+                >
+                  {t('spell.power', { n })}
+                </button>
+              ))}
+            </>
+          ) : (
+            <>
+              <span className="spell-depleted">{t('spell.depleted')}</span>
+              {onChange ? (
+                <button type="button" className="link-btn" onClick={() => onChange({ ...item, usage: { ...item.usage, current: 0 } })}>
+                  {t('spell.recharged')}
+                </button>
+              ) : null}
+            </>
+          )}
+        </div>
+      ) : null}
+
       {effectText ? (
         <div className="item-effect">
           <button type="button" className="link-btn" onClick={() => setShowEffect((v) => !v)} disabled={overlay}>
             <Info size={12} /> {t('item.effect')}
           </button>
           {showEffect ? <p>{effectText}</p> : null}
+          {showEffect && recharge ? <p className="spell-recharge"><strong>{t('spell.recharge')}:</strong> {recharge}</p> : null}
+          {showEffect && item.type === 'weapon' && onChange ? (
+            <div className="item-flags">
+              <label title={t('weapon.silveredHint')}>
+                <input type="checkbox" checked={!!item.silvered} onChange={(e) => onChange({ ...item, silvered: e.target.checked })} />
+                {t('weapon.silvered')}
+              </label>
+              <label title={t('weapon.magicHint')}>
+                <input type="checkbox" checked={!!item.magic} onChange={(e) => onChange({ ...item, magic: e.target.checked })} />
+                {t('weapon.magic')}
+              </label>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
