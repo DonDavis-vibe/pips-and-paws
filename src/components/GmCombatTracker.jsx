@@ -55,13 +55,19 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
     const id = `n_pnp_${slug(c.id)}`;
     const dmg = [4, 6, 8, 10, 12].includes(Number(sh.dmg)) ? Number(sh.dmg) : 6;
     const hpMax = clampNum(sh.hp, 1, 200, 3);
-    const stats = [sh.str && `${t('attr.abbr.str')} ${sh.str}`, sh.dex && `${t('attr.abbr.dex')} ${sh.dex}`].filter(Boolean).join(', ');
+    // STR ist seit 0.6.3 ein echter Wert (Schaden ueber die TP hinaus), DEX bleibt Notiz.
+    const stats = [sh.dex && `${t('attr.abbr.dex')} ${sh.dex}`].filter(Boolean).join(', ');
     const note = [stats, sh.special, c.notes].filter(Boolean).join(' · ').slice(0, 600);
     const name = String(c.name || '?').slice(0, 80);
     const prev = sRef.current.npcs.find((n) => n.id === id);
     const fields = {
       base: name, name, dmg, armour: clampNum(sh.armour, 0, 3, 0), wil: clampNum(sh.wil, 1, 20, 8),
-      str: prev?.str || { current: clampNum(sh.str, 1, 30, 10), max: clampNum(sh.str, 1, 30, 10) },
+      // Erneutes Pushen setzt das Maximum neu, behaelt aber den Live-Schaden.
+      str: (() => {
+        const max = clampNum(sh.str, 1, 30, prev?.str?.max ?? 10);
+        const lost = prev?.str ? prev.str.max - prev.str.current : 0;
+        return { current: Math.max(0, max - lost), max };
+      })(),
       note, attack: String(sh.attack || '').slice(0, 120) || `W${dmg}`,
     };
     const npcs = prev

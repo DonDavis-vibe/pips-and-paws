@@ -1,5 +1,7 @@
 import { loc } from '../i18n/index.jsx';
 import { itemLabel } from '../data/items.js';
+import { gritForLevel } from '../rules/character.js';
+import { armourValue, encumbrance, zeroStates } from '../rules/status.js';
 
 // Stabile Gruppen-ID: bleibt ueber Sitzungen gleich (die PeerJS-ID tut das nicht).
 export function slug(s) {
@@ -7,6 +9,18 @@ export function slug(s) {
 }
 
 export const partyId = (character, fallback) => `pc-${slug(character?.name) || slug(fallback) || 'maus'}`;
+
+// Englische Kurzwoerter fuer den Zustand (die KI-Briefings von PenNodePaper sind englisch).
+function statusOf(c) {
+  const z = zeroStates(c);
+  return [
+    z.dead && 'dead',
+    z.immobile && 'unable to move (DEX 0)',
+    z.insensible && 'insensible (WIL 0)',
+    c.incapacitated && 'incapacitated',
+    encumbrance(c).encumbered && 'encumbered',
+  ].filter(Boolean);
+}
 
 function sheetOf(character, lang) {
   const c = character || {};
@@ -20,9 +34,15 @@ function sheetOf(character, lang) {
     dex: c.dex?.current, dexMax: c.dex?.max,
     wil: c.wil?.current, wilMax: c.wil?.max,
     pips: Number(c.pips),
+    armour: armourValue(c),
+    xp: Number(c.xp),
+    grit: gritForLevel(Number(c.level) || 1),
+    status: statusOf(c),
     conditions: items.filter((i) => i.type === 'condition' && !i.cleared).map(name),
-    items: items.filter((i) => i.type !== 'condition').map(name),
-    hirelings: (c.hirelings || []).map((h) => h.name).filter(Boolean),
+    // Zauber mit freien Nutzungen ("Feuerball 2/3"), damit die KI weiss, was noch geht.
+    spells: items.filter((i) => i.type === 'spell').map((i) => `${name(i)} ${i.usage ? `${i.usage.max - i.usage.current}/${i.usage.max}` : ''}`.trim()),
+    items: items.filter((i) => i.type !== 'condition' && i.type !== 'spell').map(name),
+    hirelings: (c.hirelings || []).map((h) => (h.level > 1 ? `${h.name} (${h.level})` : h.name)).filter(Boolean),
   };
   // Nur gesetzte Felder melden (PenNodePaper liest sie nur, validiert aber nichts).
   Object.keys(sheet).forEach((k) => {
