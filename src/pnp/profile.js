@@ -37,7 +37,8 @@ export function buildProfile(t, lang) {
     protocol: PROTOCOL,
     push: {
       handout: { text: true, image: true, toPlayer: true },
-      scene: { grids: ['square'], tokens: true },
+      // characterTokens: ein Token mit `character` ist der Kampf-Tracker-Eintrag dieser Kreatur.
+      scene: { grids: ['square'], tokens: true, characterTokens: true },
       character: {},
       music_cue: { tracks: true, mood: true },
     },
@@ -49,7 +50,7 @@ export function buildProfile(t, lang) {
         {
           id: 'creature',
           label: t('pnp.role.creature'),
-          description: 'A creature or opponent of the Mausritter combat tracker (hit protection, armour, one attack die, STR for damage beyond HP, WIL for morale). Mausritter has no full sheets for monsters: keep it to the stat block; special abilities and critical-damage effects go into "special". NPCs without combat relevance may keep the defaults.',
+          description: 'A creature or opponent of the Mausritter combat tracker (hit protection, armour, one attack die, STR for damage beyond HP, WIL for morale). Mausritter has no full sheets for monsters: keep it to the stat block; special abilities and critical-damage effects go into "special". NPCs without combat relevance may keep the defaults. On a battle map, every token that names this creature is its combat tracker entry (shared HP/STR; several tokens are numbered).',
           for: ['enemy', 'npc'],
           fields: [
             num('hp', t('res.hp'), stats, { min: 1, max: 200, default: 3, help: 'Hit protection (HP). Mice have 1-6, a cat 15.' }),
@@ -62,6 +63,7 @@ export function buildProfile(t, lang) {
             num('wil', t('attr.wil'), stats, { min: 1, max: 20, default: 8, help: 'WIL for the morale save (d20 at or under = holds).' }),
             num('str', t('attr.str'), stats, { min: 1, max: 30, default: 10, help: 'STR. Damage beyond HP goes to STR, followed by a STR save (fail = critical damage); 0 STR = dead. Mice 9, rats 12, a cat 15.' }),
             num('dex', t('attr.dex'), stats, { min: 1, max: 20, help: 'Optional. Shown in the note only.' }),
+            num('size', t('map.tokenSize'), stats, { min: 0.5, max: 8, step: 0.5, default: 1, help: 'Token size on the battle map in grid cells (a mouse or rat 1, a cat 3).' }),
             text('attack', t('combat.attack'), stats, { help: 'Attack description, e.g. "d6 swipe, d8 bite".' }),
             longtext('special', t('pnp.field.special'), stats, { help: 'Critical effects and special abilities, e.g. "Flies 3x speed, knows two spells".' }),
           ],
@@ -94,7 +96,7 @@ export function buildProfile(t, lang) {
             num('grit', t('res.grit'), stats),
             tags('status', t('pnp.field.status'), stats),
             tags('conditions', t('inv.tab.condition'), stats),
-            tags('spells', t('type.spell'), gear),
+            tags('spells', t('inv.tab.spell'), gear),
             tags('items', t('inv.title'), gear),
             tags('hirelings', t('hirelings.title'), gear),
           ],

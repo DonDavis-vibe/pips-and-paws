@@ -591,5 +591,6 @@
   "hirelings.sharePrompt": "Combien de pips {name} reçoit-il comme part du trésor ? (la solde de {wage}p/jour ne compte pas, tu en as {n})",
   "hirelings.shareDone": "{name} reçoit {n} pips — +{xp} XP.",
   "hirelings.xpHint": "Les suivants progressent comme les souris : 1 XP par pip de part au-delà de leur solde journalière, niveau 2 à 1000 XP.",
-  "pnp.field.status": "État"
+  "pnp.field.status": "État",
+  "map.tokenLinked": "Lié au suivi de combat (PenNodePaper)"
 }

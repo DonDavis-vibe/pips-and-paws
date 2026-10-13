@@ -788,5 +788,6 @@
   "hirelings.sharePrompt": "How many pips does {name} get as a share of treasure? (the {wage}p daily wage doesn't count, you have {n})",
   "hirelings.shareDone": "{name} gets {n} pips — +{xp} XP.",
   "hirelings.xpHint": "Hirelings advance like mice: 1 XP per pip of treasure share above their daily wage, Level 2 at 1000 XP.",
-  "pnp.field.status": "Status"
+  "pnp.field.status": "Status",
+  "map.tokenLinked": "Linked to the combat tracker (PenNodePaper)"
 }

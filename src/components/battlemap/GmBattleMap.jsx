@@ -14,6 +14,21 @@ import { upfToDataUrl } from '../../pnp/images.js';
 import { CREATURES, CREATURE_BY_KEY } from '../../data/creatures.js';
 import { creatureArt } from '../../data/creatureArt.js';
 import { syncTokenArt } from './tokenArt.js';
+import { useGmEvent } from '../../utils/gmBus.js';
+import { pnpNpcId } from '../../pnp/party.js';
+
+const COMBAT_KEY = 'pips-paws-gm-combat';
+
+// Aussehen eines Tokens, der einen Kampf-Tracker-Eintrag darstellt (PenNodePaper
+// "characterTokens"): Name des Eintrags (bei mehreren Token nummeriert, ein
+// Kreuz bei STR 0), dessen Tokengroesse und — bei SRD-Kreaturen — das Portrait.
+function linkedLook(f, npc) {
+  const dead = npc.str ? npc.str.current <= 0 : false;
+  const name = `${dead ? '† ' : ''}${npc.name}${f.npcNo ? ` ${f.npcNo}` : ''}`.slice(0, 24);
+  const look = { name, groesse: npc.size || f.groesse || 1 };
+  if (npc.key && creatureArt(npc.key)) look.bildKey = npc.key;
+  return look;
+}
 
 const KEY = 'pips-paws-gm-map';
 const nid = () => `t_${Math.random().toString(36).slice(2, 8)}`;
@@ -58,6 +73,9 @@ export default function GmBattleMap({ mp, notify }) {
   const [advanced, setAdvanced] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [addTokenKind, setAddTokenKind] = useState('gegner');
+  // Stand des Kampf-Trackers (fuer verknuepfte Token): beim Start aus dem Speicher,
+  // danach ueber jede Aenderung, die der Tracker meldet.
+  const [npcs, setNpcs] = useState(() => readJSON(COMBAT_KEY)?.npcs || []);
   const apiRef = useRef(null);
   const fileInput = useRef(null);
 
@@ -96,6 +114,41 @@ export default function GmBattleMap({ mp, notify }) {
     syncTokenArt(api, m.zustand.figuren);
     requestAnimationFrame(() => { api.einpassen(); refreshLive(); });
   };
+
+  // Verknuepfte Token an den Tracker-Stand angleichen — auf allen Karten. Die
+  // aktive Karte laeuft ueber die Engine (die meldet und spiegelt dann selbst),
+  // die anderen werden direkt im gespeicherten Zustand angepasst.
+  useGmEvent('combat', (list) => {
+    setNpcs(list || []);
+    const byId = Object.fromEntries((list || []).map((n) => [n.id, n]));
+    const cur = sRef.current;
+    const differs = (f, look) => look.name !== f.name || look.groesse !== f.groesse || (look.bildKey && look.bildKey !== f.bildKey);
+    let changedOther = false;
+    const maps = cur.maps.map((m) => {
+      if (m.id === cur.activeId) return m;
+      let changed = false;
+      const figuren = (m.zustand.figuren || []).map((f) => {
+        const npc = f.npcRef && byId[f.npcRef];
+        if (!npc) return f;
+        const look = linkedLook(f, npc);
+        if (!differs(f, look)) return f;
+        changed = true;
+        return { ...f, ...look };
+      });
+      if (!changed) return m;
+      changedOther = true;
+      return { ...m, zustand: { ...m.zustand, figuren } };
+    });
+    if (changedOther) commit({ ...cur, maps });
+    const api = apiRef.current;
+    if (!api) return;
+    const updates = api.figuren
+      .filter((f) => f.npcRef && byId[f.npcRef])
+      .map((f) => ({ f, look: linkedLook(f, byId[f.npcRef]) }))
+      .filter(({ f, look }) => differs(f, look));
+    updates.forEach(({ f, look }) => api.addFigur({ id: f.id, ...look }));
+    if (updates.length) syncTokenArt(api, updates.map(({ f, look }) => ({ ...f, ...look })));
+  });
 
   const switchTo = (id) => {
     if (id === s.activeId) return;
@@ -189,13 +242,29 @@ export default function GmBattleMap({ mp, notify }) {
       einheitName: grid.unit ? String(grid.unit).slice(0, 8) : DEFAULT_RASTER.einheitName,
     };
     const base = `pnp-${p.id}`;
+    // characterTokens: ein Token mit `character` IST der Kampf-Tracker-Eintrag
+    // dieser Kreatur (gleiche ID-Ableitung wie dort). Mehrere Token derselben
+    // Kreatur teilen sich den Eintrag und werden durchnummeriert. Kommt die
+    // Kreatur erst nach der Karte, gleicht der Tracker die Token beim Anlegen an.
+    const trackerNow = Object.fromEntries((readJSON(COMBAT_KEY)?.npcs || []).map((n) => [n.id, n]));
+    const perChar = {};
+    (p.tokens || []).forEach((tk) => { if (tk.character) perChar[tk.character] = (perChar[tk.character] || 0) + 1; });
+    const seen = {};
     // UPF-Zellkoordinaten: (0,0) = linke obere Zelle; die Engine setzt Token auf den Zellmittelpunkt.
     const figuren = (p.tokens || []).map((tk, i) => {
       const def = TOKEN_KINDS[PNP_TOKENS[tk.kind] || 'helfer'];
-      return {
+      const figur = {
         id: `${base}-t${i}`, name: String(tk.label || '?').slice(0, 24), farbe: def.farbe, besitzer: def.besitzer,
         groesse: 1, x: (Number(tk.x) || 0) + 0.5, y: (Number(tk.y) || 0) + 0.5,
       };
+      if (tk.character) {
+        seen[tk.character] = (seen[tk.character] || 0) + 1;
+        figur.npcRef = pnpNpcId(tk.character);
+        if (perChar[tk.character] > 1) figur.npcNo = seen[tk.character];
+        const npc = trackerNow[figur.npcRef];
+        if (npc) Object.assign(figur, linkedLook(figur, npc));
+      }
+      return figur;
     });
     const cur = sRef.current;
     const existing = cur.maps.find((m) => m.pnpId === p.id);
@@ -438,6 +507,15 @@ export default function GmBattleMap({ mp, notify }) {
               <li key={f.id} className="map-token-row">
                 <span className="map-token-swatch" style={{ background: f.farbe }} />
                 <TextInput value={f.name} onChange={(v) => patchToken(f.id, { name: v })} className="map-token-name" />
+                {(() => {
+                  const npc = f.npcRef && npcs.find((n) => n.id === f.npcRef);
+                  return npc ? (
+                    <span className="map-token-link" title={t('map.tokenLinked')}>
+                      {t('res.hpShort')} {npc.hp.current}/{npc.hp.max}
+                      {npc.str ? ` · ${t('attr.abbr.str')} ${npc.str.current}/${npc.str.max}` : ''}
+                    </span>
+                  ) : null;
+                })()}
                 <Stepper value={f.groesse} min={0.5} max={8} onChange={(v) => { apiRef.current?.setFigurGroesse(f.id, v); refreshLive(); }} label={t('map.tokenSize')} />
                 <button
                   type="button"

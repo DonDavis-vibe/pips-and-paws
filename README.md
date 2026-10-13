@@ -124,7 +124,8 @@ data passing through the operator's server.
   | **Music cue** | a built-in effect or one of your uploads on the **Soundboard** (no audio is sent) |
   | *(other direction)* the **party** | PenNodePaper sees the connected mice and the table sheets you run (without notes) |
 
-  The bridge lives in `src/pnp/` (protocol: [vtt-bridge-spec](https://github.com/Rec0iL/PenNodePaper/blob/main/docs/vtt-bridge-spec.md)).
+  Map tokens that name a pushed creature are its combat tracker entry (shared HP/STR,
+  numbered, marked when it dies). The bridge lives in `src/pnp/` (protocol: [vtt-bridge-spec](https://github.com/Rec0iL/PenNodePaper/blob/main/docs/vtt-bridge-spec.md)).
   The pairing token stays on the device and is not part of a saved session.
 
 ## Playing together

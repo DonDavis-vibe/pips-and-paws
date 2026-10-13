@@ -8,6 +8,11 @@ export function slug(s) {
   return String(s || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
 }
 
+// Eintrags-ID einer von PenNodePaper geschickten Kreatur im Kampf-Tracker. Die
+// Battlemap leitet fuer Token mit `character` dieselbe ID ab — so finden sich
+// Token und Eintrag auch, wenn die Kreatur erst nach der Karte ankommt.
+export const pnpNpcId = (characterId) => `n_pnp_${slug(characterId)}`;
+
 export const partyId = (character, fallback) => `pc-${slug(character?.name) || slug(fallback) || 'maus'}`;
 
 // Englische Kurzwoerter fuer den Zustand (die KI-Briefings von PenNodePaper sind englisch).

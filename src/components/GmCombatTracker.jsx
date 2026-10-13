@@ -9,7 +9,8 @@ import InkArt from './InkArt.jsx';
 import { Field, TextInput, Stepper } from './ui.jsx';
 import Panel from './Panel.jsx';
 import { usePnpHandler } from '../pnp/PnpBridge.jsx';
-import { slug } from '../pnp/party.js';
+import { pnpNpcId } from '../pnp/party.js';
+import { emitGm } from '../utils/gmBus.js';
 
 const KEY = 'pips-paws-gm-combat';
 const fresh = () => ({ round: 0, npcs: [] });
@@ -31,10 +32,14 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
   const sRef = useRef(s);
   sRef.current = s;
 
+  // Jede Aenderung geht auch an die Battlemap: Token, die einen Tracker-Eintrag
+  // darstellen (PenNodePaper "characterTokens"), uebernehmen Name, Bild, Groesse
+  // und den Tot-Status (siehe GmBattleMap.jsx#syncLinkedTokens).
   const commit = useCallback((next) => {
     sRef.current = next;
     setS(next);
     writeJSON(KEY, next);
+    emitGm('combat', next.npcs);
   }, []);
 
   // Nur die sichtbar geschalteten NSC an die Spieler spiegeln.
@@ -52,7 +57,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
     if (c.role !== 'creature') throw new Error(t('pnp.err.role', { role: String(c.role) }));
     const sh = c.sheet || {};
     const clampNum = (v, lo, hi, d) => (Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : d);
-    const id = `n_pnp_${slug(c.id)}`;
+    const id = pnpNpcId(c.id);
     const dmg = [4, 6, 8, 10, 12].includes(Number(sh.dmg)) ? Number(sh.dmg) : 6;
     const hpMax = clampNum(sh.hp, 1, 200, 3);
     // STR ist seit 0.6.3 ein echter Wert (Schaden ueber die TP hinaus), DEX bleibt Notiz.
@@ -69,6 +74,9 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
         return { current: Math.max(0, max - lost), max };
       })(),
       note, attack: String(sh.attack || '').slice(0, 120) || `W${dmg}`,
+      // Vorlage = SRD-Kreatur -> Tusche-Portrait im Tracker und auf dem Token.
+      key: CREATURE_BY_KEY[c.preset] ? c.preset : prev?.key,
+      size: Number(sh.size) > 0 ? Math.min(8, Math.max(0.5, Number(sh.size))) : (prev?.size ?? 1),
     };
     const npcs = prev
       ? sRef.current.npcs.map((n) => (n.id === id

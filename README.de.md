@@ -129,7 +129,8 @@ Betreibers laufen.
   | **Musik-Stichwort** | eingebauter Effekt oder einer deiner Uploads im **Soundboard** (Audio wird nicht übertragen) |
   | *(Gegenrichtung)* die **Gruppe** | PenNodePaper sieht die verbundenen Mäuse und die Tischbögen, die du führst (ohne Notizen) |
 
-  Die Brücke steckt in `src/pnp/` (Protokoll: [vtt-bridge-spec](https://github.com/Rec0iL/PenNodePaper/blob/main/docs/vtt-bridge-spec.md)).
+  Kartentoken, die eine geschickte Kreatur nennen, sind ihr Kampf-Tracker-Eintrag (gemeinsame
+  TP/STR, durchnummeriert, bei Tod markiert). Die Brücke steckt in `src/pnp/` (Protokoll: [vtt-bridge-spec](https://github.com/Rec0iL/PenNodePaper/blob/main/docs/vtt-bridge-spec.md)).
   Das Pairing-Token bleibt auf dem Gerät und ist nicht Teil einer gesicherten Sitzung.
 
 ## Zusammen spielen
