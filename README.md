@@ -180,10 +180,8 @@ npm run preview
 npm run lint       # oxlint
 ```
 
-The site is hosted on its own web server (<https://mausritter.redneck-design.de/>), not on GitHub.
-`npm run release` lints, builds and injects the imprint contact block (from the local,
-git-ignored `KONTAKT.local.html`, template: `public/KONTAKT.beispiel.html`); upload the
-contents of `dist/` to the server by hand.
+`dist/` is a static site (one `index.html` plus the imprint page) that runs from any
+web server or straight from disk.
 
 **Stack:** Vite + React 19 (plain JS, no TypeScript), `@dnd-kit` for the inventory
 grid, `peerjs` for multiplayer, `lucide-react` for icons. No backend, no account.

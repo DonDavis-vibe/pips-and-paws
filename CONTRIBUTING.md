@@ -58,10 +58,9 @@ größerer Schritt und keine Voraussetzung dafür, die UI-Sprache freizuschalten
   **nicht** eingetragen — Übersetzungen und Code ändern daran nichts.
 - Wer die Kopie **selbst deployt**, braucht ein **eigenes** Impressum und eine
   eigene Datenschutzerklärung (deutsche Rechtspflicht bei Betrieb aus DE). Der
-  Kontaktblock kommt nicht aus dem Code, sondern aus der lokalen Datei
-  `KONTAKT.local.html` bzw. der Variable `IMPRESSUM_KONTAKT` (Vorlage:
-  `public/KONTAKT.beispiel.html`, Einsetzen via `npm run release` /
-  `scripts/inject-kontakt.py`). Ohne Kontaktblock bricht der Release-Build bewusst ab.
+  Kontaktblock steht nicht im Code: `public/impressum.html` enthält an zwei Stellen
+  Platzhalter zwischen `<!--KONTAKT:START-->` und `<!--KONTAKT:END-->`, die beim
+  eigenen Deployment durch die eigenen Angaben ersetzt werden müssen.
   Den Datenschutz-Text in `public/impressum.html` an das eigene Deployment anpassen.
 - Fügt eine Einsendung einen **neuen externen Dienst** hinzu (CDN, API, Font-Anbieter,
   Analytics, Fehler-Tracking …), bitte ausdrücklich erwähnen. Die

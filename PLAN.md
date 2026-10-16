@@ -3,7 +3,7 @@
 Stand: 2026-10-13 · v0.6.3
 
 **Runde 2026-10-13 (v0.6.3: Regelabgleich gegen Mausritter 2.3):** Hosting auf eigenem
-Webserver (mausritter.redneck-design.de, `npm run release`), Sprungleiste fuer Bogen und
+Webserver (mausritter.redneck-design.de), Sprungleiste fuer Bogen und
 SL-Dashboard, umsortierbares SL-Dashboard. Regeln: Hintergrund-Ausruestung landet im
 Inventar (Zauberkarten, Miethelfer, benannte Waffen), Zustaende ohne Platz = belastet
 (`rules/status.js`), Nachteil durch Verletzt/Entkraeftet/Belastet, Rast legt Zustaende ab,
@@ -168,7 +168,7 @@ Arbeitstitel: **Pips & Paws** (siehe §15.4 — jederzeit änderbar).
 **Fortschritt:** M0–M6 gebaut und verifiziert. Solo-Charakterbogen, Drag-&-Drop-Inventar, Würfeln,
 Charaktererschaffung, DE/EN, **serverloser PeerJS-Multiplayer**, SL-Dashboard, **Tischmitte (M5)**
 inkl. SL gibt Item/EP/Zustand. Live: <https://mausritter.redneck-design.de/>
-(nicht mehr auf GitHub: eigener Webserver, Release per `npm run release`, Upload von `dist/` manuell; SEO drin).
+(eigener Webserver statt GitHub Pages; SEO drin).
 `reference/` ist nur noch lokal (nicht im Repo).
 
 **SL-Werkzeuge:** [1] Tischmitte ✔ · [2] Zeit-/Licht-/Begegnungs-Tracker ✔ · [3] NSC-/Kampf-Tracker ✔ ·
@@ -414,7 +414,7 @@ GM-Karten mit Hover-Lift. `prefers-reduced-motion` respektiert. Build + Lint gr�
 | Frontend | **Vite + React 19 + plain JS** (kein TypeScript), `oxlint` | Exakt der Stack von `coc-tool` — das neueste Referenzprojekt. |
 | Icons | `lucide-react` | Wie `coc-tool`. Keine Original-Artworks von Mausritter (Lizenz). |
 | Drag & Drop | `@dnd-kit/core` + eigenes Slot-Raster | Kein fertiges Grid-Inventar-Paket nötig; das Raster ist klein und fix. |
-| Build/Deploy | **Eigener Webserver** (`npm run release` → `dist/` manuell hochladen), zusätzlich `vite-plugin-singlefile` für eine portable `index.html` | Wie `coc-tool`. |
+| Build/Deploy | **Eigener Webserver** (statisches `dist/`), zusätzlich `vite-plugin-singlefile` für eine portable `index.html` | Wie `coc-tool`. |
 | Accounts | **keine** | Raum-Code (4 Zeichen) + `?join=CODE`-Link. |
 | Sprachen | **zweisprachig DE + EN** von Anfang an, eigener Mini-`t()`-Helfer (kein i18next) | Mausritter wird in beiden Sprachen gespielt. Umschalter in der Kopfzeile, Default aus `navigator.language`, in `localStorage` gemerkt. |
 | Regeltreue | **Mausritter-SRD ohne Hausregeln** | Keine `str`-Sperre für Rucksack-Slots o.Ä. — alle 6 Pack-Slots immer nutzbar. |

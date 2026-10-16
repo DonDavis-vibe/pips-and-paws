@@ -189,10 +189,8 @@ npm run preview
 npm run lint       # oxlint
 ```
 
-Die Seite läuft auf einem eigenen Webserver (<https://mausritter.redneck-design.de/>), nicht auf GitHub.
-`npm run release` führt Lint und Build aus und setzt den Kontaktblock des Impressums ein
-(aus der lokalen, nicht eingecheckten `KONTAKT.local.html`, Vorlage:
-`public/KONTAKT.beispiel.html`); den Inhalt von `dist/` danach manuell auf den Server hochladen.
+`dist/` ist eine statische Seite (eine `index.html` plus Impressum), die von jedem
+Webserver oder direkt von der Festplatte läuft.
 
 **Stack:** Vite + React 19 (plain JS, kein TypeScript), `@dnd-kit` fürs
 Inventar-Raster, `peerjs` für den Multiplayer, `lucide-react` für Icons.
