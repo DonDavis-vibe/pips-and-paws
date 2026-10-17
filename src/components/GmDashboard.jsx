@@ -28,6 +28,7 @@ import GmGenerators from './GmGenerators.jsx';
 import GmFactions from './GmFactions.jsx';
 import GmPnpLink from './GmPnpLink.jsx';
 import GmLootXp from './GmLootXp.jsx';
+import JoinRequests from './JoinRequests.jsx';
 import { PnpProvider } from '../pnp/PnpBridge.jsx';
 import EmptyState from './EmptyState.jsx';
 import emptyLobby from '../assets/ink/lobby.webp';
@@ -367,6 +368,8 @@ function GmDashboardView({ mp, notify, localApi }) {
           </div>
         </div>
 
+        <JoinRequests mp={mp} />
+
         <label className="gm-share-log" title={t('group.shareHint')}>
           <input type="checkbox" checked={mp.groupShared} onChange={(e) => mp.setGroupShared(e.target.checked)} />
           {t('group.share')}
@@ -380,6 +383,7 @@ function GmDashboardView({ mp, notify, localApi }) {
               <GmPlayerCard
                 key={peerId}
                 player={player}
+                onKick={() => mp.kickPlayer(peerId)}
                 onCommand={(cmd) => {
                   mp.sendGmCommand(peerId, cmd);
                   mp.logGmAction({ key: `gm.log.${cmd.cmd}`, vars: cmdVars(cmd, player.character?.name || '?', lang, t) });

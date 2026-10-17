@@ -1,6 +1,13 @@
 # Pips & Paws — Mausritter Multiplayer-Web-App — MVP-Plan
 
-Stand: 2026-10-13 · v0.6.3
+Stand: 2026-10-17 · v0.6.3
+
+**Runde 2026-10-17 (Zugangskontrolle im Multiplayer):** Der SL schickt erst Daten, wenn ein
+Spieler eingelassen ist (`unauthRef` -> `admitConn` in `useMultiplayer.js`). Optional: Raum-
+Passwort per Challenge-Response (`multiplayer/auth.js`, PBKDF2 + HMAC, Passwort nie auf der
+Leitung, im Einladungslink hinter dem `#`), Beitritt bestaetigen (Anfragenliste), Rauswerfen
+mit Geraetesperre (`clientId`), Sperre nach 5 Fehlversuchen/60 s. Raum-Code 6 statt 4 Zeichen
+(Beitreten akzeptiert 4-6). Alte Clients kommen nur in offene Raeume (Legacy-Pfad).
 
 **Runde 2026-10-13 (v0.6.3: Regelabgleich gegen Mausritter 2.3):** Hosting auf eigenem
 Webserver (mausritter.redneck-design.de), Sprungleiste fuer Bogen und

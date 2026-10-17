@@ -5,13 +5,20 @@ import {
   T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG, T_TIME, T_RESTCFG, T_NPCS,
   T_GROUP, T_SOUND_FX, T_SOUND_CUSTOM, T_SOUND_VOL, T_SOUND_STOP, T_SOUND_FADE,
   T_MAP_SHARE, T_MAP, T_MAP_IMG, T_HANDOUT,
+  T_HELLO, T_AUTH, MAX_UNAUTH, AUTH_TIMEOUT_MS, CHALLENGE_TIMEOUT_MS, PENDING_TIMEOUT_MS,
   GM_GIVE, GM_STASH_DENY,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
+import {
+  hasCrypto, deriveKey, makeProof, randomHex, safeEqual,
+} from './auth.js';
 import { readJSON, writeJSON, remove as removeStore } from '../utils/storage.js';
 import { playFx, playBlob, setLiveVolume, stopAllAudio as stopAllAudioLocal, fadeOutAllAudio as fadeOutAllAudioLocal } from '../utils/sound.js';
 
 const GM_STASH_KEY = 'pips-paws-gm-stash';
+const CLIENT_ID_KEY = 'pips-paws-mp-client'; // zufaellige Geraete-ID (pro Browser), siehe Zugangskontrolle
+const GM_SECURITY_KEY = 'pips-paws-mp-gm-security'; // SL: Passwort + zugelassene/gesperrte Geraete (nur diese Browser-Sitzung)
+const APPROVAL_KEY = 'pips-paws-mp-approval'; // SL: Beitritt muss bestaetigt werden (bleibt gemerkt)
 const PARTY_LOG_KEY = 'pips-paws-party-log-on';
 const REST_LOCK_KEY = 'pips-paws-rest-locked';
 const GROUP_SHARE_KEY = 'pips-paws-group-shared';
@@ -30,8 +37,9 @@ const isShareable = (e) =>
 // feste Peer-ID = Raum-Code, Spieler verbinden sich direkt. Muster aus dem
 // Referenzprojekt coc-tool (useMultiplayer.js), auf Pips & Paws angepasst.
 
-const saveSession = (role, code) => {
-  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ role, roomCode: code })); } catch { /* */ }
+const saveSession = (role, code, pw) => {
+  // Das Raum-Passwort bleibt nur in dieser Browser-Sitzung (sessionStorage), damit ein Neuladen wieder reinkommt.
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ role, roomCode: code, ...(pw ? { pw } : {}) })); } catch { /* */ }
 };
 const clearSession = () => {
   try { sessionStorage.removeItem(SESSION_KEY); } catch { /* */ }
@@ -39,6 +47,22 @@ const clearSession = () => {
 const loadSession = () => {
   try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
 };
+
+// Geraete-ID des Spielers: bleibt ueber Neuladen gleich, damit der SL ein schon
+// zugelassenes (oder gesperrtes) Geraet wiedererkennt — die Peer-ID tut das nicht.
+function getClientId() {
+  try {
+    let id = localStorage.getItem(CLIENT_ID_KEY);
+    if (!id) {
+      id = randomHex(12);
+      localStorage.setItem(CLIENT_ID_KEY, id);
+    }
+    return id;
+  } catch { return randomHex(12); }
+}
+
+// Gesperrte Geraete zaehlen: gespeichert sind Geraete-ID und Peer-ID (Peer-IDs haben Bindestriche).
+const countBanned = (set) => [...set].filter((id) => !String(id).includes('-')).length;
 
 let uidSeq = 0;
 // Kollisionssicher auch nach einem HMR-Modul-Reset (Zeitstempel + Zufall + Zaehler).
@@ -88,6 +112,21 @@ export function useMultiplayer() {
   // zeigt "0 verbunden", obwohl Wuerfe ankommen.
   const [resyncNonce, setResyncNonce] = useState(0);
 
+  // --- Zugangskontrolle (SL) ---------------------------------------------
+  // Verbindungen sind erst "unauthentifiziert" (unauthRef) und bekommen NICHTS,
+  // bis sie zugelassen sind — erst dann wandern sie in clientConnsRef, ueber den
+  // alle Broadcasts laufen. Passwort: Challenge-Response (auth.js). Bestaetigung:
+  // der SL sieht eine Anfrage in `pending`. Rauswurf sperrt das Geraet.
+  const [security, setSecurity] = useState(() => ({
+    password: false,
+    passwordText: '', // nur im Browser des SL, fuer den Einladungslink
+    approval: readJSON(APPROVAL_KEY, false) === true,
+  }));
+  const [pending, setPending] = useState([]); // [{ peerId, name }] wartet auf die Zusage
+  const [bannedCount, setBannedCount] = useState(0);
+  // Spieler: der SL verlangt ein Passwort, das wir noch nicht haben ('password' | null)
+  const [authPrompt, setAuthPrompt] = useState(null);
+
   // Spiegel von `players` fuer synchrone Namens-Lookups ausserhalb von State-Updatern
   // (pushLog darf NIE in einem setState-Updater laufen — StrictMode ruft die doppelt auf).
   const playersRef = useRef({});
@@ -125,8 +164,26 @@ export function useMultiplayer() {
   const retryJoinAttemptsRef = useRef(0);
   const retryJoinPendingRef = useRef(false);
   const wireHostRef = useRef(null);
+  const challengeAnswerRef = useRef(null);
   const autoRestoreRef = useRef(false);
   const seenEidsRef = useRef(new Set()); // Deduplizierung doppelt zugestellter Nachrichten
+  // SL
+  const unauthRef = useRef({}); // peerId -> { conn, state, nonce, clientId, name, timer }
+  const secretRef = useRef(null); // abgeleiteter Passwort-Schluessel (CryptoKey) oder null
+  const approvalRef = useRef(security.approval);
+  approvalRef.current = security.approval;
+  const trustedRef = useRef(new Set()); // clientIds, die schon zugelassen waren (kein erneutes Fragen)
+  const bannedRef = useRef(new Set()); // clientIds und peerIds, die rausgeworfen wurden
+  const admittedInfoRef = useRef({}); // peerId -> { clientId, name }
+  const failRef = useRef({ count: 0, since: 0, lockedUntil: 0 }); // Brute-Force-Bremse
+  const roomCodeRef = useRef('');
+  // Spieler
+  const joinPwRef = useRef(''); // Passwort fuer die laufende Verbindung
+  const identityRef = useRef(''); // Name der Maus, fuer die Anfrage beim SL
+  const challengeRef = useRef(null); // { nonce, conn } wartet auf ein Passwort
+  const authedRef = useRef(false); // wurden wir eingelassen?
+  const authFailedRef = useRef(false); // abgelehnt -> kein automatisches Neuverbinden
+  const lastJoinCodeRef = useRef('');
 
   const pushLog = useCallback((entry) => {
     const full = { id: uid(), time: Date.now(), ...entry };
@@ -402,6 +459,10 @@ export function useMultiplayer() {
     peerRef.current = null;
     hostConnRef.current = null;
     clientConnsRef.current = {};
+    Object.values(unauthRef.current).forEach((u) => clearTimeout(u.timer));
+    unauthRef.current = {};
+    admittedInfoRef.current = {};
+    challengeRef.current = null;
     reconnectAttemptsRef.current = 0;
     reconnectPendingRef.current = false;
     retryJoinAttemptsRef.current = 0;
@@ -426,6 +487,16 @@ export function useMultiplayer() {
     setPartyGroup([]);
     setMyPeerId(null);
     setPartyMap(null);
+    setPending([]);
+    setBannedCount(0);
+    setAuthPrompt(null);
+    secretRef.current = null;
+    trustedRef.current = new Set();
+    bannedRef.current = new Set();
+    joinPwRef.current = '';
+    authedRef.current = false;
+    authFailedRef.current = false;
+    try { sessionStorage.removeItem(GM_SECURITY_KEY); } catch { /* */ }
   }, [cleanupPeer]);
 
   // SL raeumt die Tischmitte komplett ab (auch aus dem lokalen Speicher).
@@ -465,8 +536,11 @@ export function useMultiplayer() {
     }, delay);
   }, [pushLog]);
 
+  const handleIncomingRef = useRef(null);
   const handleIncoming = useCallback((peerId, payload) => {
     if (!isMessage(payload)) return;
+    // Daten nimmt der SL nur von zugelassenen Verbindungen an.
+    if (roleRef.current === 'gm' && !clientConnsRef.current[peerId]) return;
     // Doppelt zugestellte Nachrichten (Reconnect / mehrfache DataConnection) verwerfen
     if (payload.eid != null) {
       if (seenEidsRef.current.has(payload.eid)) return;
@@ -510,6 +584,230 @@ export function useMultiplayer() {
       }
     }
   }, [pushLog, commitStash, scheduleGroupBroadcast]);
+  handleIncomingRef.current = handleIncoming;
+
+  // --- SL: Zugangskontrolle ---------------------------------------------
+  const persistSecurity = useCallback((pw) => {
+    try {
+      const prev = JSON.parse(sessionStorage.getItem(GM_SECURITY_KEY) || 'null') || {};
+      sessionStorage.setItem(GM_SECURITY_KEY, JSON.stringify({
+        code: roomCodeRef.current,
+        pw: pw !== undefined ? pw : (prev.code === roomCodeRef.current ? prev.pw : ''),
+        trusted: [...trustedRef.current].slice(-200),
+        banned: [...bannedRef.current].slice(-200),
+      }));
+    } catch { /* privater Modus */ }
+  }, []);
+
+  const refreshPending = useCallback(() => {
+    setPending(Object.entries(unauthRef.current)
+      .filter(([, u]) => u.state === 'pending')
+      .map(([peerId, u]) => ({ peerId, name: u.name })));
+  }, []);
+
+  const dropUnauth = useCallback((peerId) => {
+    const u = unauthRef.current[peerId];
+    if (!u) return;
+    clearTimeout(u.timer);
+    delete unauthRef.current[peerId];
+    refreshPending();
+  }, [refreshPending]);
+
+  const armUnauthTimer = useCallback((peerId, ms, reason = 'timeout') => {
+    const u = unauthRef.current[peerId];
+    if (!u) return;
+    clearTimeout(u.timer);
+    u.timer = setTimeout(() => {
+      const cur = unauthRef.current[peerId];
+      if (!cur) return;
+      try { cur.conn.send({ t: T_AUTH, step: 'denied', reason }); } catch { /* */ }
+      try { cur.conn.close(); } catch { /* */ }
+      dropUnauth(peerId);
+    }, ms);
+  }, [dropUnauth]);
+
+  const denyConn = useCallback((conn, reason) => {
+    try { conn.send({ t: T_AUTH, step: 'denied', reason }); } catch { /* */ }
+    dropUnauth(conn.peer);
+    // kurz warten, damit die Absage noch ankommt, dann trennen
+    setTimeout(() => { try { conn.close(); } catch { /* */ } }, 200);
+  }, [dropUnauth]);
+
+  // Alles, was ein neu zugelassener Spieler zum Start bekommt (frueher beim Verbindungsaufbau).
+  const sendBundle = useCallback((conn) => {
+    try { conn.send({ t: T_STASH, items: stashRef.current.filter((i) => !i.hidden) }); } catch { /* */ }
+    try {
+      conn.send({ t: T_LOGCFG, eid: uid(), shared: partyLogRef.current });
+      if (partyLogRef.current) {
+        const backlog = liveLogRef.current.filter(isShareable).slice(0, 40);
+        if (backlog.length) conn.send({ t: T_LOG, eid: uid(), entries: backlog });
+      }
+      if (partyTimeRef.current) conn.send({ t: T_TIME, eid: uid(), clock: partyTimeRef.current });
+      conn.send({ t: T_RESTCFG, eid: uid(), locked: restLockedRef.current });
+      if (partyNpcsRef.current.length) conn.send({ t: T_NPCS, eid: uid(), npcs: partyNpcsRef.current });
+      if (groupSharedRef.current) conn.send({ t: T_GROUP, eid: uid(), members: groupSnapshot() });
+      conn.send({ t: T_MAP_SHARE, eid: uid(), shared: mapSharedRef.current });
+      if (mapSharedRef.current) {
+        if (mapStateRef.current) conn.send({ t: T_MAP, eid: uid(), ...mapStateRef.current });
+        if (mapImageRef.current) conn.send({ t: T_MAP_IMG, eid: uid(), ...mapImageRef.current });
+      }
+    } catch { /* */ }
+  }, [groupSnapshot]);
+
+  // Verbindung zulassen: ab jetzt gehoert sie zu clientConnsRef (alle Broadcasts).
+  const admitConn = useCallback((conn, info) => {
+    const pid = conn.peer;
+    const old = clientConnsRef.current[pid];
+    if (old && old !== conn) {
+      try { old.close(); } catch { /* */ }
+    }
+    dropUnauth(pid);
+    clientConnsRef.current[pid] = conn;
+    admittedInfoRef.current[pid] = { clientId: info.clientId, name: info.name };
+    if (info.clientId && !String(info.clientId).startsWith('legacy-')) {
+      trustedRef.current.add(info.clientId);
+      persistSecurity();
+    }
+    try { conn.send({ t: T_AUTH, step: 'ok' }); } catch { /* */ }
+    sendBundle(conn);
+  }, [dropUnauth, persistSecurity, sendBundle]);
+
+  const isBanned = (clientId, peerId) => bannedRef.current.has(clientId) || bannedRef.current.has(peerId);
+
+  // Nach Passwort (oder ohne): ggf. auf die Zusage des SL warten.
+  const afterPassword = useCallback((conn, u) => {
+    if (approvalRef.current && !trustedRef.current.has(u.clientId)) {
+      u.state = 'pending';
+      try { conn.send({ t: T_AUTH, step: 'wait' }); } catch { /* */ }
+      armUnauthTimer(conn.peer, PENDING_TIMEOUT_MS);
+      refreshPending();
+    } else {
+      admitConn(conn, u);
+    }
+  }, [admitConn, armUnauthTimer, refreshPending]);
+
+  const handleUnauth = useCallback(async (conn, payload) => {
+    if (!isMessage(payload)) return;
+    const pid = conn.peer;
+    const u = unauthRef.current[pid];
+    if (!u || u.conn !== conn) return;
+
+    if (payload.t === T_HELLO && u.state === 'new') {
+      const clientId = String(payload.clientId || '').slice(0, 64);
+      if (!clientId) { denyConn(conn, 'rejected'); return; }
+      u.clientId = clientId;
+      u.name = String(payload.name || '').trim().slice(0, 40);
+      if (isBanned(clientId, pid)) { denyConn(conn, 'kicked'); return; }
+      if (Date.now() < failRef.current.lockedUntil) { denyConn(conn, 'locked'); return; }
+      if (secretRef.current) {
+        u.state = 'challenged';
+        u.nonce = randomHex(16);
+        armUnauthTimer(pid, CHALLENGE_TIMEOUT_MS); // der Spieler muss das Passwort ja noch eintippen
+        try { conn.send({ t: T_AUTH, step: 'challenge', nonce: u.nonce }); } catch { /* */ }
+      } else {
+        afterPassword(conn, u);
+      }
+    } else if (payload.t === T_AUTH && payload.step === 'proof' && u.state === 'challenged') {
+      u.state = 'verifying';
+      let ok = false;
+      try {
+        const expected = await makeProof(secretRef.current, u.nonce, roomCodeRef.current);
+        ok = typeof payload.proof === 'string' && safeEqual(expected, payload.proof);
+      } catch { ok = false; }
+      if (unauthRef.current[pid] !== u) return; // waehrenddessen getrennt
+      if (!ok) {
+        // Brute-Force-Bremse: 5 Fehlversuche in 60 s sperren alle Anmeldungen fuer 60 s.
+        const f = failRef.current;
+        if (Date.now() - f.since > 60000) { f.count = 0; f.since = Date.now(); }
+        f.count += 1;
+        if (f.count >= 5) { f.lockedUntil = Date.now() + 60000; f.count = 0; }
+        denyConn(conn, 'password');
+        return;
+      }
+      u.state = 'verified';
+      afterPassword(conn, u);
+    } else if (payload.t === T_STATE && u.state === 'new' && !secretRef.current && !approvalRef.current
+      && !isBanned(`legacy-${pid}`, pid)) {
+      // Alter Client (vor dem Zugangs-Protokoll): kennt kein Hallo und schickt gleich seinen Bogen.
+      // Nur im offenen Raum zugelassen — mit Passwort oder Bestaetigung kommt er nicht rein.
+      u.clientId = `legacy-${pid}`;
+      admitConn(conn, u);
+      handleIncomingRef.current?.(pid, payload);
+    }
+  }, [admitConn, afterPassword, armUnauthTimer, denyConn]);
+
+  // SL: Raum-Passwort setzen (leer = kein Passwort). Gilt fuer neue Verbindungen.
+  const setRoomPassword = useCallback(async (pw) => {
+    const value = String(pw || '');
+    if (!value) {
+      secretRef.current = null;
+      setSecurity((s) => ({ ...s, password: false, passwordText: '' }));
+      persistSecurity('');
+      return true;
+    }
+    if (!hasCrypto()) return false;
+    secretRef.current = await deriveKey(value, roomCodeRef.current);
+    setSecurity((s) => ({ ...s, password: true, passwordText: value }));
+    persistSecurity(value);
+    return true;
+  }, [persistSecurity]);
+
+  const setApprovalRequired = useCallback((on) => {
+    setSecurity((s) => ({ ...s, approval: !!on }));
+    approvalRef.current = !!on;
+    writeJSON(APPROVAL_KEY, !!on);
+    // Schaltet der SL die Bestaetigung aus, werden wartende Anfragen eingelassen.
+    if (!on) {
+      Object.values(unauthRef.current)
+        .filter((u) => u.state === 'pending')
+        .forEach((u) => admitConn(u.conn, u));
+    }
+  }, [admitConn]);
+
+  const approvePending = useCallback((peerId) => {
+    const u = unauthRef.current[peerId];
+    if (u && u.state === 'pending') admitConn(u.conn, u);
+  }, [admitConn]);
+
+  const rejectPending = useCallback((peerId) => {
+    const u = unauthRef.current[peerId];
+    if (u) denyConn(u.conn, 'rejected');
+  }, [denyConn]);
+
+  // SL wirft einen Spieler raus und sperrt das Geraet fuer diese Sitzung.
+  const kickPlayer = useCallback((peerId) => {
+    const conn = clientConnsRef.current[peerId];
+    const info = admittedInfoRef.current[peerId] || {};
+    const name = playersRef.current[peerId]?.character?.name || info.name || '?';
+    bannedRef.current.add(peerId);
+    if (info.clientId) {
+      bannedRef.current.add(info.clientId);
+      trustedRef.current.delete(info.clientId);
+    }
+    persistSecurity();
+    setBannedCount(countBanned(bannedRef.current));
+    // erst aus der Liste nehmen, damit der close-Handler nicht noch "hat den Raum verlassen" loggt
+    delete clientConnsRef.current[peerId];
+    delete admittedInfoRef.current[peerId];
+    knownPeersRef.current.delete(peerId);
+    if (conn) {
+      try { conn.send({ t: T_AUTH, step: 'denied', reason: 'kicked' }); } catch { /* */ }
+      setTimeout(() => { try { conn.close(); } catch { /* */ } }, 200);
+    }
+    setPlayers((prev) => {
+      const next = { ...prev };
+      delete next[peerId];
+      return next;
+    });
+    pushLog({ kind: 'system', key: 'mp.log.kicked', vars: { name } });
+    scheduleGroupBroadcast();
+  }, [persistSecurity, pushLog, scheduleGroupBroadcast]);
+
+  const unbanAll = useCallback(() => {
+    bannedRef.current = new Set();
+    persistSecurity();
+    setBannedCount(0);
+  }, [persistSecurity]);
 
   // --- SL: Sitzung hosten ---
   const hostSession = useCallback((preferredCodeArg) => {
@@ -521,6 +819,14 @@ export function useMultiplayer() {
     setLiveLog([]);
 
     const code = preferredCode || generateRoomCode();
+    roomCodeRef.current = code;
+    secretRef.current = null;
+    trustedRef.current = new Set();
+    bannedRef.current = new Set();
+    failRef.current = { count: 0, since: 0, lockedUntil: 0 };
+    setSecurity((sec) => ({ ...sec, password: false, passwordText: '' }));
+    setPending([]);
+    setBannedCount(0);
     const peer = new Peer(ROOM_PREFIX + code, peerConfig());
     peerRef.current = peer;
     let opened = false;
@@ -540,6 +846,23 @@ export function useMultiplayer() {
       setStatusMessage('');
       pushLog({ kind: 'system', key: 'mp.log.started', vars: { code } });
       saveSession('gm', code);
+
+      // Zugangskontrolle: Passwort und zugelassene/gesperrte Geraete dieser Sitzung wiederherstellen
+      // (nach einem Neuladen des SL muessen nicht alle erneut gefragt werden).
+      roomCodeRef.current = code;
+      let saved = null;
+      try { saved = JSON.parse(sessionStorage.getItem(GM_SECURITY_KEY) || 'null'); } catch { /* */ }
+      if (saved && saved.code === code) {
+        trustedRef.current = new Set(saved.trusted || []);
+        bannedRef.current = new Set(saved.banned || []);
+        setBannedCount(countBanned(bannedRef.current));
+        if (saved.pw && hasCrypto()) {
+          deriveKey(saved.pw, code).then((k) => {
+            secretRef.current = k;
+            setSecurity((sec) => ({ ...sec, password: true, passwordText: saved.pw }));
+          }).catch(() => { /* ohne Passwort weiter — der SL kann es neu setzen */ });
+        }
+      }
     });
 
     peer.on('disconnected', () => {
@@ -548,48 +871,43 @@ export function useMultiplayer() {
     });
 
     peer.on('connection', (conn) => {
-      // Alte Verbindung desselben Spielers ersetzen (Reconnect / Doppelverbindung)
-      const old = clientConnsRef.current[conn.peer];
-      if (old && old !== conn) {
-        try { old.close(); } catch { /* */ }
+      const pid = conn.peer;
+      // Neue Verbindung: unauthentifiziert. Daten bekommt sie erst nach dem Einlass
+      // (admitConn) — bis dahin ist sie NICHT in clientConnsRef und sieht keinen Broadcast.
+      const stale = unauthRef.current[pid];
+      if (stale) {
+        clearTimeout(stale.timer);
+        try { stale.conn.close(); } catch { /* */ }
       }
-      conn.on('open', () => {
-        // Neu (wieder) verbundene Spieler bekommen den aktuellen Stand der Tischmitte
-        // und, wenn aktiv, das bisherige Runden-Log.
-        try { conn.send({ t: T_STASH, items: stashRef.current.filter((i) => !i.hidden) }); } catch { /* */ }
-        try {
-          conn.send({ t: T_LOGCFG, eid: uid(), shared: partyLogRef.current });
-          if (partyLogRef.current) {
-            const backlog = liveLogRef.current.filter(isShareable).slice(0, 40);
-            if (backlog.length) conn.send({ t: T_LOG, eid: uid(), entries: backlog });
-          }
-          // Tageszeit nur, wenn der SL sie gerade teilt
-          if (partyTimeRef.current) conn.send({ t: T_TIME, eid: uid(), clock: partyTimeRef.current });
-          conn.send({ t: T_RESTCFG, eid: uid(), locked: restLockedRef.current });
-          if (partyNpcsRef.current.length) conn.send({ t: T_NPCS, eid: uid(), npcs: partyNpcsRef.current });
-          if (groupSharedRef.current) conn.send({ t: T_GROUP, eid: uid(), members: groupSnapshot() });
-          conn.send({ t: T_MAP_SHARE, eid: uid(), shared: mapSharedRef.current });
-          if (mapSharedRef.current) {
-            if (mapStateRef.current) conn.send({ t: T_MAP, eid: uid(), ...mapStateRef.current });
-            if (mapImageRef.current) conn.send({ t: T_MAP_IMG, eid: uid(), ...mapImageRef.current });
-          }
-        } catch { /* */ }
+      if (Object.keys(unauthRef.current).length >= MAX_UNAUTH) {
+        conn.on('open', () => {
+          try { conn.send({ t: T_AUTH, step: 'denied', reason: 'full' }); } catch { /* */ }
+          setTimeout(() => { try { conn.close(); } catch { /* */ } }, 200);
+        });
+        return;
+      }
+      unauthRef.current[pid] = { conn, state: 'new', timer: null };
+      armUnauthTimer(pid, AUTH_TIMEOUT_MS);
+
+      conn.on('data', (data) => {
+        if (clientConnsRef.current[pid] === conn) handleIncoming(pid, data);
+        else handleUnauth(conn, data);
       });
-      conn.on('data', (data) => handleIncoming(conn.peer, data));
       conn.on('close', () => {
-        if (clientConnsRef.current[conn.peer] !== conn) return; // wurde bereits ersetzt
-        delete clientConnsRef.current[conn.peer];
-        knownPeersRef.current.delete(conn.peer);
-        const name = playersRef.current[conn.peer]?.character?.name;
+        if (unauthRef.current[pid]?.conn === conn) dropUnauth(pid);
+        if (clientConnsRef.current[pid] !== conn) return; // nie zugelassen oder bereits ersetzt
+        delete clientConnsRef.current[pid];
+        delete admittedInfoRef.current[pid];
+        knownPeersRef.current.delete(pid);
+        const name = playersRef.current[pid]?.character?.name;
         if (name) pushLog({ kind: 'system', key: 'mp.log.left', vars: { name } });
         setPlayers((prev) => {
           const next = { ...prev };
-          delete next[conn.peer];
+          delete next[pid];
           return next;
         });
         scheduleGroupBroadcast();
       });
-      clientConnsRef.current[conn.peer] = conn;
     });
 
     peer.on('error', (err) => {
@@ -602,7 +920,7 @@ export function useMultiplayer() {
       setConnectionState('error');
       setRole(null);
     });
-  }, [cleanupPeer, handleIncoming, pushLog, reconnectHost, groupSnapshot, scheduleGroupBroadcast]);
+  }, [cleanupPeer, handleIncoming, handleUnauth, armUnauthTimer, dropUnauth, pushLog, reconnectHost, scheduleGroupBroadcast]);
 
   // --- Spieler: Reconnect zum SL ---
   const attemptReconnectToHost = useCallback((code) => {
@@ -630,21 +948,102 @@ export function useMultiplayer() {
       try { prev.close(); } catch { /* */ }
     }
     hostConnRef.current = conn;
+    authedRef.current = false;
+    authFailedRef.current = false;
+    challengeRef.current = null;
 
-    conn.on('open', () => {
+    // Eingelassen (oder alter SL ohne Zugangskontrolle): ab jetzt normaler Betrieb.
+    const becomeConnected = () => {
+      if (authedRef.current) return;
+      authedRef.current = true;
       clearTimeout(joinTimeoutRef.current);
       retryJoinAttemptsRef.current = 0;
+      challengeRef.current = null;
+      setAuthPrompt(null);
       setRole('player');
       setRoomCode(code);
       setConnectionState('connected');
       setStatusMessage('');
-      saveSession('player', code);
+      saveSession('player', code, joinPwRef.current);
       setResyncNonce((n) => n + 1);
       setMyPeerId(peerRef.current?.id || null);
+    };
+
+    // Auf die Passwort-Frage des SL antworten (das Passwort selbst geht nie raus).
+    const answerChallenge = async (nonce) => {
+      if (!hasCrypto()) {
+        authFailedRef.current = true;
+        setConnectionState('error');
+        setStatusMessage('noCrypto');
+        return;
+      }
+      try {
+        const key = await deriveKey(joinPwRef.current, code);
+        const proof = await makeProof(key, nonce, code);
+        if (conn.open) conn.send({ t: T_AUTH, step: 'proof', proof });
+      } catch {
+        authFailedRef.current = true;
+        setConnectionState('error');
+        setStatusMessage('noCrypto');
+      }
+    };
+    challengeAnswerRef.current = (pw) => {
+      joinPwRef.current = pw;
+      const c = challengeRef.current;
+      if (!c || c.conn !== conn) return false;
+      challengeRef.current = null;
+      setAuthPrompt(null);
+      setStatusMessage('authenticating');
+      answerChallenge(c.nonce);
+      return true;
+    };
+
+    const handleAuth = (payload) => {
+      if (payload.step === 'challenge' && typeof payload.nonce === 'string') {
+        if (joinPwRef.current) {
+          setStatusMessage('authenticating');
+          answerChallenge(payload.nonce);
+        } else {
+          challengeRef.current = { nonce: payload.nonce, conn };
+          setAuthPrompt('password');
+          setConnectionState('connecting');
+          setStatusMessage('needPassword');
+        }
+      } else if (payload.step === 'wait') {
+        setConnectionState('connecting');
+        setStatusMessage('waitApproval');
+      } else if (payload.step === 'ok') {
+        becomeConnected();
+      } else if (payload.step === 'denied') {
+        authFailedRef.current = true;
+        authedRef.current = false;
+        clearTimeout(joinTimeoutRef.current);
+        clearSession();
+        setConnectionState('error');
+        const map = {
+          password: 'wrongPassword', kicked: 'kicked', rejected: 'rejected', locked: 'locked', timeout: 'authTimeout', full: 'hostBusy',
+        };
+        setStatusMessage(map[payload.reason] || 'rejected');
+        if (payload.reason === 'password') {
+          joinPwRef.current = '';
+          setAuthPrompt('password');
+        } else {
+          setAuthPrompt(null);
+        }
+      }
+    };
+
+    conn.on('open', () => {
+      clearTimeout(joinTimeoutRef.current);
+      // Hallo: Geraete-ID (fuer Wiedererkennen/Sperre) und Name der Maus (fuer die Anfrage beim SL).
+      try { conn.send({ t: T_HELLO, v: 2, clientId: getClientId(), name: identityRef.current }); } catch { /* */ }
     });
 
     conn.on('data', (payload) => {
       if (!isMessage(payload)) return;
+      if (payload.t === T_AUTH) { handleAuth(payload); return; }
+      // Alter SL (ohne Zugangskontrolle) schickt gleich Daten: einfach so weitermachen.
+      if (!authedRef.current && !authFailedRef.current) becomeConnected();
       if (payload.t === T_STASH) {
         commitStash(Array.isArray(payload.items) ? payload.items : []);
       } else if (payload.t === T_GM) {
@@ -701,6 +1100,8 @@ export function useMultiplayer() {
     conn.on('close', () => {
       if (hostConnRef.current !== conn) return; // bereits ersetzt
       hostConnRef.current = null;
+      // Abgelehnt/gesperrt/falsches Passwort: nicht automatisch weiter versuchen.
+      if (authFailedRef.current) return;
       setConnectionState('connecting');
       setStatusMessage('hostInterrupted');
       attemptReconnectToHost(code);
@@ -711,13 +1112,18 @@ export function useMultiplayer() {
 
   wireHostRef.current = wireHostConnection;
 
-  const joinSession = useCallback((codeInput) => {
+  const joinSession = useCallback((codeInput, opts = {}) => {
     const code = (codeInput || '').trim().toUpperCase();
     if (!code) {
       setStatusMessage('needCode');
       return;
     }
     cleanupPeer();
+    joinPwRef.current = opts.password || '';
+    lastJoinCodeRef.current = code;
+    authFailedRef.current = false;
+    authedRef.current = false;
+    setAuthPrompt(null);
     setConnectionState('connecting');
     setStatusMessage('connecting');
 
@@ -748,6 +1154,18 @@ export function useMultiplayer() {
       else setStatusMessage(`error:${err.type}`);
     });
   }, [cleanupPeer, wireHostConnection]);
+
+  // Spieler: Passwort eintippen. Laeuft die Verbindung noch (Frage wartet), wird einfach geantwortet,
+  // sonst (nach "falsches Passwort") neu verbunden.
+  const submitPassword = useCallback((pw) => {
+    const value = String(pw || '');
+    if (!value) return;
+    if (challengeAnswerRef.current && challengeAnswerRef.current(value)) return;
+    if (lastJoinCodeRef.current) joinSession(lastJoinCodeRef.current, { password: value });
+  }, [joinSession]);
+
+  // Name der Maus, den der SL bei einer Beitrittsanfrage sieht.
+  const setIdentity = useCallback((name) => { identityRef.current = String(name || '').trim().slice(0, 40); }, []);
 
   // --- Senden: Spieler -> SL ---
   const sendState = useCallback((character) => {
@@ -792,16 +1210,19 @@ export function useMultiplayer() {
       return;
     }
     if (stored?.role === 'player' && stored.roomCode) {
-      joinSession(stored.roomCode);
+      joinSession(stored.roomCode, { password: stored.pw });
       return;
     }
     const params = new URLSearchParams(window.location.search);
     const joinParam = params.get('join');
     if (joinParam) {
+      // Passwort im Einladungslink steht hinter dem '#' — der geht nie an einen Server.
+      const hashPw = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('pw') || '';
       const url = new URL(window.location.href);
       url.searchParams.delete('join');
+      url.hash = '';
       window.history.replaceState({}, '', url);
-      joinSession(joinParam);
+      joinSession(joinParam, { password: hashPw });
     }
   }, [hostSession, joinSession]);
 
@@ -843,6 +1264,18 @@ export function useMultiplayer() {
     stopSoundShared,
     fadeOutSoundShared,
     resyncNonce,
+    security,
+    pending,
+    bannedCount,
+    authPrompt,
+    setRoomPassword,
+    setApprovalRequired,
+    approvePending,
+    rejectPending,
+    kickPlayer,
+    unbanAll,
+    submitPassword,
+    setIdentity,
     gmCommand,
     stash,
     hostSession,

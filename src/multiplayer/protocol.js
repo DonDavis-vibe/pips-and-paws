@@ -13,6 +13,19 @@ export const STUN_SERVERS = [
   { urls: 'stun:stun2.l.google.com:19302' },
 ];
 
+// Zugang (siehe auth.js und useMultiplayer.js): erst wenn der SL einen Spieler
+// eingelassen hat, schickt er Daten. Bis dahin laufen nur diese Nachrichten.
+export const T_HELLO = 'hello'; // Spieler -> SL: { clientId, name, v }
+// beide Richtungen, Feld `step`:
+//   SL -> Spieler: 'challenge' { nonce } | 'wait' | 'ok' | 'denied' { reason }
+//   Spieler -> SL: 'proof' { proof }
+export const T_AUTH = 'auth';
+// reason bei 'denied': password | rejected | kicked | locked | timeout | full
+export const MAX_UNAUTH = 12; //   gleichzeitig wartende/pruefende Verbindungen
+export const AUTH_TIMEOUT_MS = 20000; //   Zeit fuer das Hallo
+export const CHALLENGE_TIMEOUT_MS = 120000; // so lange darf ein Spieler fuers Passwort brauchen
+export const PENDING_TIMEOUT_MS = 600000; // so lange darf eine Anfrage auf die Zusage warten
+
 // Spieler -> Spielleiter
 export const T_STATE = 'state'; // { character, items }
 export const T_EVENT = 'event'; // { ev } strukturiert, z.B. { kind:'save', attr, roll, ok }
@@ -62,11 +75,16 @@ export const T_MAP_SHARE = 'mapShare'; // { shared } SL schaltet die Kartenfreig
 export const T_MAP = 'map'; // { name, raster, figuren, formen, nebel } haeufig, ohne Bild
 export const T_MAP_IMG = 'mapImg'; // { name, dataUrl } nur bei Bild- oder Kartenwechsel
 
+// 6 Zeichen aus 32 = rund eine Milliarde Moeglichkeiten (4 Zeichen waren eine
+// Million und damit durchprobierbar). Aeltere 4-stellige Codes funktionieren
+// weiter, wenn ein alter SL sie vergibt — Beitreten akzeptiert 4 bis 6 Zeichen.
+export const ROOM_CODE_LENGTH = 6;
+export const ROOM_CODE_MIN = 4;
 export function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // ohne I/O/0/1
-  let code = '';
-  for (let i = 0; i < 4; i += 1) code += chars.charAt(Math.floor(Math.random() * chars.length));
-  return code;
+  const bytes = new Uint8Array(ROOM_CODE_LENGTH);
+  (globalThis.crypto || { getRandomValues: (a) => a.map(() => Math.floor(Math.random() * 256)) }).getRandomValues(bytes);
+  return Array.from(bytes, (b) => chars.charAt(b % chars.length)).join('');
 }
 
 export function isMessage(m) {

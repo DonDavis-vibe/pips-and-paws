@@ -131,8 +131,13 @@ data passing through the operator's server.
 ## Playing together
 
 - **Serverless multiplayer** over WebRTC / PeerJS. The GM is the host; players join
-  with a 4-character code or a `?join` link. Reconnect and reload recovery are
+  with a 6-character code or a `?join` link. Reconnect and reload recovery are
   built in.
+- **Room access control** — nothing is sent to a device before the GM has let it in.
+  Optional room password (checked by challenge-response, never transmitted; it can
+  ride in the invite link behind the `#`), optional "approve joins" with an
+  Allow / Deny prompt, a Remove button per player that also blocks the device, and
+  a lock-out after repeated wrong passwords.
 - **Shared round log** — the GM opens it up, then every player sees the round's
   rolls and events on their own sheet. Players' rolls always reach the GM regardless.
 - **Optional Discord webhook** — mirrors rolls and events into a channel. The URL

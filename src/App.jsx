@@ -220,6 +220,10 @@ export default function App() {
     }
   };
 
+  // Name der Maus fuer die Beitrittsanfrage beim SL (siehe useMultiplayer.js, T_HELLO)
+  const { setIdentity } = mp;
+  useEffect(() => { setIdentity(character.name); }, [setIdentity, character.name]);
+
   const isGm = mp.role === 'gm';
 
   return (

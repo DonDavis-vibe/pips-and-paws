@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Heart, Coins, Shield, Swords, Backpack, Sparkles, AlertTriangle, ChevronDown, ChevronRight,
-  BookOpen, Download, Trash2, Users,
+  BookOpen, Download, Trash2, Users, UserX,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { REST_KINDS } from '../rules/rest.js';
@@ -26,7 +26,7 @@ const SLOT_LABELS = {
 // `onOpenSheet`/`onSave`/`onRemove` gelten nur dann; Fluestern entfaellt, weil
 // es kein zweites Geraet gibt, an das es gehen koennte.
 export default function GmPlayerCard({
-  player, onCommand, local = false, onOpenSheet, onSave, onRemove,
+  player, onCommand, local = false, onOpenSheet, onSave, onRemove, onKick,
 }) {
   const { t, lang } = useLang();
   const c = player.character || {};
@@ -280,16 +280,28 @@ export default function GmPlayerCard({
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            className="btn btn-sm btn-ghost"
-            onClick={() => {
-              const text = window.prompt(t('gm.prompt.whisper'));
-              if (text) onCommand({ cmd: GM_WHISPER, text });
-            }}
-          >
-            {t('gm.action.whisper')}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost"
+              onClick={() => {
+                const text = window.prompt(t('gm.prompt.whisper'));
+                if (text) onCommand({ cmd: GM_WHISPER, text });
+              }}
+            >
+              {t('gm.action.whisper')}
+            </button>
+            {onKick ? (
+              <button
+                type="button"
+                className="btn btn-sm btn-danger"
+                title={t('gm.kick.hint')}
+                onClick={() => window.confirm(t('gm.kick.confirm', { name: c.name || '?' })) && onKick()}
+              >
+                <UserX size={13} /> {t('gm.kick.button')}
+              </button>
+            ) : null}
+          </>
         )}
       </div>
 

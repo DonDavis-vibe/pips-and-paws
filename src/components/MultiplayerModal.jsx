@@ -1,17 +1,127 @@
 import { useState } from 'react';
-import { Radio, Users, LogOut, Copy, Check, MessagesSquare, Send } from 'lucide-react';
+import {
+  Radio, Users, LogOut, Copy, Check, MessagesSquare, Send, Lock, ShieldCheck, KeyRound,
+} from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { Modal, Field, TextInput } from './ui.jsx';
-import { GM_WEBHOOK } from '../multiplayer/protocol.js';
+import { GM_WEBHOOK, ROOM_CODE_LENGTH, ROOM_CODE_MIN } from '../multiplayer/protocol.js';
+import { hasCrypto } from '../multiplayer/auth.js';
+import JoinRequests from './JoinRequests.jsx';
 import {
   getWebhook, setWebhook, isValidWebhook, getOpts, setOpts, testWebhook,
 } from '../utils/discord.js';
 
-function inviteLink(code) {
+// Das Passwort steht (wenn gewuenscht) hinter dem '#': dieser Teil einer Adresse
+// wird vom Browser nie an einen Server geschickt, auch nicht an unseren.
+function inviteLink(code, password) {
   const url = new URL(window.location.href);
   url.searchParams.set('join', code);
-  url.hash = '';
+  url.hash = password ? `pw=${encodeURIComponent(password)}` : '';
   return url.toString();
+}
+
+// SL: Zugang zum Raum absichern — Passwort, Beitritt bestaetigen, Gesperrte.
+function RoomSecurity({ mp }) {
+  const { t } = useLang();
+  const [draft, setDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const canCrypto = hasCrypto();
+
+  const apply = async (value) => {
+    setBusy(true);
+    setFailed(false);
+    const ok = await mp.setRoomPassword(value);
+    setBusy(false);
+    if (!ok) setFailed(true);
+    else setDraft('');
+  };
+
+  return (
+    <details className="mp-security" open={mp.security.password || mp.security.approval}>
+      <summary>
+        <ShieldCheck size={15} /> {t('mp.sec.title')}
+        {mp.security.password || mp.security.approval ? <span className="mp-sec-on">{t('mp.sec.on')}</span> : null}
+      </summary>
+      <div className="mp-security-body">
+        <p className="hint">{t('mp.sec.help')}</p>
+
+        <Field label={t('mp.sec.password')}>
+          <div className="inline-roll">
+            <input
+              type="text"
+              className="text-input"
+              value={draft}
+              maxLength={60}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder={mp.security.password ? t('mp.sec.passwordSet') : t('mp.sec.passwordNone')}
+              disabled={!canCrypto}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && draft.trim()) apply(draft.trim()); }}
+            />
+            <button type="button" className="btn btn-sm" disabled={busy || !draft.trim() || !canCrypto} onClick={() => apply(draft.trim())}>
+              <Lock size={14} /> {t('mp.sec.set')}
+            </button>
+            {mp.security.password ? (
+              <button type="button" className="btn btn-sm btn-ghost" disabled={busy} onClick={() => apply('')}>
+                {t('mp.sec.remove')}
+              </button>
+            ) : null}
+          </div>
+        </Field>
+        {!canCrypto ? <p className="mp-status" style={{ color: 'var(--bad)' }}>{t('mp.sec.noCrypto')}</p> : null}
+        {failed ? <p className="mp-status" style={{ color: 'var(--bad)' }}>{t('mp.sec.noCrypto')}</p> : null}
+        {mp.security.password ? <p className="hint">{t('mp.sec.passwordHint')}</p> : null}
+
+        <label className="gm-share-log">
+          <input
+            type="checkbox"
+            checked={mp.security.approval}
+            onChange={(e) => mp.setApprovalRequired(e.target.checked)}
+          />
+          {t('mp.sec.approval')}
+        </label>
+        <p className="hint">{t('mp.sec.approvalHint')}</p>
+
+        {mp.bannedCount > 0 ? (
+          <p className="hint">
+            {t('mp.sec.banned', { n: mp.bannedCount })}{' '}
+            <button type="button" className="link-btn" onClick={mp.unbanAll}>{t('mp.sec.unban')}</button>
+          </p>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
+// Spieler: Passwort abfragen (der SL hat eines gesetzt, im Link stand keins).
+function PasswordPrompt({ mp }) {
+  const { t } = useLang();
+  const [pw, setPw] = useState('');
+  return (
+    <form
+      className="mp-password"
+      onSubmit={(e) => { e.preventDefault(); if (pw) { mp.submitPassword(pw); setPw(''); } }}
+    >
+      <Field label={t('mp.pw.label')}>
+        <div className="inline-roll">
+          <input
+            type="password"
+            className="text-input"
+            value={pw}
+            autoFocus
+            autoComplete="off"
+            maxLength={60}
+            onChange={(e) => setPw(e.target.value)}
+          />
+          <button type="submit" className="btn" disabled={!pw}>
+            <KeyRound size={14} /> {t('mp.pw.send')}
+          </button>
+        </div>
+      </Field>
+    </form>
+  );
 }
 
 function DiscordSettings({ mp }) {
@@ -82,12 +192,13 @@ export default function MultiplayerModal({ mp, onClose }) {
   const { t } = useLang();
   const [code, setCode] = useState('');
   const [copied, setCopied] = useState(false);
+  const [withPw, setWithPw] = useState(false); // Passwort in den Einladungslink einbetten
 
   const status = mp.statusMessage ? t(`mp.status.${mp.statusMessage}`, { v: mp.statusMessage }) : '';
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(inviteLink(mp.roomCode));
+      await navigator.clipboard.writeText(inviteLink(mp.roomCode, withPw ? mp.security.passwordText : ''));
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -108,16 +219,22 @@ export default function MultiplayerModal({ mp, onClose }) {
             <div className="inline-roll">
               <TextInput
                 value={code}
-                onChange={(v) => setCode(v.toUpperCase().slice(0, 4))}
-                placeholder="ABCD"
-                maxLength={4}
+                onChange={(v) => setCode(v.toUpperCase().slice(0, ROOM_CODE_LENGTH))}
+                placeholder="ABCDEF"
+                maxLength={ROOM_CODE_LENGTH}
               />
-              <button type="button" className="btn" disabled={code.length < 4} onClick={() => mp.joinSession(code)}>
+              <button type="button" className="btn" disabled={code.length < ROOM_CODE_MIN} onClick={() => mp.joinSession(code)}>
                 {t('mp.joinBtn')}
               </button>
             </div>
           </Field>
           {status ? <p className="mp-status">{status}</p> : null}
+          {mp.authPrompt === 'password' ? <PasswordPrompt mp={mp} /> : null}
+          {mp.connectionState === 'connecting' ? (
+            <button type="button" className="btn btn-ghost" onClick={mp.leaveSession}>
+              <LogOut size={16} /> {t('mp.cancel')}
+            </button>
+          ) : null}
         </div>
       ) : (
         <div className="mp-active">
@@ -133,15 +250,23 @@ export default function MultiplayerModal({ mp, onClose }) {
             <>
               <Field label={t('mp.inviteLink')}>
                 <div className="inline-roll">
-                  <TextInput value={inviteLink(mp.roomCode)} onChange={() => {}} readOnly />
+                  <TextInput value={inviteLink(mp.roomCode, withPw ? mp.security.passwordText : '')} onChange={() => {}} readOnly />
                   <button type="button" className="icon-btn" onClick={copy} aria-label={t('mp.copyLink')}>
                     {copied ? <Check size={16} /> : <Copy size={16} />}
                   </button>
                 </div>
               </Field>
+              {mp.security.password ? (
+                <label className="gm-share-log" title={t('mp.sec.linkPwHint')}>
+                  <input type="checkbox" checked={withPw} onChange={(e) => setWithPw(e.target.checked)} />
+                  {t('mp.sec.linkPw')}
+                </label>
+              ) : null}
               <p className="hint">
                 <Users size={14} /> {t('mp.playersConnected', { n: Object.keys(mp.players).length })}
               </p>
+              <JoinRequests mp={mp} />
+              <RoomSecurity mp={mp} />
             </>
           ) : (
             <p className="mp-status">{status || t(`mp.state.${mp.connectionState}`)}</p>

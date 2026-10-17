@@ -136,8 +136,13 @@ Betreibers laufen.
 ## Zusammen spielen
 
 - **Serverloser Multiplayer** über WebRTC / PeerJS. Die Spielleitung ist der Host;
-  Spieler treten per 4-Zeichen-Code oder `?join`-Link bei. Reconnect und
+  Spieler treten per 6-Zeichen-Code oder `?join`-Link bei. Reconnect und
   Reload-Wiederherstellung sind eingebaut.
+- **Zugangskontrolle für den Raum** — an ein Gerät geht erst etwas raus, wenn die
+  Spielleitung es eingelassen hat. Optionales Raum-Passwort (per Challenge-Response
+  geprüft, nie übertragen; auf Wunsch im Einladungslink hinter dem `#`), optional
+  „Beitritt bestätigen“ mit Zulassen/Ablehnen, Rauswerfen-Knopf je Spieler (sperrt
+  das Gerät) und eine Sperre nach mehreren falschen Passwörtern.
 - **Geteiltes Runden-Log** — die Spielleitung schaltet es frei, dann sehen alle
   Spieler die Würfe und Ereignisse der Runde in ihrem eigenen Bogen. Würfe der
   Spieler erreichen die Spielleitung in jedem Fall.
