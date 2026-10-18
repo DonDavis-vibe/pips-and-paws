@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pips &amp; Paws — translation checker</title>
+<style>
+  :root { --bg:#f6eeda; --fg:#241e13; --muted:#6b5f45; --card:#fdf9ee; --line:#c9bfa4; --ok:#3c7a4a; --bad:#b0362f; --warn:#b07a1c; --accent:#7d3616; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#1b1813; --fg:#eee4cf; --muted:#b3a888; --card:#262219; --line:#4a4235; --ok:#8fbf6a; --bad:#ef8a7f; --warn:#e0b25a; --accent:#e79a5c; } }
+  body { margin:0; padding:24px 16px 60px; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { margin: 0 0 4px; font-size: 1.5rem; }
+  p.sub { margin: 0 0 18px; color: var(--muted); }
+  .drop { display:block; border:2px dashed var(--line); border-radius:12px; padding:26px; text-align:center; background:var(--card); cursor:pointer; }
+  .drop.over { border-color: var(--accent); }
+  .stats { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0; }
+  .stat { flex:1 1 140px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .stat b { display:block; font-size:1.4rem; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); } .warn { color:var(--warn); }
+  ul.problems { padding-left:20px; }
+  li { margin: 6px 0; }
+  code { background: color-mix(in srgb, var(--fg) 10%, transparent); padding: 1px 5px; border-radius: 4px; font-size: .9em; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin: 12px 0; }
+  details { margin-top: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Translation checker</h1>
+  <p class="sub">Pips &amp; Paws — language: <b id="lang"></b>. Everything stays in your browser; nothing is uploaded.</p>
+
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept=".jsonc,.json,.txt" hidden>
+    <strong>Choose your filled-in translation file</strong><br>
+    <span class="sub">or drop it here — the <code>translate-*.jsonc</code> file from this package</span>
+  </label>
+
+  <div id="result" hidden>
+    <div class="stats">
+      <div class="stat"><b id="n-done" class="ok">0</b>translated</div>
+      <div class="stat"><b id="n-empty" class="warn">0</b>still empty (fine, falls back to English)</div>
+      <div class="stat"><b id="n-bad" class="bad">0</b>problems to fix</div>
+    </div>
+    <div id="problems"></div>
+    <div class="row">
+      <button class="primary" id="download" disabled>Download checked result (.json)</button>
+      <button id="copy-summary">Copy summary</button>
+    </div>
+    <p class="sub">Send the <b>original file you edited</b> (or the downloaded .json, either works) back to the person who sent you this package.</p>
+  </div>
+
+  <details>
+    <summary>What is checked?</summary>
+    <ul>
+      <li>Every <code>{placeholder}</code> in your text must be exactly the same as in English (same names, none missing, none added).</li>
+      <li>Values must be text. Empty values are fine: those texts simply stay English.</li>
+      <li>Unknown keys (typos in the key name) are reported.</li>
+      <li>The file must stay valid JSON apart from the <code>//</code> comment lines: quotes inside a text need a backslash (<code>\"</code>), line breaks are <code>\n</code>.</li>
+    </ul>
+  </details>
+</main>
+
+<script>
+const LANG = "__LANG__";
+const EN = __EN__; // { key: { ph: ["n","name"], en: "English text" } }
+document.getElementById('lang').textContent = LANG;
+
+const $ = (id) => document.getElementById(id);
+let checked = {};
+
+function parse(text) {
+  const body = text.split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n').replace(/,(\s*})/g, '$1');
+  return JSON.parse(body);
+}
+const ph = (s) => [...new Set([...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
+const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+function run(text) {
+  const out = $('problems'); out.innerHTML = '';
+  let data;
+  try { data = parse(text); } catch (e) {
+    $('result').hidden = false;
+    $('n-done').textContent = '0'; $('n-empty').textContent = '0'; $('n-bad').textContent = '1';
+    out.innerHTML = '<p class="bad"><b>The file is not valid JSON.</b> ' + esc(e.message) + '<br>Typical causes: a missing quote or comma, an unescaped <code>"</code> inside a text, or an accidental line break inside a text (use <code>\\n</code>).</p>';
+    $('download').disabled = true; return;
+  }
+  checked = {}; let done = 0, empty = 0; const problems = [];
+  for (const [key, val] of Object.entries(data)) {
+    if (!(key in EN)) { problems.push(['Unknown key <code>' + esc(key) + '</code> (typo in the key name?)']); continue; }
+    if (typeof val !== 'string') { problems.push(['<code>' + esc(key) + '</code>: the value must be text in "quotes"']); continue; }
+    if (val.trim() === '') { empty += 1; continue; }
+    if (!same(ph(val), EN[key].ph)) {
+      const want = EN[key].ph.map((p) => '{' + p + '}').join(' ') || '(none)';
+      const got = ph(val).map((p) => '{' + p + '}').join(' ') || '(none)';
+      problems.push(['<code>' + esc(key) + '</code>: placeholders must be ' + esc(want) + ' — yours: ' + esc(got) + '<br><small>EN: ' + esc(EN[key].en) + '</small>']);
+      continue;
+    }
+    checked[key] = val; done += 1;
+  }
+  $('result').hidden = false;
+  $('n-done').textContent = done; $('n-empty').textContent = empty; $('n-bad').textContent = problems.length;
+  out.innerHTML = problems.length
+    ? '<p class="bad"><b>Please fix these:</b></p><ul class="problems">' + problems.map((p) => '<li>' + p[0] + '</li>').join('') + '</ul>'
+    : '<p class="ok"><b>All good.</b> ' + done + ' texts checked, no problems.</p>';
+  $('download').disabled = done === 0;
+}
+
+function read(f) { const r = new FileReader(); r.onload = () => run(String(r.result)); r.readAsText(f, 'utf-8'); }
+$('file').addEventListener('change', (e) => e.target.files[0] && read(e.target.files[0]));
+const drop = $('drop');
+['dragover', 'dragenter'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', (e) => e.dataTransfer.files[0] && read(e.dataTransfer.files[0]));
+
+$('download').addEventListener('click', () => {
+  const ordered = {}; for (const k of Object.keys(EN)) if (k in checked) ordered[k] = checked[k];
+  const blob = new Blob([JSON.stringify(ordered, null, 2) + '\n'], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = LANG + '-checked.json'; a.click();
+});
+$('copy-summary').addEventListener('click', () => {
+  const t = 'Pips & Paws translation (' + LANG + '): ' + $('n-done').textContent + ' texts checked, ' + $('n-bad').textContent + ' problems.';
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).catch(() => {});
+});
+</script>
+</body>
+</html>

@@ -29,3 +29,6 @@ imp/
 
 # Rohbilder der Item-Bild-Erzeugung (tools/item-art)
 tools/item-art/raw/
+
+# Uebersetzer-Pakete (tools/i18n package)
+tools/i18n/out/

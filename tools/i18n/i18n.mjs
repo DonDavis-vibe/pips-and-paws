@@ -7,6 +7,7 @@
 //   node tools/i18n/i18n.mjs template new           the blank preset for a NEW language (all keys, empty)
 //   node tools/i18n/i18n.mjs register <code> [LABEL] add a new language to src/i18n/index.jsx (import, DICTS, language switch)
 //   node tools/i18n/i18n.mjs templates              regenerate the committed templates in docs/translations/
+//   node tools/i18n/i18n.mjs package <lang|new>     build a zip to hand to a translator (template + checker + guide + screenshots)
 //   node tools/i18n/i18n.mjs apply <file> <lang>    merge a filled-in template into src/i18n/<lang>.json
 //
 // The UI texts live in src/i18n/<code>.json. English (en.json) is the source;
@@ -18,6 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const I18N = path.join(ROOT, 'src', 'i18n');
@@ -293,13 +295,89 @@ function cmdRegister(code, labelArg) {
   console.log(`Registered ${code} (${label}) in src/i18n/index.jsx. Check: npm run dev, then open ?lang=${code}.`);
 }
 
+// Builds tools/i18n/out/pips-and-paws-translation-<lang>.zip for someone without the repo:
+// the commented template, a browser-based checker (no install), a short guide and screenshots.
+async function cmdPackage(lang) {
+  if (!lang) { console.error('usage: package <lang|new>'); process.exit(2); }
+  const isNew = lang === 'new';
+  await cmdTemplate(lang, false);
+  const en = readDict(SRC_REF);
+  const name = isNew ? 'new-language' : lang;
+  const outRoot = path.join(ROOT, 'tools', 'i18n', 'out');
+  const dir = path.join(outRoot, `pips-and-paws-translation-${name}`);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(path.join(dir, 'screenshots'), { recursive: true });
+
+  const template = path.join(OUT, isNew ? '_new-language.jsonc' : `${lang}.jsonc`);
+  const count = (fs.readFileSync(template, 'utf8').match(/^ {2}"[^"]+": /gm) || []).length;
+  fs.copyFileSync(template, path.join(dir, `translate-${name}.jsonc`));
+
+  const table = Object.fromEntries(Object.entries(en).map(([k, v]) => [k, { ph: placeholders(v), en: v }]));
+  const html = fs.readFileSync(path.join(ROOT, 'tools', 'i18n', 'checker.template.html'), 'utf8')
+    .replace('__LANG__', isNew ? 'new language' : lang)
+    .replace('__EN__', JSON.stringify(table).replace(/</g, '\\u003c'));
+  fs.writeFileSync(path.join(dir, 'checker.html'), html, 'utf8');
+
+  const shots = path.join(ROOT, 'docs', 'screenshots');
+  if (fs.existsSync(shots)) for (const f of fs.readdirSync(shots)) fs.copyFileSync(path.join(shots, f), path.join(dir, 'screenshots', f));
+
+  const langName = isNew ? 'your language' : { fr: 'French', it: 'Italian', ja: 'Japanese', es: 'Spanish', de: 'German' }[lang] || lang;
+  const a = isNew ? null : analyse(lang, en);
+  const guide = `# Translating Pips & Paws into ${langName}
+
+Pips & Paws is a free, browser-based helper for the tabletop game **Mausritter** (brave little mice
+adventuring in a big dangerous world): character sheet, dice, game master tools. You are helping to make
+its interface speak ${langName}. No programming needed — just a text editor.
+
+Live app to look around: https://mausritter.redneck-design.de/  (the screenshots folder shows the main screens)
+
+## What is in this package
+- \`translate-${name}.jsonc\` — the file you edit (${count} texts${isNew ? ', all of them' : ', only the ones still missing'}).
+- \`checker.html\` — double-click to open in your browser; checks your file (nothing is uploaded).
+- \`screenshots/\` — what the app looks like, for context.
+
+## How to do it (roughly ${Math.max(1, Math.round(count / 80))}–${Math.max(2, Math.round(count / 40))} hours, in as many sittings as you like)
+1. Open \`translate-${name}.jsonc\` in any text editor (VS Code, Notepad++, Sublime — not Word).
+2. Fill in the empty \`""\` values. Above each one you find: where it is used, what the {placeholders}
+   mean, the English text and the German text. At the top there is a glossary of the core game terms.
+   If you leave a value empty, that text just stays English — skipping is fine.
+3. Rules for the text:
+   - Keep every \`{placeholder}\` exactly as written (words around it may move).
+   - Keep \`\\n\` (a line break) and \`[SQUARE BRACKET]\` markers.
+   - Do not translate: Pips & Paws, Mausritter, PenNodePaper, Discord, MIT, CC BY 4.0.
+   - Friendly, plain wording like the rulebook; buttons short, messages full sentences; one form of "you".
+   - If Mausritter exists in ${langName}, use the official game terms.
+4. Open \`checker.html\` in your browser, choose your file, fix anything it reports.
+5. Send the file back (the \`.jsonc\` you edited is perfect). Partial is welcome — send what you have,
+   we can add the rest later.
+
+Thank you! Questions? Just ask in the Discord.
+`;
+  fs.writeFileSync(path.join(dir, 'START-HERE.md'), guide, 'utf8');
+
+  const zip = path.join(outRoot, `pips-and-paws-translation-${name}.zip`);
+  fs.rmSync(zip, { force: true });
+  try {
+    execFileSync('zip', ['-r', '-q', path.basename(zip), path.basename(dir)], { cwd: outRoot });
+  } catch {
+    execFileSync('python3', ['-m', 'zipfile', '-c', zip, dir], { cwd: outRoot });
+  }
+  const msg = `Hi! Thanks for offering to help translate Pips & Paws (a free Mausritter helper app) into ${langName} 🐭
+I put everything in the attached zip: unzip it and read START-HERE.md — it's a text file with the texts to fill in (${count} of them, mostly short UI labels) plus a checker you open in your browser. Partial work is fine, you can stop and send what you have any time. If anything is unclear, just ask here.`;
+  fs.writeFileSync(path.join(outRoot, `discord-message-${name}.txt`), `${msg}\n`, 'utf8');
+  console.log(`Built ${path.relative(ROOT, zip)} (${Math.round(fs.statSync(zip).size / 1024)} KB, ${count} texts).`);
+  console.log(`Message to send: ${path.relative(ROOT, path.join(outRoot, `discord-message-${name}.txt`))}`);
+  void a;
+}
+
 const [cmd, a1, a2, a3] = process.argv.slice(2);
 if (cmd === 'status') cmdStatus();
 else if (cmd === 'templates') await cmdTemplates();
 else if (cmd === 'template') await cmdTemplate(a1, [a2, a3].includes('--all'));
 else if (cmd === 'apply') cmdApply(a1, a2);
 else if (cmd === 'register') cmdRegister(a1, a2);
+else if (cmd === 'package') await cmdPackage(a1);
 else {
-  console.log('Pips & Paws translation kit\n  status\n  template <lang> [--all]\n  template new\n  templates\n  apply <template.jsonc> <lang>\n  register <code> [LABEL]');
+  console.log('Pips & Paws translation kit\n  status\n  template <lang> [--all]\n  template new\n  templates\n  apply <template.jsonc> <lang>\n  register <code> [LABEL]\n  package <lang|new>');
   process.exitCode = cmd ? 2 : 0;
 }

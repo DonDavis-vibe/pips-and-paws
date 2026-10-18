@@ -66,6 +66,14 @@ your code to those objects; if you want to take that on, ask first so the work c
 pre-filled (as the value) and the English and German source above it — handy for a full
 proofread. Apply it the same way.
 
+## Handing it to a translator who does not use the repo
+
+`npm run i18n -- package <code|new>` builds `tools/i18n/out/pips-and-paws-translation-<code>.zip`
+with everything a person needs: `START-HERE.md`, the commented template, `checker.html`
+(opens in any browser, checks placeholders, nothing installed or uploaded) and screenshots,
+plus a ready-to-paste Discord message (`discord-message-<code>.txt`). When the filled-in file
+comes back: `npm run i18n -- apply <file> <code>` (and `register` for a new language).
+
 ## Notes for maintainers
 
 - When you add UI texts: add the key to `en.json` and `de.json`; `fr/it/ja` may follow.
