@@ -208,7 +208,9 @@ and shadows, never grid/flex structure. Line art lives in `src/components/Art.js
 Contributions are welcome — translations especially (reach out on [Discord](https://discord.gg/s6J6JqBQ8w)). The UI ships in English,
 German, Spanish, French, Italian and Japanese. Spanish was contributed by
 [@Salgraphics](https://github.com/Salgraphics); FR/IT/JA are machine-assisted, so
-corrections from native speakers are very welcome. Keys added after the Spanish
+corrections from native speakers are very welcome. A commented template per language
+and a step-by-step guide are in [`docs/translations/`](docs/translations/GUIDE.md).
+Keys added after the Spanish
 PR (local play, soundboard, group overview, the print-sheet skin, hirelings, the
 character roster, the automatic damage chain) are deliberately left untranslated
 in `es.json` — they fall back to English — so

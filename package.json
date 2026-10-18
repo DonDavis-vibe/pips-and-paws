@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "i18n": "node tools/i18n/i18n.mjs",
+    "i18n:templates": "node tools/i18n/i18n.mjs templates"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

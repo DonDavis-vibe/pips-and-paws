@@ -14,7 +14,17 @@ Absprachen und Einsendungen laufen über den [Discord](https://discord.gg/s6J6Jq
 Der Code steht unter **MIT** (`LICENSE`). Mit einer Einsendung stellst du deinen Beitrag
 unter dieselbe Lizenz. Ein CLA gibt es nicht.
 
-## Eine Sprache hinzufügen
+## Übersetzen mit dem kommentierten Preset
+
+Der einfachste Weg: `docs/translations/` enthält fertige **kommentierte Vorlagen**
+(`fr`, `it`, `ja`, `es` mit den noch fehlenden Schlüsseln, `_new-language.jsonc` für eine
+neue Sprache). Zu jedem Schlüssel steht, wo er vorkommt, was die `{Platzhalter}` bedeuten,
+der englische und deutsche Text und ein Glossar der Spielbegriffe. Ausfüllen, dann
+`npm run i18n -- apply <Datei> <code>` — das prüft die Platzhalter und schreibt die
+Sprachdatei. Die ganze Anleitung steht in [`docs/translations/GUIDE.md`](docs/translations/GUIDE.md);
+`npm run i18n -- status` zeigt den Stand je Sprache.
+
+## Eine Sprache hinzufügen (von Hand)
 
 Die Oberfläche liegt in `src/i18n/`. `de.json`, `en.json`, `fr.json`, `it.json`
 und `ja.json` sind vollständig; `es.json` traegt den ursprünglichen PR von

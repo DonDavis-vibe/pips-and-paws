@@ -199,7 +199,7 @@
   "gm.prompt.pips": "Cuántas pepitas? (negativo = restar)",
   "gm.prompt.whisper": "Mensaje a éste jugador:",
   "gm.prompt.broadcast": "Anuncio a todos los jugadores:",
-  "gm.log.damage": "{name}: {amount} daño",
+  "gm.log.damage": "{name}: {amount} daño{extra}",
   "gm.log.heal": "{name}: se curó {amount} PG",
   "gm.log.pips": "{name}: {amount} pepitas",
   "gm.log.save": "{name}: se te pide una tirada de {attr}",

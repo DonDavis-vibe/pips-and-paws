@@ -1,0 +1,2356 @@
+// Pips & Paws — translation template for "es"
+// Generated 2026-10-18 by tools/i18n/i18n.mjs — 376 of 861 keys (missing, empty, identical-to-English or broken).
+//
+// HOW TO USE
+//  1. Fill in the empty "" values below. Leave a value empty to skip a key — it falls back to English.
+//  2. Keep every {placeholder} exactly as written (same name, braces included). Words around it can move.
+//  3. Keep line breaks as \n, keep [SQUARE_BRACKET] markers, keep product and licence names (Pips & Paws, Mausritter, PenNodePaper, MIT, CC BY 4.0).
+//  4. Lines starting with // are comments for you; they are ignored.
+//  5. Check:  node tools/i18n/i18n.mjs apply docs/translations/es.jsonc es
+//     That writes src/i18n/es.json (use the two-letter language code, e.g. pl). Then run the app (npm run dev) with ?lang=es to see your text in place.
+//  New language? Also see docs/translations/GUIDE.md (register it in src/i18n/index.jsx).
+//
+// STYLE
+//  - Mausritter is a gentle, slightly whimsical game about brave little mice. Plain, friendly wording; no slang.
+//  - Use one form of address consistently (informal "you" is used in the existing languages).
+//  - Button labels: short, imperative, no full stop. Messages: full sentences.
+//  - If your language has an official Mausritter translation, use its terms for the glossary below.
+//
+// GLOSSARY — existing translations of core terms (stay consistent with them)
+//   Hit Protection (HP) — A buffer: damage goes here first, then to STR.
+//     EN: Hit protection   DE: Trefferpunkte   FR: Protection   IT: Protezione   JA: 防護点
+//   Strength / Dexterity / Will (STR, DEX, WIL)
+//     EN: Strength (STR) / Dexterity (DEX) / Will (WIL)   DE: Stärke (STR) / Geschick (DEX) / Wille (WIL)   FR: Force (STR) / Dextérité (DEX) / Volonté (WIL)   IT: Forza (STR) / Destrezza (DEX) / Volontà (WIL)   JA: 筋力 (STR) / 敏捷 (DEX) / 意志 (WIL)
+//   Save — d20 roll under the attribute; official Mausritter wording.
+//     EN: Save   DE: Probe   FR: Sauvegarde   IT: Tiro salvezza   JA: セーヴ
+//   Pips — The currency.
+//     EN: Pips   DE: Pips   FR: Pips   IT: Pip   JA: ピップ
+//   XP / Level / Grit
+//     EN: XP / Level / Grit   DE: EP / Stufe / Mumm   FR: XP / Niveau / Cran   IT: PE / Livello / Grinta   JA: 経験点 / レベル / 気概
+//   Paws / Body / Pack — The three kinds of inventory slots.
+//     EN: Paws / Body / Pack   DE: Pfoten / Körper / Rucksack   FR: Pattes / Corps / Sac   IT: Zampe / Corpo / Zaino   JA: 手 / 身体 / バックパック
+//   Short / Long / Full rest
+//     EN: Short / Long / Full   DE: Kurz / Lang / Voll   FR: Court / Long / Complet   IT: Breve / Lungo / Completo   JA: 短い / 長い / 完全
+//   Turn / Watch / Day
+//     EN: Turn / Watch / Day   DE: Zug / Wache / Tag   FR: Tour / Veille / Jour   IT: Turno / Veglia / Giorno   JA: ターン / ウォッチ / 日
+//   Hireling
+//     EN: Hirelings   DE: Mietlinge   FR: Auxiliaires   IT: Aiutanti   JA: 雇われ助っ人
+//   Defence / Armour
+//     EN: Defence   DE: Rüstung   FR: Armure   IT: Armatura   JA: 防御
+//   Spell
+//     EN: Spells   DE: Zauber   FR: Sorts   IT: Incantesimi   JA: 呪文
+//   Condition — Negative effects that occupy an inventory slot (Exhausted, Frightened, Hungry, Injured, Drained, Encumbered).
+//     EN: Conditions   DE: Zustände   FR: États   IT: Condizioni   JA: 状態
+//   Birthsign
+//     EN: Birthsign   DE: Sternzeichen   FR: Signe de naissance   IT: Segno natale   JA: 誕生星座
+//   Disadvantage / Advantage — Roll 2d20, take the highest / lowest.
+//     EN: Disadvantage / Advantage   DE: Nachteil / Vorteil   FR: Désavantage / Avantage   IT: Svantaggio / Vantaggio   JA: 不利 / 有利
+//   Conditions (names are in src/data/items.js, not in the UI file; shown for reference):
+//     EN: Exhausted   DE: Erschöpft   ES: Cansado
+//     EN: Frightened   DE: Ängstlich   ES: Asustado
+//     EN: Hungry   DE: Hungrig   ES: Hambriento
+//     EN: Injured   DE: Verletzt   ES: Herido
+//     EN: Drained   DE: Entkräftet   ES: Agotado
+//     EN: Encumbered   DE: Belastet   ES: Sobrecargado
+//
+// PLACEHOLDERS — what the {names} stand for
+//   {ammo} = the name of an ammunition item
+//   {amount} = an amount of damage / healing / pips / XP
+//   {attr} = the name of an attribute: STR / DEX / WIL (already translated)
+//   {d} = the number rolled on a d20 or d6
+//   {dice} = the number of dice cast
+//   {dmg} = an amount of damage
+//   {fee} = a fee in pips
+//   {got} = pips actually received after the fee
+//   {have} = number of pip purses carried
+//   {id} = a technical id
+//   {item} = the name of an item
+//   {kind} = a kind: rest type or an unsupported item kind
+//   {level} = a level number
+//   {n} = a number (count, amount)
+//   {name} = a name: a mouse, a player, an item or a spell
+//   {names} = a comma-separated list of names
+//   {need} = number of pip purses needed
+//   {result} = a short result phrase such as 'success' or 'hold' (already translated)
+//   {role} = a role name from PenNodePaper
+//   {s} = a number: damage that went to STR
+//   {share} = an XP share per mouse
+//   {sum} = the sum of dice cast
+//   {text} = free text typed by the GM
+//   {total} = a total (step count, treasure value)
+//   {wage} = a daily wage in pips
+//   {why} = reasons, e.g. 'Injured, Encumbered' (already translated)
+//   {x} = the X of an 'X-in-6' luck roll (1 to 5)
+//   {xp} = experience points gained
+
+{
+
+  // ═══ Inventory (inv.*) ════════════════════════════════════════
+  // Paws, body and pack slots; add-item dialog.
+
+  // Used in: CharacterSheet.jsx, InventoryGrid.jsx
+  // EN: "No slot — encumbered"
+  // DE: "Ohne Platz — belastet"
+  "inv.overflow": "",
+
+  // ═══ Item cards (item.*) ══════════════════════════════════════
+  // Texts on an item card: damage, defence, usage dots, rename, rolls.
+
+  // Used in: CharacterSheet.jsx, ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Rename"
+  // DE: "Umbenennen"
+  "item.rename": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "enhanced"
+  // DE: "verstärkt"
+  "item.enhanced": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "impaired"
+  // DE: "geschwächt"
+  "item.impaired": "",
+
+  // Used in: CharacterSheet.jsx, GmCombatTracker.jsx, ItemCard.jsx
+  // EN: "Enhanced attack (gambit, vulnerable foe): d12 instead of the weapon die"
+  // DE: "Verstärkter Angriff (Finte, wehrloses Ziel): W12 statt Waffenwürfel"
+  "item.enhancedHint": "",
+
+  // Used in: CharacterSheet.jsx, GmCombatTracker.jsx, ItemCard.jsx
+  // EN: "Impaired attack (cover, grappled): d4 instead of the weapon die"
+  // DE: "Geschwächter Angriff (Deckung, im Griff gehalten): W4 statt Waffenwürfel"
+  "item.impairedHint": "",
+
+  // Used in: CharacterSheet.jsx
+  // EN: "two light weapons, best roll"
+  // DE: "zwei leichte Waffen, bester Wurf"
+  "item.dualWield": "",
+
+  // ═══ Dice roller (dice.*) ═════════════════════════════════════
+  // The player's dice panel and save rolls. 'Save' is the d20 roll-under-attribute check of Mausritter.
+
+  // Used in: DiceRoller.jsx
+  // Placeholders: {why}
+  // EN: "Disadvantage from {why}"
+  // DE: "Nachteil durch {why}"
+  "dice.forcedDisadv": "",
+
+  // Used in: DiceRoller.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Injured"
+  // DE: "Verletzt"
+  "dice.why.injured": "",
+
+  // Used in: DiceRoller.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Drained"
+  // DE: "Entkräftet"
+  "dice.why.drained": "",
+
+  // Used in: DiceRoller.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Encumbered"
+  // DE: "Belastet"
+  "dice.why.encumbered": "",
+
+  // ═══ Character creation wizard (wizard.*) ═════════════════════
+  // Five steps following the Mausritter rules: attributes, HP and pips, background, weapon, details.
+
+  // Used in: CharacterWizard.jsx
+  // Placeholders: {ammo}
+  // EN: "incl. {ammo}"
+  // DE: "inkl. {ammo}"
+  "wizard.withAmmo": "",
+
+  // Used in: CharacterWizard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Spell"
+  // DE: "Zauber"
+  "wizard.spell": "",
+
+  // Used in: CharacterWizard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hireling"
+  // DE: "Miethelfer"
+  "wizard.hireling": "",
+
+  // ═══ Multiplayer (mp.*) ═══════════════════════════════════════
+  // Hosting and joining a room over peer-to-peer WebRTC. 'GM' = Game Master / Spielleiter.
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Cancel"
+  // DE: "Abbrechen"
+  "mp.cancel": "",
+
+  // Used in: useMultiplayer.js
+  // Placeholders: {name}
+  // EN: "{name} was removed from the room."
+  // DE: "{name} wurde aus dem Raum entfernt."
+  "mp.log.kicked": "",
+
+  // ═══ Connection status messages (mp.status.*) ═════════════════
+  // Shown while connecting; full sentences.
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Checking access ..."
+  // DE: "Prüfe Zugang ..."
+  "mp.status.authenticating": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The GM has set a password."
+  // DE: "Der Spielleiter hat ein Passwort gesetzt."
+  "mp.status.needPassword": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Waiting for the GM to let you in ..."
+  // DE: "Warte auf die Zusage des Spielleiters ..."
+  "mp.status.waitApproval": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Wrong password."
+  // DE: "Falsches Passwort."
+  "mp.status.wrongPassword": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The GM removed you from the room."
+  // DE: "Der Spielleiter hat dich aus dem Raum entfernt."
+  "mp.status.kicked": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The GM declined your request."
+  // DE: "Der Spielleiter hat den Beitritt abgelehnt."
+  "mp.status.rejected": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Too many failed attempts — please wait a minute."
+  // DE: "Zu viele Fehlversuche — bitte eine Minute warten."
+  "mp.status.locked": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Timed out. Please join again."
+  // DE: "Zeit abgelaufen. Bitte erneut beitreten."
+  "mp.status.authTimeout": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The room is handling too many requests. Try again in a moment."
+  // DE: "Der Raum bearbeitet gerade zu viele Anfragen. Gleich noch mal versuchen."
+  "mp.status.hostBusy": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "This password cannot be checked here (secure connection needed)."
+  // DE: "Dieses Passwort kann hier nicht geprüft werden (sichere Verbindung nötig)."
+  "mp.status.noCrypto": "",
+
+  // ═══ GM dashboard (gm.*) ══════════════════════════════════════
+  // Everything the Game Master sees: players, actions, logs.
+
+  // Used in: GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Secret"
+  // DE: "Geheim"
+  "gm.secret": "",
+
+  // ═══ GM log lines (gm.log.*) ══════════════════════════════════
+  // One line per event in the live log. {name} is usually a player's mouse.
+
+  // Used in: GmDashboard.jsx, GmLocalPlayers.jsx
+  // Placeholders: {amount} {name}
+  // EN: "{name}: {amount} XP"
+  // DE: "{name}: {amount} EP"
+  // current ES is identical to English — translate it or confirm it should stay.
+  "gm.log.xp": "",
+
+  // Used in: GmCombatTracker.jsx, GmDashboard.jsx, GmLocalPlayers.jsx
+  // Placeholders: {name} {text}
+  // EN: "{name}: {text}"
+  // DE: "{name}: {text}"
+  "gm.log.note": "",
+
+  // Used in: GmDashboard.jsx, GmLootXp.jsx
+  // Placeholders: {n} {share} {total}
+  // EN: "Loot worth {total}p brought to safety: {share} XP per mouse (party: {n})"
+  // DE: "Beute {total}p in Sicherheit: {share} EP pro Maus (Gruppe: {n})"
+  "gm.log.loot": "",
+
+  // Used in: GmDashboard.jsx
+  // NOTE: Luck roll result line; {result} is the translated 'It happens' / 'It doesn't happen'.
+  // Placeholders: {d} {result} {x}
+  // EN: "Luck roll {x} in 6 — d6 {d}: {result}"
+  // DE: "Glückswurf {x} in 6 — W6 {d}: {result}"
+  "gm.log.luck": "",
+
+  // ═══ Messages to the player (player.*) ════════════════════════
+  // Notifications a player gets when the GM acts (damage, healing, items ...).
+
+  // Used in: App.jsx, CharacterSheet.jsx, GmLocalPlayers.jsx, ruleText.js
+  // Placeholders: {name}
+  // EN: "\"{name}\" has no free slot — the mouse is encumbered until it drops something."
+  // DE: "„{name}“ hat keinen Platz mehr — die Maus ist belastet, bis sie etwas ablegt."
+  "player.gm.conditionOverflow": "",
+
+  // ═══ Footer (footer.*) ════════════════════════════════════════
+  // Links and legal lines at the bottom of the page. Keep the licence names (MIT, CC BY 4.0) as they are.
+
+  // Used in: Footer.jsx
+  // EN: "Images: AI-generated"
+  // DE: "Bilder: KI-generiert"
+  "footer.imagesAi": "",
+
+  // Used in: Footer.jsx
+  // EN: "The illustrations are AI-generated (Krea 2 Turbo) and not official Mausritter artwork."
+  // DE: "Die Illustrationen sind mit KI erzeugt (Krea 2 Turbo) und kein offizielles Mausritter-Artwork."
+  "footer.imagesAiHint": "",
+
+  // ═══ Shared stash (table centre) (stash.*) ════════════════════
+  // A common loot pile / cart / chest that GM and players share.
+
+  // Used in: SharedStash.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Visible"
+  // DE: "Sichtbar"
+  // current ES is identical to English — translate it or confirm it should stay.
+  "stash.visible": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {name}
+  // EN: "{name} is full."
+  // DE: "{name} ist voll."
+  "stash.full": "",
+
+  // Used in: App.jsx
+  // Placeholders: {item}
+  // EN: "The storage is full — \"{item}\" is back with you."
+  // DE: "Das Lager ist voll — „{item}“ ist zurück bei dir."
+  "stash.fullReturned": "",
+
+  // Used in: SharedStash.jsx
+  // EN: "used / available slots (2-slot items count double)"
+  // DE: "belegte / verfügbare Plätze (2-Platz-Gegenstände zählen doppelt)"
+  "stash.capacityHint": "",
+
+  // Used in: SharedStash.jsx
+  // EN: "Storage settings"
+  // DE: "Lager einstellen"
+  "stash.settings": "",
+
+  // Used in: SharedStash.jsx
+  // EN: "Name (e.g. Cart)"
+  // DE: "Name (z. B. Karren)"
+  "stash.cfgName": "",
+
+  // Used in: SharedStash.jsx
+  // EN: "Slots (0 = unlimited)"
+  // DE: "Plätze (0 = unbegrenzt)"
+  "stash.cfgCapacity": "",
+
+  // Used in: SharedStash.jsx
+  // EN: "Players can't add anything once the storage is full. You can still put loot in yourself."
+  // DE: "Spieler können nichts mehr ablegen, wenn das Lager voll ist. Du selbst darfst weiter Beute hineinlegen."
+  "stash.cfgHint": "",
+
+  // ═══ NPC and combat tracker (combat.*) ════════════════════════
+  // Creatures with HP, STR and attacks; morale checks.
+
+  // Used in: GmCombatTracker.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Critical"
+  // DE: "Kritisch"
+  "combat.crit": "",
+
+  // Used in: GmCombatTracker.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "dead"
+  // DE: "tot"
+  "combat.dead": "",
+
+  // Used in: GmCombatTracker.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hit"
+  // DE: "Treffer"
+  "combat.hit": "",
+
+  // Used in: GmCombatTracker.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Damage"
+  // DE: "Schaden"
+  "combat.hitPlaceholder": "",
+
+  // Used in: GmCombatTracker.jsx
+  // EN: "Damage minus armour to HP, the rest to STR with a STR save"
+  // DE: "Schaden abzüglich Rüstung auf TP, Rest auf STR mit STR-Probe"
+  "combat.hitHint": "",
+
+  // ═══ Hirelings (hirelings.*) ══════════════════════════════════
+  // Hired helpers with their own stats and inventory.
+
+  // Used in: HirelingsPanel.jsx
+  // EN: "No room left with the hireling."
+  // DE: "Kein Platz mehr beim Miethelfer."
+  "hirelings.invFull": "",
+
+  // Used in: HirelingsPanel.jsx
+  // Placeholders: {n}
+  // EN: "Inventory {n}/6"
+  // DE: "Inventar {n}/6"
+  "hirelings.inventory": "",
+
+  // Used in: HirelingsPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hand over …"
+  // DE: "Übergeben …"
+  "hirelings.give": "",
+
+  // Used in: HirelingsPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "New"
+  // DE: "Neu"
+  "hirelings.addNew": "",
+
+  // Used in: HirelingsPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Take back"
+  // DE: "Zurücknehmen"
+  "hirelings.takeBack": "",
+
+  // Used in: HirelingsPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Give a share"
+  // DE: "Anteil geben"
+  "hirelings.share": "",
+
+  // Used in: HirelingsPanel.jsx
+  // Placeholders: {n} {name} {wage}
+  // EN: "How many pips does {name} get as a share of treasure? (the {wage}p daily wage doesn't count, you have {n})"
+  // DE: "Wie viele Pips bekommt {name} als Schatz-Anteil? (Lohn {wage}p/Tag zählt nicht, du hast {n})"
+  "hirelings.sharePrompt": "",
+
+  // Used in: HirelingsPanel.jsx
+  // Placeholders: {n} {name} {xp}
+  // EN: "{name} gets {n} pips — +{xp} XP."
+  // DE: "{name} bekommt {n} Pips — +{xp} EP."
+  "hirelings.shareDone": "",
+
+  // Used in: HirelingsPanel.jsx
+  // EN: "Hirelings advance like mice: 1 XP per pip of treasure share above their daily wage, Level 2 at 1000 XP."
+  // DE: "Miethelfer steigen wie Mäuse auf: 1 EP je Pip Schatz-Anteil über dem Tageslohn, ab 1000 EP Stufe 2."
+  "hirelings.xpHint": "",
+
+  // ═══ Battle map (map.*) ═══════════════════════════════════════
+  // Map image with grid, tokens, drawing tools and fog of war.
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Color"
+  // DE: "Farbe"
+  // current ES is identical to English — translate it or confirm it should stay.
+  "map.drawColor": "",
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Grid"
+  // DE: "Raster"
+  "map.grid": "",
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Square"
+  // DE: "Quadrat"
+  "map.grid.square": "",
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hex"
+  // DE: "Sechseck"
+  "map.grid.hex": "",
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Show grid"
+  // DE: "Raster zeigen"
+  "map.grid.show": "",
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Cell size (px)"
+  // DE: "Feldgröße (px)"
+  "map.grid.size": "",
+
+  // Used in: GmBattleMap.jsx
+  // EN: "Pixels per cell on the map image — match it to the grid printed on the map."
+  // DE: "Pixel je Feld auf dem Kartenbild — passe es an das aufgedruckte Raster der Karte an."
+  "map.grid.sizeHint": "",
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Offset"
+  // DE: "Versatz"
+  "map.grid.offset": "",
+
+  // Used in: GmBattleMap.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Creatures"
+  // DE: "Kreaturen"
+  "map.token.creatures": "",
+
+  // Used in: GmBattleMap.jsx
+  // EN: "Linked to the combat tracker (PenNodePaper)"
+  // DE: "Mit dem Kampf-Tracker verknüpft (PenNodePaper)"
+  "map.tokenLinked": "",
+
+  // ═══ PenNodePaper link (pnp.*) ════════════════════════════════
+  // Bridge to the world-building tool PenNodePaper (product name, do not translate).
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "PenNodePaper"
+  // DE: "PenNodePaper"
+  "pnp.title": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "Connects this dashboard with the AI-assisted world and story builder"
+  // DE: "Verbindet dieses Dashboard mit dem KI-gestützten Welten- und Story-Baukasten"
+  "pnp.intro": "",
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Address"
+  // DE: "Adresse"
+  "pnp.url": "",
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Pairing token"
+  // DE: "Pairing-Token"
+  "pnp.token": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "In PenNodePaper under ⚙ Settings → VTT link. Stays on this device (not part of the saved session)."
+  // DE: "In PenNodePaper unter ⚙ Einstellungen → VTT link. Bleibt auf diesem Gerät (nicht Teil der gesicherten Sitzung)."
+  "pnp.tokenHint": "",
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Connect"
+  // DE: "Verbinden"
+  "pnp.connect": "",
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Disconnect"
+  // DE: "Trennen"
+  "pnp.disconnect": "",
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Connected"
+  // DE: "Verbunden"
+  "pnp.connected": "",
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Connecting …"
+  // DE: "Verbinde …"
+  "pnp.connecting": "",
+
+  // Used in: GmPnpLink.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Not connected"
+  // DE: "Nicht verbunden"
+  "pnp.off": "",
+
+  // Used in: GmPnpLink.jsx
+  // Placeholders: {name}
+  // EN: "campaign “{name}”"
+  // DE: "Kampagne „{name}“"
+  "pnp.campaign": "",
+
+  // Used in: PnpBridge.jsx
+  // Placeholders: {s}
+  // EN: "retry in {s} s"
+  // DE: "neuer Versuch in {s} s"
+  "pnp.retry": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "Handout (read-aloud text or picture) → Handouts library, shown to everyone or one player on request"
+  // DE: "Handout (Vorlesetext oder Bild) → Handout-Bibliothek, auf Wunsch allen oder einem Spieler gezeigt"
+  "pnp.map.handout": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "Map → a new map on the Battlemap, with grid and tokens (square grids only)"
+  // DE: "Karte → neue Karte in der Battlemap, mit Raster und Token (nur Quadratraster)"
+  "pnp.map.scene": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "Creature / NPC → Combat & NPCs, as a stat block (HP, armour, attack die, WIL)"
+  // DE: "Kreatur / NSC → Kampf & NSC, als Statblock (TP, Rüstung, Angriffswürfel, WIL)"
+  "pnp.map.character": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "Music cue → Soundboard (built-in effects and your own uploads)"
+  // DE: "Musik-Stichwort → Soundboard (eingebaute Effekte und deine eigenen Uploads)"
+  "pnp.map.music": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "The other way: PenNodePaper sees your mice (without notes) and writes for them"
+  // DE: "Gegenrichtung: PenNodePaper sieht deine Mäuse (ohne Notizen) und schreibt für sie"
+  "pnp.map.party": "",
+
+  // Used in: GmPnpLink.jsx
+  // EN: "Everything arrives with you first. Players only see what you show them."
+  // DE: "Alles kommt zuerst nur bei dir an. Spieler sehen nur, was du ihnen zeigst."
+  "pnp.privacy": "",
+
+  // Used in: profile.js
+  // EN: "Creature / opponent"
+  // DE: "Kreatur / Gegner"
+  "pnp.role.creature": "",
+
+  // Used in: profile.js
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Player mouse"
+  // DE: "Spielermaus"
+  "pnp.role.pc": "",
+
+  // Used in: profile.js
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Stats"
+  // DE: "Werte"
+  "pnp.group.stats": "",
+
+  // Used in: profile.js
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Person"
+  // DE: "Person"
+  "pnp.group.person": "",
+
+  // Used in: profile.js
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Gear"
+  // DE: "Ausrüstung"
+  "pnp.group.gear": "",
+
+  // Used in: profile.js
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Special"
+  // DE: "Besonderheiten"
+  "pnp.field.special": "",
+
+  // Used in: PnpBridge.jsx
+  // Placeholders: {name}
+  // EN: "PenNodePaper: handout “{name}” received"
+  // DE: "PenNodePaper: Handout „{name}“ erhalten"
+  "pnp.toast.handout": "",
+
+  // Used in: PnpBridge.jsx
+  // Placeholders: {name}
+  // EN: "PenNodePaper: map “{name}” received"
+  // DE: "PenNodePaper: Karte „{name}“ erhalten"
+  "pnp.toast.scene": "",
+
+  // Used in: PnpBridge.jsx
+  // Placeholders: {name}
+  // EN: "PenNodePaper: {name} added to Combat & NPCs"
+  // DE: "PenNodePaper: {name} in Kampf & NSC eingetragen"
+  "pnp.toast.character": "",
+
+  // Used in: PnpBridge.jsx
+  // EN: "PenNodePaper: music cue"
+  // DE: "PenNodePaper: Musik-Stichwort"
+  "pnp.toast.music_cue": "",
+
+  // Used in: PnpBridge.jsx
+  // EN: "Pips & Paws can't take this right now. Close the open table sheet and try again."
+  // DE: "Pips & Paws kann das gerade nicht annehmen. Schließe den geöffneten Tischbogen und versuche es erneut."
+  "pnp.err.busy": "",
+
+  // Used in: PnpBridge.jsx
+  // EN: "Pairing token missing"
+  // DE: "Pairing-Token fehlt"
+  "pnp.err.noToken": "",
+
+  // Used in: PnpBridge.jsx
+  // EN: "Invalid address"
+  // DE: "Ungültige Adresse"
+  "pnp.err.badUrl": "",
+
+  // Used in: PnpBridge.jsx
+  // Placeholders: {kind}
+  // EN: "Pips & Paws does not support “{kind}”."
+  // DE: "Pips & Paws unterstützt „{kind}“ nicht."
+  "pnp.err.unsupported": "",
+
+  // Used in: GmCombatTracker.jsx
+  // Placeholders: {role}
+  // EN: "Unknown role “{role}” — Pips & Paws receives: creature"
+  // DE: "Unbekannte Rolle „{role}“ — Pips & Paws empfängt: creature"
+  "pnp.err.role": "",
+
+  // Used in: GmBattleMap.jsx
+  // EN: "Hex grids are not supported — only square grids."
+  // DE: "Hex-Raster werden nicht unterstützt — nur Quadratraster."
+  "pnp.err.hex": "",
+
+  // Used in: GmSoundboard.jsx
+  // Placeholders: {id}
+  // EN: "Unknown track “{id}”. Ask for the track list."
+  // DE: "Unbekannter Titel „{id}“. Die Titelliste anfragen."
+  "pnp.err.track": "",
+
+  // Used in: GmSoundboard.jsx
+  // EN: "No track given and the mood matches no effect. Pick a trackId from the track list."
+  // DE: "Kein Titel angegeben und die Stimmung passt zu keinem Effekt. Eine trackId aus der Titelliste wählen."
+  "pnp.err.noTrack": "",
+
+  // Used in: GmHandouts.jsx
+  // Placeholders: {name}
+  // EN: "Player “{name}” is not connected. The handout is in the GM's library."
+  // DE: "Spieler „{name}“ ist nicht verbunden. Das Handout liegt in der Bibliothek des SL."
+  "pnp.err.playerAbsent": "",
+
+  // Used in: GmBattleMap.jsx, GmHandouts.jsx
+  // EN: "Browser storage is full — this change will be lost on reload. Delete old maps or handouts."
+  // DE: "Der Browser-Speicher ist voll — diese Änderung geht beim Neuladen verloren. Alte Karten oder Handouts löschen."
+  "pnp.err.storageFull": "",
+
+  // Used in: profile.js
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Status"
+  // DE: "Status"
+  "pnp.field.status": "",
+
+  // ═══ Handouts (handout.*) ═════════════════════════════════════
+  // Texts and pictures the GM shows to players.
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Handouts"
+  // DE: "Handouts"
+  "handout.title": "",
+
+  // Used in: PartyHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Handouts"
+  // DE: "Handouts"
+  "handout.playerTitle": "",
+
+  // Used in: GmHandouts.jsx
+  // EN: "Read-aloud texts and pictures to show your players — written here or sent from PenNodePaper. What you show stays on the players' devices."
+  // DE: "Vorlesetexte und Bilder, die du deinen Spielern zeigst — hier geschrieben oder aus PenNodePaper geschickt. Was du zeigst, bleibt auf den Geräten der Spieler."
+  "handout.hint": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "New"
+  // DE: "Neu"
+  "handout.new": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Title"
+  // DE: "Titel"
+  "handout.field.title": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Text"
+  // DE: "Text"
+  "handout.field.text": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Add picture"
+  // DE: "Bild hinzufügen"
+  "handout.addImage": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Save handout"
+  // DE: "Handout speichern"
+  "handout.save": "",
+
+  // Used in: GmHandouts.jsx
+  // EN: "No handouts yet."
+  // DE: "Noch keine Handouts."
+  "handout.empty": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Handout"
+  // DE: "Handout"
+  "handout.untitled": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Show to all"
+  // DE: "Allen zeigen"
+  "handout.showAll": "",
+
+  // Used in: GmHandouts.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Show to …"
+  // DE: "Zeigen an …"
+  "handout.showTo": "",
+
+  // Used in: GmHandouts.jsx
+  // Placeholders: {n}
+  // EN: "Shown to {n} player(s)."
+  // DE: "{n} Spieler zugestellt."
+  "handout.shown": "",
+
+  // Used in: GmHandouts.jsx
+  // EN: "Nobody is connected — the handout stays in your library."
+  // DE: "Niemand verbunden — das Handout bleibt in deiner Bibliothek."
+  "handout.nobody": "",
+
+  // Used in: GmHandouts.jsx
+  // Placeholders: {name}
+  // EN: "Remove “{name}” from the library? Players who already saw it keep their copy."
+  // DE: "„{name}“ aus der Bibliothek entfernen? Wer es schon gesehen hat, behält seine Kopie."
+  "handout.removeConfirm": "",
+
+  // ═══ Level up (levelup.*) ═════════════════════════════════════
+  // Banner and result of advancing a level.
+
+  // Used in: ResourceBar.jsx
+  // Placeholders: {level}
+  // EN: "Level {level} reached!"
+  // DE: "Stufe {level} erreicht!"
+  "levelup.ready": "",
+
+  // Used in: ResourceBar.jsx
+  // EN: "Roll the advancement: d20 per attribute (higher than the score = +1) and the new Hit Dice for hit protection."
+  // DE: "Aufstieg würfeln: W20 je Attribut (höher als der Wert = +1) und die neuen Trefferwürfel für die Trefferpunkte."
+  "levelup.hint": "",
+
+  // Used in: HirelingsPanel.jsx, ResourceBar.jsx
+  // EN: "Roll advancement"
+  // DE: "Aufstieg würfeln"
+  "levelup.roll": "",
+
+  // Used in: ResourceBar.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Done by hand"
+  // DE: "Schon erledigt"
+  "levelup.manual": "",
+
+  // Used in: ResourceBar.jsx
+  // EN: "You already did the advancement yourself — just clear this notice."
+  // DE: "Du hast den Aufstieg schon selbst gemacht — nur den Hinweis ausblenden."
+  "levelup.manualHint": "",
+
+  // Used in: CharacterSheet.jsx, HirelingsPanel.jsx
+  // Placeholders: {level}
+  // EN: "Level {level}"
+  // DE: "Stufe {level}"
+  "levelup.stage": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "HD"
+  // DE: "TW"
+  "levelup.hd": "",
+
+  // ═══ Generators (gen.*) ═══════════════════════════════════════
+  // Random tables (weather, NPCs, hexes, settlements, adventure sites). The table content itself is in src/data/, not here.
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Generators"
+  // DE: "Generatoren"
+  "gen.title": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Random tables from the SRD for prep and improvising. Re-roll single lines, then copy the result, add it to your notes or turn it into a handout."
+  // DE: "Zufallstabellen aus der SRD für Vorbereitung und Improvisation. Einzelne Zeilen neu würfeln, dann das Ergebnis kopieren, in die Notizen legen oder als Handout speichern."
+  "gen.hint": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Pick a generator and roll."
+  // DE: "Generator wählen und würfeln."
+  "gen.empty": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Roll"
+  // DE: "Würfeln"
+  "gen.roll": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Re-roll this line"
+  // DE: "Diese Zeile neu würfeln"
+  "gen.reroll": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Copy"
+  // DE: "Kopieren"
+  "gen.copy": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Copied to the clipboard."
+  // DE: "In die Zwischenablage kopiert."
+  "gen.copied": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Could not copy."
+  // DE: "Kopieren nicht möglich."
+  "gen.copyFailed": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "To notes"
+  // DE: "In die Notizen"
+  "gen.toNotes": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "As handout"
+  // DE: "Als Handout"
+  "gen.toHandout": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Added to your notes."
+  // DE: "An deine Notizen angehängt."
+  "gen.addedNotes": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Added to the handout library."
+  // DE: "In die Handout-Bibliothek gelegt."
+  "gen.addedHandout": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Weather & season"
+  // DE: "Wetter & Jahreszeit"
+  "gen.g.weather": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "NPC"
+  // DE: "NSC"
+  "gen.g.npc": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Adventure seed"
+  // DE: "Abenteuer-Idee"
+  "gen.g.seed": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hex"
+  // DE: "Hex"
+  "gen.g.hex": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Settlement"
+  // DE: "Siedlung"
+  "gen.g.settlement": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Treasure"
+  // DE: "Schatz"
+  "gen.g.treasure": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Season"
+  // DE: "Jahreszeit"
+  "gen.season": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Spring"
+  // DE: "Frühling"
+  "gen.season.spring": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Summer"
+  // DE: "Sommer"
+  "gen.season.summer": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Autumn"
+  // DE: "Herbst"
+  "gen.season.autumn": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Winter"
+  // DE: "Winter"
+  "gen.season.winter": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "poor"
+  // DE: "schlecht"
+  "gen.poor": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Poor weather: when travelling, make a STR save or gain an Exhausted condition."
+  // DE: "Schlechtes Wetter: Beim Reisen STR-Probe, sonst Zustand Erschöpft."
+  "gen.poorHint": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Roll each column separately"
+  // DE: "Jede Spalte einzeln würfeln"
+  "gen.split": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Extra rolls"
+  // DE: "Zusätzliche Würfe"
+  "gen.bonus": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Two d20 rolls, plus one more for each that is true: former mouse settlement, castle or dungeon · highly magical area · defended by a great beast or devious trap · great adversity overcome to find it."
+  // DE: "Zwei W20-Würfe, dazu einer je zutreffender Frage: ehemalige Mäusesiedlung, Schloss oder Verlies · stark magisches Gebiet · von einer großen Bestie oder tückischen Falle bewacht · große Widrigkeiten überwunden, um ihn zu finden."
+  "gen.bonusHint": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Roll a settlement"
+  // DE: "Siedlung würfeln"
+  "gen.toSettlement": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Weather"
+  // DE: "Wetter"
+  "gen.f.weather": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Event"
+  // DE: "Ereignis"
+  "gen.f.event": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Name"
+  // DE: "Name"
+  "gen.f.name": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Social position"
+  // DE: "Stand"
+  "gen.f.position": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Birthsign"
+  // DE: "Sternzeichen"
+  "gen.f.birthsign": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Appearance"
+  // DE: "Aussehen"
+  "gen.f.appearance": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Quirk"
+  // DE: "Eigenheit"
+  "gen.f.quirk": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Wants"
+  // DE: "Wunsch"
+  "gen.f.wants": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Relationship"
+  // DE: "Beziehung"
+  "gen.f.relationship": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Physical detail"
+  // DE: "Körperliches Merkmal"
+  "gen.f.trait": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Who"
+  // DE: "Wer"
+  "gen.f.creature": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Problem"
+  // DE: "Problem"
+  "gen.f.problem": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Complication"
+  // DE: "Komplikation"
+  "gen.f.complication": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hex type"
+  // DE: "Hex-Art"
+  "gen.f.type": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Landmark"
+  // DE: "Wahrzeichen"
+  "gen.f.landmark": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Detail"
+  // DE: "Detail"
+  "gen.f.detail": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Size"
+  // DE: "Größe"
+  "gen.f.size": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Governance"
+  // DE: "Verwaltung"
+  "gen.f.governance": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Inhabitants"
+  // DE: "Bewohner"
+  "gen.f.inhabitants": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Notable feature"
+  // DE: "Besonderheit"
+  "gen.f.feature": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Industry"
+  // DE: "Gewerbe"
+  "gen.f.industry": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Tavern"
+  // DE: "Gasthaus"
+  "gen.f.tavern": "",
+
+  // Used in: GmGenerators.jsx
+  // Placeholders: {n}
+  // EN: "Find {n}"
+  // DE: "Fund {n}"
+  "gen.f.treasure": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Adventure site"
+  // DE: "Abenteuerort"
+  "gen.g.site": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Stock rooms"
+  // DE: "Räume bestücken"
+  "gen.g.rooms": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Rooms"
+  // DE: "Räume"
+  "gen.roomCount": "",
+
+  // Used in: GmGenerators.jsx
+  // Placeholders: {n}
+  // EN: "Room {n}"
+  // DE: "Raum {n}"
+  "gen.f.room": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Built as"
+  // DE: "Erbaut als"
+  "gen.f.construction": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Ruined by"
+  // DE: "Verfallen durch"
+  "gen.f.ruination": "",
+
+  // Used in: GmGenerators.jsx
+  // EN: "Searching for / protecting"
+  // DE: "Sucht / bewacht"
+  "gen.f.seeking": "",
+
+  // Used in: GmGenerators.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Secret"
+  // DE: "Geheimnis"
+  "gen.f.secret": "",
+
+  // ═══ Factions (fac.*) ═════════════════════════════════════════
+  // Faction tracker of the Mausritter GM tools.
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Factions"
+  // DE: "Fraktionen"
+  "fac.title": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Large powers of your world, each with resources and goals. Between sessions, roll for each faction's current goal: d6 + its relevant resources − the resources of a targeted rival; 4–5 marks 1 progress, 6+ marks 2. Click the dots to mark or erase progress when the players help or interfere."
+  // DE: "Große Mächte deiner Welt mit Ressourcen und Zielen. Zwischen den Sitzungen würfelst du für das aktuelle Ziel jeder Fraktion: W6 + ihre relevanten Ressourcen − die Ressourcen einer betroffenen Rivalin; 4–5 bringt 1 Fortschritt, 6+ bringt 2. Über die Punkte setzt oder löschst du Fortschritt, wenn die Spieler helfen oder stören."
+  "fac.hint": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "No factions yet. Pick one of the SRD examples or start a blank one."
+  // DE: "Noch keine Fraktionen. Wähle ein SRD-Beispiel oder beginne mit einer leeren."
+  "fac.empty": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Blank faction"
+  // DE: "Leere Fraktion"
+  "fac.blank": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Example faction"
+  // DE: "Beispiel-Fraktion"
+  "fac.preset": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Add"
+  // DE: "Hinzufügen"
+  "fac.add": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Roll all (between sessions)"
+  // DE: "Alle würfeln (zwischen Sitzungen)"
+  "fac.rollAll": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Faction name"
+  // DE: "Name der Fraktion"
+  "fac.name": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Faction name"
+  // DE: "Name der Fraktion"
+  "fac.namePlaceholder": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Unnamed faction"
+  // DE: "Unbenannte Fraktion"
+  "fac.unnamed": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Remove faction"
+  // DE: "Fraktion entfernen"
+  "fac.remove": "",
+
+  // Used in: GmFactions.jsx
+  // Placeholders: {name}
+  // EN: "Remove faction “{name}”?"
+  // DE: "Fraktion „{name}“ entfernen?"
+  "fac.removeConfirm": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "warband"
+  // DE: "Kriegsschar"
+  "fac.warband": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "With at least three resources, a faction can field a warband."
+  // DE: "Mit mindestens drei Ressourcen kann eine Fraktion eine Kriegsschar aufstellen."
+  "fac.warbandHint": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Resources"
+  // DE: "Ressourcen"
+  "fac.resources": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "New resource + Enter"
+  // DE: "Neue Ressource + Enter"
+  "fac.addResource": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Remove resource"
+  // DE: "Ressource entfernen"
+  "fac.removeResource": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Goals"
+  // DE: "Ziele"
+  "fac.goals": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Goal"
+  // DE: "Ziel"
+  "fac.goal": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Goal"
+  // DE: "Ziel"
+  "fac.goalPlaceholder": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Goal"
+  // DE: "Ziel"
+  "fac.unnamedGoal": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Make this the current goal"
+  // DE: "Als aktuelles Ziel festlegen"
+  "fac.setCurrent": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Progress"
+  // DE: "Fortschritt"
+  "fac.progress": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Progress marks needed"
+  // DE: "Nötige Fortschrittsmarken"
+  "fac.marks": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Goal"
+  // DE: "Ziel"
+  "fac.addGoal": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Remove goal"
+  // DE: "Ziel entfernen"
+  "fac.removeGoal": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Relevant resources"
+  // DE: "Relevante Ressourcen"
+  "fac.relevant": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "+1 per resource that helps with the current goal. Default: all resources."
+  // DE: "+1 je Ressource, die beim aktuellen Ziel hilft. Standard: alle Ressourcen."
+  "fac.relHint": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Rival's"
+  // DE: "Rivalin"
+  "fac.rival": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "−1 per relevant resource of a rival faction that the goal targets."
+  // DE: "−1 je relevanter Ressource einer Rivalin, die das Ziel trifft."
+  "fac.rivalHint": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Roll"
+  // DE: "Würfeln"
+  "fac.roll": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "No open goal."
+  // DE: "Kein offenes Ziel."
+  "fac.noGoal": "",
+
+  // Used in: GmFactions.jsx
+  // Placeholders: {n}
+  // EN: "+{n} progress"
+  // DE: "+{n} Fortschritt"
+  "fac.gain": "",
+
+  // Used in: GmFactions.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "no progress"
+  // DE: "kein Fortschritt"
+  "fac.noGain": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "goal completed!"
+  // DE: "Ziel erreicht!"
+  "fac.completed": "",
+
+  // Used in: GmFactions.jsx
+  // Placeholders: {name}
+  // EN: "{name} completed a goal."
+  // DE: "{name} hat ein Ziel erreicht."
+  "fac.completedNotify": "",
+
+  // Used in: GmFactions.jsx
+  // EN: "Completed goal: add a new resource, and remove or change one from a faction it hurt."
+  // DE: "Ziel erreicht: Füge eine neue Ressource hinzu und entferne oder ändere eine der Fraktion, der es geschadet hat."
+  "fac.newResourceHint": "",
+
+  // ═══ Info hints (hint.*) ══════════════════════════════════════
+  // Text shown in the little (i) pop-overs.
+
+  // Used in: InventoryGrid.jsx
+  // EN: "More things than slots: the mouse is encumbered (cannot run, all saves with Disadvantage). Drag the card onto a free slot, a Condition into the Grit space, or drop something."
+  // DE: "Mehr Dinge als Plätze: Die Maus ist belastet (kein Rennen, alle Proben mit Nachteil). Zieh die Karte auf ein freies Feld, einen Zustand ins Mumm-Feld, oder leg etwas ab."
+  "hint.overflow": "",
+
+  // ═══ Resting (rest.*) ═════════════════════════════════════════
+  // Short rest = 1 Turn, long rest = 1 Watch, full rest = 1 week.
+
+  // Used in: App.jsx, GmDashboard.jsx, GmPlayerCard.jsx, RestControls.jsx, ruleText.js
+  // Placeholders: {names}
+  // EN: "cleared: {names}"
+  // DE: "abgelegt: {names}"
+  "rest.cleared": "",
+
+  // Used in: App.jsx, GmDashboard.jsx, GmPlayerCard.jsx, RestControls.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Restore d6 to:"
+  // DE: "W6 zurück auf:"
+  "rest.pickAttr": "",
+
+  // ═══ Panel buttons (panel.*) ══════════════════════════════════
+  // Collapse / expand / drag handle of the sheet panels.
+
+  // Used in: SortableItem.jsx
+  // EN: "Drag to reorder"
+  // DE: "Ziehen zum Umordnen"
+  "panel.dragHandle": "",
+
+  // ═══ Jump bar (nav.*) ═════════════════════════════════════════
+  // Bottom bar that scrolls to a section. Each label sits under a small icon: keep to one short word (about 12 characters at most).
+
+  // Used in: CharacterSheet.jsx, SectionNav.jsx
+  // EN: "Jump to section"
+  // DE: "Zu Bereich springen"
+  "nav.label": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Profile"
+  // DE: "Steckbrief"
+  "nav.identity": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Stats"
+  // DE: "Werte"
+  "nav.attributes": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Inventory"
+  // DE: "Inventar"
+  "nav.inventory": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hirelings"
+  // DE: "Helfer"
+  "nav.hirelings": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Map"
+  // DE: "Karte"
+  "nav.battlemap": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Handouts"
+  // DE: "Handouts"
+  "nav.handouts": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "NPCs"
+  // DE: "NSC"
+  "nav.npcs": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Party"
+  // DE: "Gruppe"
+  "nav.group": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Log"
+  // DE: "Protokoll"
+  "nav.log": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Notes"
+  // DE: "Notizen"
+  "nav.notes": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Dice"
+  // DE: "Würfel"
+  "nav.dice": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Players"
+  // DE: "Spieler"
+  "nav.gm.players": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Local"
+  // DE: "Lokal"
+  "nav.gm.local": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Sound"
+  // DE: "Sound"
+  "nav.gm.sound": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Time"
+  // DE: "Zeit"
+  "nav.gm.time": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Generators"
+  // DE: "Generator"
+  "nav.gm.generators": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Factions"
+  // DE: "Fraktionen"
+  "nav.gm.factions": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Combat"
+  // DE: "Kampf"
+  "nav.gm.combat": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Map"
+  // DE: "Karte"
+  "nav.gm.map": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Handouts"
+  // DE: "Handouts"
+  "nav.gm.handouts": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Table centre"
+  // DE: "Tischmitte"
+  "nav.gm.stash": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Notes"
+  // DE: "Notizen"
+  "nav.gm.notes": "",
+
+  // Used in: CharacterSheet.jsx, GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Log"
+  // DE: "Protokoll"
+  "nav.gm.livelog": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Bank"
+  // DE: "Bank"
+  "nav.bank": "",
+
+  // ═══ Damage messages (dmg.*) ══════════════════════════════════
+  // Messages when the GM deals damage (armour, damage to an attribute).
+
+  // Used in: GmCombatTracker.jsx, ruleText.js
+  // Placeholders: {n}
+  // EN: "{n} damage"
+  // DE: "{n} Schaden"
+  "dmg.taken": "",
+
+  // Used in: GmCombatTracker.jsx, ruleText.js
+  // NOTE: Short parenthetical: how much damage armour absorbed.
+  // Placeholders: {n}
+  // EN: "(armour stops {n})"
+  // DE: "(Rüstung fängt {n} ab)"
+  "dmg.armour": "",
+
+  // Used in: GmCombatTracker.jsx, ruleText.js
+  // Placeholders: {attr} {n}
+  // EN: "{n} of it to {attr}"
+  // DE: "{n} davon auf {attr}"
+  "dmg.toAttr": "",
+
+  // Used in: ruleText.js
+  // EN: "Critical damage — the creature's own critical effect applies (see its stats)."
+  // DE: "Kritischer Schaden — es greift die Kritisch-Wirkung der Kreatur (steht in ihren Werten)."
+  "dmg.critSpecial": "",
+
+  // Used in: GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "minus armour"
+  // DE: "abzügl. Rüstung"
+  "dmg.minusArmour": "",
+
+  // Used in: GmPlayerCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Hits"
+  // DE: "Trifft"
+  "dmg.attrLabel": "",
+
+  // Used in: GmPlayerCard.jsx
+  // EN: "Some creatures (spider, centipede, ghost) damage DEX or WIL instead of STR."
+  // DE: "Manche Kreaturen (Spinne, Hundertfüßer, Geist) schaden DEX oder WIL statt STR."
+  "dmg.attrHint": "",
+
+  // Used in: GmPlayerCard.jsx
+  // Placeholders: {n}
+  // EN: "Subtract armour ({n})"
+  // DE: "Rüstung abziehen ({n})"
+  "dmg.useArmour": "",
+
+  // Used in: GmPlayerCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Amount"
+  // DE: "Menge"
+  "dmg.amount": "",
+
+  // ═══ Attribute at 0 (zero.*) ══════════════════════════════════
+  // What it means when DEX or WIL reaches zero.
+
+  // Used in: GmPlayerCard.jsx, ResourceBar.jsx, ruleText.js
+  // EN: "DEX at 0: the mouse is unable to move."
+  // DE: "DEX auf 0: Die Maus kann sich nicht mehr bewegen."
+  "zero.immobile": "",
+
+  // Used in: CharacterSheet.jsx, GmPlayerCard.jsx, ResourceBar.jsx, ruleText.js
+  // EN: "WIL at 0: the mouse is reduced to insensibility."
+  // DE: "WIL auf 0: Die Maus ist ohne Besinnung."
+  "zero.insensible": "",
+
+  // Used in: GmPlayerCard.jsx, ResourceBar.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Dead"
+  // DE: "Tot"
+  "zero.deadShort": "",
+
+  // Used in: GmPlayerCard.jsx, ResourceBar.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Unable to move"
+  // DE: "Bewegungsunfähig"
+  "zero.immobileShort": "",
+
+  // Used in: GmPlayerCard.jsx, ResourceBar.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Insensible"
+  // DE: "Ohne Besinnung"
+  "zero.insensibleShort": "",
+
+  // ═══ Encumbrance (enc.*) ══════════════════════════════════════
+  // More items than slots: no running, disadvantage on saves.
+
+  // Used in: GmPlayerCard.jsx, ResourceBar.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Encumbered"
+  // DE: "Belastet"
+  "enc.label": "",
+
+  // Used in: GmPlayerCard.jsx, ResourceBar.jsx
+  // EN: "Cannot run, all saves with Disadvantage."
+  // DE: "Kein Rennen, alle Proben mit Nachteil."
+  "enc.hint": "",
+
+  // Used in: ResourceBar.jsx
+  // Placeholders: {n}
+  // EN: "{n} without a slot."
+  // DE: "{n} ohne Platz."
+  "enc.overflow": "",
+
+  // Used in: ResourceBar.jsx
+  // Placeholders: {n}
+  // EN: "Missing pip purses: {n}."
+  // DE: "Fehlende Pip-Beutel: {n}."
+  "enc.pips": "",
+
+  // ═══ Pips and purses (pips.*) ═════════════════════════════════
+  // Carrying more than 250 pips needs pip purses.
+
+  // Used in: ResourceBar.jsx
+  // Placeholders: {have} {need}
+  // EN: "Over 250 pips: {need} pip purse(s) needed ({have} carried)."
+  // DE: "Über 250 Pips: {need} Pip-Beutel nötig ({have} dabei)."
+  "pips.purses": "",
+
+  // ═══ Spellcasting (spell.*) ═══════════════════════════════════
+  // Casting a spell with a power of 1-3, usage, miscasts and recharging.
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Cast"
+  // DE: "Wirken"
+  "spell.cast": "",
+
+  // Used in: ItemCard.jsx
+  // EN: "Choose power: that many d6. Each 4–6 marks a usage, each 6 is a miscast."
+  // DE: "Kraft wählen: so viele W6. Jede 4–6 markiert eine Nutzung, jede 6 ist ein Patzer."
+  "spell.castHint": "",
+
+  // Used in: ItemCard.jsx
+  // EN: "To cast, the tablet must be held in a paw."
+  // DE: "Zum Wirken muss die Tafel in einer Pfote liegen."
+  "spell.needPaw": "",
+
+  // Used in: ItemCard.jsx
+  // NOTE: Button: cast the spell with power {n} (1-3). 'Power' is the Mausritter term.
+  // Placeholders: {n}
+  // EN: "Power {n}"
+  // DE: "Kraft {n}"
+  "spell.power": "",
+
+  // Used in: ItemCard.jsx
+  // Placeholders: {n}
+  // EN: "Cast with power {n} ({n}d6)"
+  // DE: "Mit Kraft {n} wirken ({n}W6)"
+  "spell.powerHint": "",
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Depleted"
+  // DE: "Erschöpft"
+  "spell.depleted": "",
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Recharged"
+  // DE: "Aufgeladen"
+  "spell.recharged": "",
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Recharge"
+  // DE: "Aufladen"
+  "spell.recharge": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {n} {name}
+  // EN: "{name} (power {n})"
+  // DE: "{name} (Kraft {n})"
+  "spell.castLabel": "",
+
+  // Used in: CharacterSheet.jsx
+  // NOTE: Contains the literal markers [SUM] and [DICE] in English. Keep the square brackets and use the same words your language uses in the spell texts of the rulebook if you translated them.
+  // Placeholders: {dice} {sum}
+  // EN: "[SUM] {sum} · [DICE] {dice}"
+  // DE: "[SUMME] {sum} · [WÜRFEL] {dice}"
+  "spell.sumDice": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {n}
+  // EN: "{n} usage marked"
+  // DE: "{n} Nutzung markiert"
+  "spell.marked": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "●"
+  // DE: "●"
+  "spell.markShort": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {name}
+  // EN: "{name} is depleted — fulfil its recharge requirement first."
+  // DE: "{name} ist erschöpft — erst die Aufladebedingung erfüllen."
+  "spell.nowDepleted": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {dmg} {n}
+  // EN: "Miscast! {n}× a 6 — {dmg} WIL damage."
+  // DE: "Patzer! {n}× die 6 — {dmg} Schaden auf WIL."
+  "spell.miscast": "",
+
+  // Used in: CharacterSheet.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Miscast"
+  // DE: "Patzer"
+  "spell.miscastShort": "",
+
+  // ═══ After the fight (fight.*) ════════════════════════════════
+  // Rolls a d6 per used weapon/armour/ammo to mark usage.
+
+  // Used in: AfterFight.jsx
+  // EN: "After the fight"
+  // DE: "Nach dem Kampf"
+  "fight.title": "",
+
+  // Used in: AfterFight.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "always"
+  // DE: "immer"
+  "fight.always": "",
+
+  // Used in: AfterFight.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "used up"
+  // DE: "verbraucht"
+  "fight.depleted": "",
+
+  // Used in: AfterFight.jsx
+  // Placeholders: {n}
+  // EN: "{n} marked"
+  // DE: "{n} markiert"
+  "fight.marked": "",
+
+  // Used in: AfterFight.jsx
+  // EN: "Roll d6 for each weapon, armour and ammunition used: on 4–6 mark usage. Improvised weapons always mark."
+  // DE: "Für jede benutzte Waffe, Rüstung und Munition W6: bei 4–6 eine Nutzung markieren. Improvisierte Waffen immer."
+  "fight.hint": "",
+
+  // Used in: AfterFight.jsx
+  // EN: "Nothing in paws or body slots that could mark usage."
+  // DE: "Nichts an Pfoten oder Körper, das Nutzung markieren könnte."
+  "fight.none": "",
+
+  // Used in: AfterFight.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Roll"
+  // DE: "Würfeln"
+  "fight.roll": "",
+
+  // ═══ Light sources (light.*) ══════════════════════════════════
+  // Torches and lanterns burning down.
+
+  // Used in: ItemCard.jsx
+  // EN: "While lit, the light source marks usage every 6 Turns — the GM's time tracker keeps count."
+  // DE: "Brennt die Lichtquelle, markiert sie alle 6 Züge eine Nutzung — der Zeit-Tracker des SL zählt mit."
+  "light.hint": "",
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Lit"
+  // DE: "Brennt"
+  "light.lit": "",
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Light"
+  // DE: "Anzünden"
+  "light.light": "",
+
+  // Used in: App.jsx, GmDashboard.jsx
+  // Placeholders: {name}
+  // EN: "{name} has burned out."
+  // DE: "{name} ist heruntergebrannt."
+  "light.out": "",
+
+  // Used in: App.jsx
+  // Placeholders: {name}
+  // EN: "{name}: 6 Turns — usage marked."
+  // DE: "{name}: 6 Züge — eine Nutzung markiert."
+  "light.burned": "",
+
+  // ═══ Repairs (repair.*) ═══════════════════════════════════════
+  // Paying pips to repair weapons and armour.
+
+  // Used in: ItemCard.jsx
+  // EN: "Have one usage dot repaired: 10% of the price"
+  // DE: "Einen Nutzungspunkt reparieren lassen: 10 % des Preises"
+  "repair.hint": "",
+
+  // Used in: ItemCard.jsx
+  // Placeholders: {n}
+  // EN: "Repair ({n}p)"
+  // DE: "Reparieren ({n}p)"
+  "repair.button": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {n}
+  // EN: "Not enough pips — the repair costs {n}p."
+  // DE: "Zu wenig Pips — die Reparatur kostet {n}p."
+  "repair.tooPoor": "",
+
+  // Used in: CharacterSheet.jsx
+  // EN: "Only catalogue weapons and armour can be repaired."
+  // DE: "Nur Katalog-Waffen und -Rüstungen lassen sich reparieren."
+  "repair.no": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {n} {name}
+  // EN: "{name} repaired (−{n}p)."
+  // DE: "{name} repariert (−{n}p)."
+  "repair.done": "",
+
+  // ═══ Weapon traits (weapon.*) ═════════════════════════════════
+  // Silvered and magic weapons.
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Silvered"
+  // DE: "Versilbert"
+  "weapon.silvered": "",
+
+  // Used in: ItemCard.jsx
+  // EN: "Silvered weapons always mark usage after a fight (price ×10)."
+  // DE: "Versilberte Waffen markieren nach jedem Kampf eine Nutzung (Preis ×10)."
+  "weapon.silveredHint": "",
+
+  // Used in: ItemCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Magic sword"
+  // DE: "Magisches Schwert"
+  "weapon.magic": "",
+
+  // Used in: ItemCard.jsx
+  // EN: "Magic swords only mark usage after a fight on a 6."
+  // DE: "Magische Schwerter markieren nach dem Kampf nur bei einer 6."
+  "weapon.magicHint": "",
+
+  // ═══ Loot to XP (loot.*) ══════════════════════════════════════
+  // Treasure brought home gives XP to the party.
+
+  // Used in: GmLootXp.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Loot → XP"
+  // DE: "Beute → EP"
+  "loot.title": "",
+
+  // Used in: GmLootXp.jsx
+  // EN: "Treasure brought to safety: 1 XP per pip-worth, divided equally amongst the party."
+  // DE: "Schatz in Sicherheit gebracht: 1 EP je Pip-Wert, gleichmäßig auf die Gruppe verteilt."
+  "loot.hint": "",
+
+  // Used in: GmLootXp.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Pip value"
+  // DE: "Pip-Wert"
+  "loot.total": "",
+
+  // Used in: GmLootXp.jsx
+  // EN: "No mouse at the table yet."
+  // DE: "Noch keine Maus am Tisch."
+  "loot.nobody": "",
+
+  // Used in: GmLootXp.jsx
+  // EN: "Also credit the share as pips"
+  // DE: "Anteil auch als Pips gutschreiben"
+  "loot.asPips": "",
+
+  // Used in: GmLootXp.jsx
+  // Placeholders: {n}
+  // EN: "Per mouse: {n} XP"
+  // DE: "Je Maus: {n} EP"
+  "loot.share": "",
+
+  // Used in: GmLootXp.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Share out"
+  // DE: "Verteilen"
+  "loot.apply": "",
+
+  // ═══ Donating pips (donate.*) ═════════════════════════════════
+  // Spending pips selflessly on the community gives XP.
+
+  // Used in: ResourceBar.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Donate"
+  // DE: "Spenden"
+  "donate.button": "",
+
+  // Used in: ResourceBar.jsx
+  // EN: "Spend selflessly on the community: 1 XP per 10 pips."
+  // DE: "Selbstlos für die Gemeinschaft ausgeben: je 10 Pips 1 EP."
+  "donate.hint": "",
+
+  // Used in: ResourceBar.jsx
+  // Placeholders: {n}
+  // EN: "How many pips do you give to the community? (you have {n})"
+  // DE: "Wie viele Pips spendest du der Gemeinschaft? (du hast {n})"
+  "donate.prompt": "",
+
+  // Used in: HirelingsPanel.jsx, ResourceBar.jsx
+  // EN: "You don't have that many pips."
+  // DE: "So viele Pips hast du nicht."
+  "donate.tooMuch": "",
+
+  // Used in: ResourceBar.jsx
+  // Placeholders: {n} {xp}
+  // EN: "Donated {n} pips — +{xp} XP."
+  // DE: "{n} Pips gespendet — +{xp} EP."
+  "donate.done": "",
+
+  // ═══ Buying (buy.*) ═══════════════════════════════════════════
+  // Paying pips for catalogue items.
+
+  // Used in: AddItemMenu.jsx
+  // Placeholders: {n}
+  // EN: "Pay with pips (you have {n})"
+  // DE: "Mit Pips bezahlen (du hast {n})"
+  "buy.toggle": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {n}
+  // EN: "Not enough pips — costs {n}p."
+  // DE: "Zu wenig Pips — kostet {n}p."
+  "buy.tooPoor": "",
+
+  // Used in: CharacterSheet.jsx
+  // Placeholders: {n} {name}
+  // EN: "Bought {name} (−{n}p)."
+  // DE: "{name} gekauft (−{n}p)."
+  "buy.done": "",
+
+  // ═══ Join requests (mp.pending.*) ═════════════════════════════
+  // The GM allows or denies a new device.
+
+  // Used in: JoinRequests.jsx
+  // Placeholders: {n}
+  // EN: "{n} join request(s)"
+  // DE: "{n} Beitrittsanfrage(n)"
+  "mp.pending.title": "",
+
+  // Used in: JoinRequests.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "New device"
+  // DE: "Neues Gerät"
+  "mp.pending.unnamed": "",
+
+  // Used in: JoinRequests.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Allow"
+  // DE: "Zulassen"
+  "mp.pending.allow": "",
+
+  // Used in: JoinRequests.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Deny"
+  // DE: "Ablehnen"
+  "mp.pending.deny": "",
+
+  // ═══ Room security (mp.sec.*) ═════════════════════════════════
+  // Optional password and 'approve joins' for the room.
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Secure access"
+  // DE: "Zugang absichern"
+  "mp.sec.title": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "on"
+  // DE: "aktiv"
+  "mp.sec.on": "",
+
+  // Used in: MultiplayerModal.jsx
+  // NOTE: Explains that without protection anyone who knows the 6-character room code can join.
+  // EN: "Without protection anyone who knows the room code can join. A password and/or your approval protect the table."
+  // DE: "Ohne Schutz kommt jeder rein, der den Raum-Code kennt. Ein Passwort und/oder eine Bestätigung durch dich schützen die Runde."
+  "mp.sec.help": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Room password (optional)"
+  // DE: "Raum-Passwort (optional)"
+  "mp.sec.password": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Password set — type a new one to change it"
+  // DE: "Passwort gesetzt — neues eintippen zum Ändern"
+  "mp.sec.passwordSet": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "e.g. cheesecake"
+  // DE: "z. B. Käsekuchen"
+  "mp.sec.passwordNone": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Set"
+  // DE: "Setzen"
+  "mp.sec.set": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Remove"
+  // DE: "Entfernen"
+  "mp.sec.remove": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Passwords need a secure connection (HTTPS) — not available here."
+  // DE: "Passwörter brauchen eine sichere Verbindung (HTTPS) — hier nicht verfügbar."
+  "mp.sec.noCrypto": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Applies to new connections; anyone already in stays in. The password is never sent, only a proof of it."
+  // DE: "Gilt für neue Verbindungen. Wer schon drin ist, bleibt drin. Das Passwort wird nie übertragen, nur ein Beweis dafür."
+  "mp.sec.passwordHint": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Approve joins"
+  // DE: "Beitritt bestätigen"
+  "mp.sec.approval": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "New devices wait until you let them in. Anyone who was admitted before gets straight back in after a dropped connection."
+  // DE: "Neue Geräte warten, bis du sie zulässt. Wer schon einmal zugelassen war, kommt nach einem Verbindungsabbruch direkt wieder rein."
+  "mp.sec.approvalHint": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Placeholders: {n}
+  // EN: "{n} device(s) blocked."
+  // DE: "{n} Gerät(e) gesperrt."
+  "mp.sec.banned": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Lift blocks"
+  // DE: "Sperren aufheben"
+  "mp.sec.unban": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Include password in the link"
+  // DE: "Passwort im Link mitschicken"
+  "mp.sec.linkPw": "",
+
+  // Used in: MultiplayerModal.jsx
+  // NOTE: '#' is the hash character in a web address; the part behind it never reaches a server.
+  // EN: "The password sits behind the # and is never sent to any server. Only share the link with your group."
+  // DE: "Das Passwort steht hinter dem # und geht nie an einen Server. Teile den Link nur mit deiner Gruppe."
+  "mp.sec.linkPwHint": "",
+
+  // ═══ Password prompt (mp.pw.*) ════════════════════════════════
+  // Shown to a player when the room has a password.
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Password for this room"
+  // DE: "Passwort für diesen Raum"
+  "mp.pw.label": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Join"
+  // DE: "Beitreten"
+  "mp.pw.send": "",
+
+  // ═══ Removing a player (gm.kick.*) ════════════════════════════
+  // Remove a player from the room and block the device.
+
+  // Used in: GmPlayerCard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Remove"
+  // DE: "Rauswerfen"
+  "gm.kick.button": "",
+
+  // Used in: GmPlayerCard.jsx
+  // EN: "Removes the mouse and blocks the device for this session."
+  // DE: "Entfernt die Maus und sperrt das Gerät für diese Sitzung."
+  "gm.kick.hint": "",
+
+  // Used in: GmPlayerCard.jsx
+  // Placeholders: {name}
+  // EN: "Remove {name} from the room and block the device?"
+  // DE: "{name} aus dem Raum werfen und sperren?"
+  "gm.kick.confirm": "",
+
+  // ═══ Luck rolls (luck.*) ══════════════════════════════════════
+  // X-in-6 chance: roll a d6, equal or under X means it happens.
+
+  // Used in: GmDashboard.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Luck"
+  // DE: "Glück"
+  "luck.title": "",
+
+  // Used in: GmDashboard.jsx
+  // EN: "Luck roll (p. 20): set an X-in-6 chance and roll a d6 — equal or under means it happens."
+  // DE: "Glückswurf (S. 20): Chance X-in-6 festlegen, W6 würfeln — gleich oder niedriger heißt: es passiert."
+  "luck.hint": "",
+
+  // Used in: GmDashboard.jsx
+  // Placeholders: {x}
+  // EN: "Luck {x} in 6"
+  // DE: "Glück {x} in 6"
+  "luck.label": "",
+
+  // Used in: GmDashboard.jsx
+  // NOTE: Result of a luck roll: the event happens.
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "It happens"
+  // DE: "Es passiert"
+  "luck.yes": "",
+
+  // Used in: GmDashboard.jsx
+  // NOTE: Result of a luck roll: the event does not happen.
+  // EN: "It doesn't happen"
+  // DE: "Es passiert nicht"
+  "luck.no": "",
+
+  // ═══ Secret rolls (gm.secret.*) ═══════════════════════════════
+  // A switch: the GM's rolls are not shown to players.
+
+  // Used in: GmDashboard.jsx
+  // EN: "Secret mode: your rolls only show in your own log, never for players or in Discord."
+  // DE: "Geheimer Modus: Deine Würfe erscheinen nur bei dir im Protokoll, nie bei den Spielern oder in Discord."
+  "gm.secret.hint": "",
+
+  // ═══ Bank (bank.*) ════════════════════════════════════════════
+  // Storing pips and items in a settlement; 1% fee when retrieving.
+
+  // Used in: BankPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Bank"
+  // DE: "Bank"
+  "bank.title": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "In a settlement, pips and items can be stored in a bank or safebox (rules p. 8). Retrieving costs 1% of the value. The bank takes no inventory slots."
+  // DE: "In einer Siedlung lassen sich Pips und Gegenstände in einer Bank oder einem Safe lagern (Regeln S. 8). Beim Abholen kostet es 1 % des Wertes. Die Bank belegt keine Inventarplätze."
+  "bank.hint": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {n}
+  // EN: "Stored: {n} pips"
+  // DE: "Eingelagert: {n} Pips"
+  "bank.balance": "",
+
+  // Used in: BankPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Deposit"
+  // DE: "Einzahlen"
+  "bank.deposit": "",
+
+  // Used in: BankPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Withdraw"
+  // DE: "Abheben"
+  "bank.withdraw": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "Store an item …"
+  // DE: "Gegenstand einlagern …"
+  "bank.storeItem": "",
+
+  // Used in: BankPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Store"
+  // DE: "Einlagern"
+  "bank.store": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "No items in the bank."
+  // DE: "Keine Gegenstände in der Bank."
+  "bank.empty": "",
+
+  // Used in: BankPanel.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Worth"
+  // DE: "Wert"
+  "bank.worth": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "Value in pips for the fee. Catalogue items use their list price; enter treasure (e.g. a gold ring) yourself."
+  // DE: "Wert in Pips für die Gebühr. Bei Katalog-Gegenständen der Listenpreis, bei Schatz (z. B. Goldring) selbst eintragen."
+  "bank.worthHint": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {fee}
+  // EN: "Retrieve (−{fee}p)"
+  // DE: "Abholen (−{fee}p)"
+  "bank.retrieve": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "Brings the item back into your inventory; 1% of its value as a fee."
+  // DE: "Holt den Gegenstand zurück ins Inventar; 1 % des Wertes als Gebühr."
+  "bank.retrieveHint": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {n}
+  // EN: "How many pips to deposit? (you carry {n})"
+  // DE: "Wie viele Pips einzahlen? (du trägst {n})"
+  "bank.promptDeposit": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {n}
+  // EN: "How many pips to withdraw? (in the bank: {n}, 1% fee)"
+  // DE: "Wie viele Pips abheben? (in der Bank: {n}, 1 % Gebühr)"
+  "bank.promptWithdraw": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {n}
+  // EN: "Deposited {n} pips."
+  // DE: "{n} Pips eingezahlt."
+  "bank.deposited": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {fee} {got} {n}
+  // EN: "Withdrew {n} pips, fee {fee} — you receive {got}."
+  // DE: "{n} Pips abgehoben, Gebühr {fee} — du erhältst {got}."
+  "bank.withdrawn": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {name}
+  // EN: "{name} stored."
+  // DE: "{name} eingelagert."
+  "bank.stored": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {fee} {name}
+  // EN: "{name} retrieved (fee {fee}p)."
+  // DE: "{name} abgeholt (Gebühr {fee}p)."
+  "bank.retrieved": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "That many pips aren't there."
+  // DE: "So viele Pips sind nicht da."
+  "bank.tooFew": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "Please enter a number above 0."
+  // DE: "Bitte eine Zahl größer 0 eingeben."
+  "bank.amount": "",
+
+  // Used in: BankPanel.jsx
+  // Placeholders: {n}
+  // EN: "Not enough pips for the fee ({n}p)."
+  // DE: "Zu wenig Pips für die Gebühr ({n}p)."
+  "bank.tooPoor": "",
+
+  // Used in: BankPanel.jsx
+  // EN: "Conditions can't be stored."
+  // DE: "Zustände lassen sich nicht einlagern."
+  "bank.notStorable": ""
+}

@@ -220,6 +220,8 @@ Beiträge sind willkommen — besonders Übersetzungen (am besten über den [Dis
 auf Deutsch, Englisch, Spanisch, Französisch, Italienisch und Japanisch. Spanisch
 stammt von [@Salgraphics](https://github.com/Salgraphics); FR/IT/JA sind
 maschinell unterstützt, Korrekturen von Muttersprachler:innen sehr willkommen.
+Kommentierte Vorlagen je Sprache und eine Schritt-für-Schritt-Anleitung liegen in
+[`docs/translations/`](docs/translations/GUIDE.md).
 Schlüssel, die erst nach dem Spanisch-PR dazukamen (Offline-Tisch-Modus,
 Soundboard, Gruppenübersicht, der Druckbogen-Skin, Miethelfer, die Maus-Liste,
 die automatische Schadenskette), bleiben in `es.json` absichtlich unübersetzt
