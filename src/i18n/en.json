@@ -864,5 +864,7 @@
   "stash.settings": "Storage settings",
   "stash.cfgName": "Name (e.g. Cart)",
   "stash.cfgCapacity": "Slots (0 = unlimited)",
-  "stash.cfgHint": "Players can't add anything once the storage is full. You can still put loot in yourself."
+  "stash.cfgHint": "Players can't add anything once the storage is full. You can still put loot in yourself.",
+  "footer.imagesAi": "Images: AI-generated",
+  "footer.imagesAiHint": "The illustrations are AI-generated (Krea 2 Turbo) and not official Mausritter artwork."
 }

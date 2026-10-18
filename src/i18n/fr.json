@@ -667,5 +667,7 @@
   "stash.settings": "Réglages du stockage",
   "stash.cfgName": "Nom (p. ex. Charrette)",
   "stash.cfgCapacity": "Emplacements (0 = illimité)",
-  "stash.cfgHint": "Les joueurs ne peuvent plus rien déposer quand le stockage est plein. Toi, tu peux toujours y mettre du butin."
+  "stash.cfgHint": "Les joueurs ne peuvent plus rien déposer quand le stockage est plein. Toi, tu peux toujours y mettre du butin.",
+  "footer.imagesAi": "Images : générées par IA",
+  "footer.imagesAiHint": "Les illustrations sont générées par IA (Krea 2 Turbo) et ne sont pas des illustrations officielles de Mausritter."
 }

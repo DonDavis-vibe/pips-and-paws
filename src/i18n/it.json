@@ -667,5 +667,7 @@
   "stash.settings": "Impostazioni del deposito",
   "stash.cfgName": "Nome (es. Carretto)",
   "stash.cfgCapacity": "Spazi (0 = illimitato)",
-  "stash.cfgHint": "I giocatori non possono più aggiungere nulla quando il deposito è pieno. Tu puoi comunque metterci bottino."
+  "stash.cfgHint": "I giocatori non possono più aggiungere nulla quando il deposito è pieno. Tu puoi comunque metterci bottino.",
+  "footer.imagesAi": "Immagini: generate da IA",
+  "footer.imagesAiHint": "Le illustrazioni sono generate da IA (Krea 2 Turbo) e non sono artwork ufficiale di Mausritter."
 }

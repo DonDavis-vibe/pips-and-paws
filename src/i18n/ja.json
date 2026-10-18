@@ -667,5 +667,7 @@
   "stash.settings": "保管場所の設定",
   "stash.cfgName": "名前（例：荷車）",
   "stash.cfgCapacity": "枠数（0 = 無制限）",
-  "stash.cfgHint": "満杯になるとプレイヤーは何も置けない。GMは引き続き戦利品を入れられる。"
+  "stash.cfgHint": "満杯になるとプレイヤーは何も置けない。GMは引き続き戦利品を入れられる。",
+  "footer.imagesAi": "画像：AI生成",
+  "footer.imagesAiHint": "イラストは AI（Krea 2 Turbo）で生成したもので、Mausritter 公式のアートではない。"
 }

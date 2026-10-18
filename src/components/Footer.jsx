@@ -32,7 +32,7 @@ export default function Footer({ onHelp }) {
           </div>
           <p className="footer-tagline">{t('footer.tagline')}</p>
           <p className="footer-meta">
-            v{APP_VERSION} · <span>{t('footer.codeLicense')}</span> · <span>{t('footer.rulesLicense')}</span>
+            v{APP_VERSION} · <span>{t('footer.codeLicense')}</span> · <span>{t('footer.rulesLicense')}</span> · <span title={t('footer.imagesAiHint')}>{t('footer.imagesAi')}</span>
           </p>
           <p className="footer-credit">
             {tEsPre}

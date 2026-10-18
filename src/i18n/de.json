@@ -864,5 +864,7 @@
   "stash.settings": "Lager einstellen",
   "stash.cfgName": "Name (z. B. Karren)",
   "stash.cfgCapacity": "Plätze (0 = unbegrenzt)",
-  "stash.cfgHint": "Spieler können nichts mehr ablegen, wenn das Lager voll ist. Du selbst darfst weiter Beute hineinlegen."
+  "stash.cfgHint": "Spieler können nichts mehr ablegen, wenn das Lager voll ist. Du selbst darfst weiter Beute hineinlegen.",
+  "footer.imagesAi": "Bilder: KI-generiert",
+  "footer.imagesAiHint": "Die Illustrationen sind mit KI erzeugt (Krea 2 Turbo) und kein offizielles Mausritter-Artwork."
 }
