@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Package2, Trash2, HandCoins, Eye, EyeOff } from 'lucide-react';
+import {
+  Package2, Trash2, HandCoins, Eye, EyeOff, Settings2,
+} from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import ItemCard from './ItemCard.jsx';
 import AddItemMenu from './AddItemMenu.jsx';
@@ -8,6 +10,7 @@ import IconPicker from './IconPicker.jsx';
 import { iconForItem } from '../data/icons.js';
 import EmptyState from './EmptyState.jsx';
 import emptyStash from '../assets/ink/stash.webp';
+import { stashUsed } from '../rules/stash.js';
 
 // Praefix, an dem onDragEnd erkennt: die Karte kommt aus der Mitte, nicht aus dem Raster.
 export const STASH_DRAG_PREFIX = 'stash:';
@@ -17,8 +20,14 @@ export const STASH_DRAG_PREFIX = 'stash:';
 // mode 'player': Gegenstaende sehen und "Nehmen"
 // draggable: Spieler duerfen die Karte direkt auf einen Inventarplatz ziehen
 // (die Komponente muss dann innerhalb eines DndContext stehen).
-export default function SharedStash({ items, mode, onAdd, onRemove, onClear, onTake, onToggleHidden, onItemChange, draggable, takingIds = [] }) {
+export default function SharedStash({
+  items, mode, cfg, onCfg, onAdd, onRemove, onClear, onTake, onToggleHidden, onItemChange, draggable, takingIds = [],
+}) {
   const { t } = useLang();
+  const [cfgOpen, setCfgOpen] = useState(false);
+  // Beim SL zaehlt alles (auch Verstecktes), beim Spieler meldet der SL die belegten Plaetze mit.
+  const used = mode === 'gm' ? stashUsed(items) : (cfg?.used ?? stashUsed(items));
+  const capacity = cfg?.capacity || 0;
   const [iconFor, setIconFor] = useState(null); // { id, anchor }
   // Versteckte Gegenstaende gehen gar nicht erst an die Spieler raus (siehe
   // commitStash) — der SL kann die Mitte also in Ruhe vorbereiten.
@@ -31,8 +40,12 @@ export default function SharedStash({ items, mode, onAdd, onRemove, onClear, onT
       className="stash-panel"
       title={(
         <>
-          {t('stash.title')}
-          {items.length ? <span className="stash-count">{items.length}</span> : null}
+          {cfg?.name || t('stash.title')}
+          {capacity ? (
+            <span className={`stash-count${used > capacity ? ' stash-count-over' : ''}`} title={t('stash.capacityHint')}>
+              {used}/{capacity}
+            </span>
+          ) : (items.length ? <span className="stash-count">{items.length}</span> : null)}
           {hiddenCount ? (
             <span className="stash-count stash-count-hidden" title={t('stash.hiddenCount', { n: hiddenCount })}>
               <EyeOff size={12} /> {hiddenCount}
@@ -42,6 +55,9 @@ export default function SharedStash({ items, mode, onAdd, onRemove, onClear, onT
       )}
       right={mode === 'gm' ? (
         <div className="stash-head-actions">
+          <button type="button" className="btn btn-sm btn-ghost" onClick={() => setCfgOpen((v) => !v)} aria-expanded={cfgOpen} title={t('stash.settings')}>
+            <Settings2 size={14} />
+          </button>
           <AddItemMenu onAdd={onAdd} triggerLabel={t('stash.addLoot')} triggerClass="btn btn-sm" />
           {items.length ? (
             <button type="button" className="btn btn-sm btn-ghost" onClick={onClear}>
@@ -51,6 +67,34 @@ export default function SharedStash({ items, mode, onAdd, onRemove, onClear, onT
         </div>
       ) : null}
     >
+      {mode === 'gm' && cfgOpen ? (
+        <div className="stash-cfg">
+          <label>
+            <span>{t('stash.cfgName')}</span>
+            <input
+              type="text"
+              className="text-input"
+              maxLength={40}
+              placeholder={t('stash.title')}
+              defaultValue={cfg?.name || ''}
+              onBlur={(e) => onCfg?.({ name: e.target.value })}
+            />
+          </label>
+          <label>
+            <span>{t('stash.cfgCapacity')}</span>
+            <input
+              type="number"
+              min="0"
+              max="99"
+              className="text-input"
+              defaultValue={capacity}
+              onBlur={(e) => onCfg?.({ capacity: e.target.value })}
+            />
+          </label>
+          <p className="hint">{t('stash.cfgHint')}</p>
+        </div>
+      ) : null}
+
       {items.length === 0 ? (
         <EmptyState img={emptyStash} alt="">{mode === 'gm' ? t('stash.emptyGm') : t('stash.emptyPlayer')}</EmptyState>
       ) : (

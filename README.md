@@ -82,7 +82,11 @@ data passing through the operator's server.
   are always private), and a roll log
   that also shows the players' rolls.
 - **Shared table** — a common loot drop; items can be prepared and hidden from the
-  players until they're "on the table".
+  players until they're "on the table". Name it and give it a slot limit (a cart, a
+  chest): players can't add more once it's full.
+- **Bank** — on each sheet: deposit and withdraw pips, store and retrieve items; the
+  rules' 1% fee applies when retrieving. The bank takes no inventory slots and the
+  stored pips don't count towards pip purses.
 - **Time & light** — turn / watch / day counter, torch and encounter countdowns,
   an alarm banner on an encounter or omen, an optional time-of-day readout for the
   players.

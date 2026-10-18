@@ -21,7 +21,7 @@ import { damageMessages, restText } from './utils/ruleText.js';
 import { shareEvent, setWebhook } from './utils/discord.js';
 import {
   GM_DAMAGE, GM_HEAL, GM_PIPS, GM_SAVE, GM_WHISPER, GM_BROADCAST,
-  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_WEBHOOK, GM_REST, GM_LIGHT,
+  GM_XP, GM_GIVE, GM_CONDITION, GM_STASH_DENY, GM_STASH_FULL, GM_WEBHOOK, GM_REST, GM_LIGHT,
 } from './multiplayer/protocol.js';
 import { useMultiplayer } from './multiplayer/useMultiplayer.js';
 import brandMark from './assets/ink/brand.webp';
@@ -196,6 +196,14 @@ export default function App() {
       notify(t('player.gm.condition', { name: label }), 'bad');
       if (overflow) notify(t('player.gm.conditionOverflow', { name: label }), 'warn');
       shareEvent(cn, `⚠️ ${t('player.gm.condition', { name: label })}`, 'bad');
+    } else if (cmd === GM_STASH_FULL && gmCommand.item) {
+      // Lager voll: der Gegenstand kommt zurueck. Hat der Bogen keinen Platz mehr, geht er als
+      // "bounce" noch einmal ans Lager (wird dort immer angenommen), damit nichts verloren geht.
+      const item = gmCommand.item;
+      const { ok } = applyGive(character, item);
+      if (ok) setCharacter((c) => applyGive(c, item).character);
+      else stashDrop({ ...item, bounce: true });
+      notify(t('stash.fullReturned', { item: loc(item.name, lang) }), 'warn');
     } else if (cmd === GM_STASH_DENY) {
       notify(t('player.gm.stashGone'), 'warn');
     } else if (cmd === GM_WEBHOOK && gmCommand.url) {
@@ -327,7 +335,7 @@ export default function App() {
             setCharacter={setCharacter}
             notify={notify}
             onEvent={mp.role === 'player' ? sendEvent : null}
-            stash={mp.role === 'player' ? { items: mp.stash, take: takeFromStash, drop: mp.stashDrop } : null}
+            stash={mp.role === 'player' ? { items: mp.stash, cfg: mp.stashCfg, take: takeFromStash, drop: mp.stashDrop } : null}
             partyLog={mp.role === 'player' ? { entries: mp.liveLog, shared: mp.partyLog } : null}
             partyTime={mp.role === 'player' ? mp.partyTime : null}
             restLocked={mp.role === 'player' && mp.restLocked}

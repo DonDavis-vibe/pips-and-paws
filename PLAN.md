@@ -2,6 +2,13 @@
 
 Stand: 2026-10-17 · v0.6.3
 
+**Runde 2026-10-18 (Luecken gegen foundry-mausritter, Teil 1+2):** Glueckswurf X-in-6 und
+geheimer Modus im SL-Wuerfel-Panel (Begegnungswuerfe nie an Spieler), Bank am Bogen
+(`rules/bank.js`, `BankPanel.jsx`, 1 % beim Abholen, Gegenstaende mit eigenem `worth`) und
+Lager mit Name + Platzgrenze (`rules/stash.js`, `T_STASH.cfg`, `GM_STASH_FULL` schickt den
+Gegenstand zurueck, `bounce` verhindert Schleifen). **Offen:** grosse Gegenstaende (4/6 Plaetze),
+vergleichende Probe, Item-Bilder per ComfyUI.
+
 **Runde 2026-10-17 (Zugangskontrolle im Multiplayer):** Der SL schickt erst Daten, wenn ein
 Spieler eingelassen ist (`unauthRef` -> `admitConn` in `useMultiplayer.js`). Optional: Raum-
 Passwort per Challenge-Response (`multiplayer/auth.js`, PBKDF2 + HMAC, Passwort nie auf der

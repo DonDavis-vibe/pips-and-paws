@@ -34,7 +34,7 @@ export const T_STASH_DROP = 'stash/drop'; // { item } Spieler legt Gegenstand in
 export const T_STASH_TAKE = 'stash/take'; // { itemId } Spieler will einen Gegenstand nehmen
 
 // Spielleiter -> Spieler
-export const T_STASH = 'stash'; // { items } vollstaendiger Stand der Tischmitte (Broadcast)
+export const T_STASH = 'stash'; // { items, cfg: { name, capacity, used } } vollstaendiger Stand der Tischmitte (Broadcast)
 export const T_LOG = 'log'; //     { entry } | { entries } geteilter Runden-Log (Host spiegelt)
 export const T_LOGCFG = 'logcfg'; // { shared } Host schaltet das geteilte Runden-Log an/aus
 export const T_TIME = 'time'; //   { clock } Tageszeit fuer die Spieler; clock=null blendet sie aus
@@ -64,6 +64,7 @@ export const GM_CONDITION = 'condition'; // { key } Zustand zuweisen
 export const GM_LIGHT = 'light'; //    {} 6 Zuege vergangen: brennende Lichtquellen markieren eine Nutzung
 export const GM_REST = 'rest'; //      { kind: 'short'|'long'|'full' } SL loest eine Rast aus
 export const GM_STASH_DENY = 'stashDeny'; // { itemId } Nehmen abgelehnt (schon weg)
+export const GM_STASH_FULL = 'stashFull'; // { item } Ablegen abgelehnt (Lager voll): der Gegenstand geht zurueck an den Spieler
 export const GM_WEBHOOK = 'webhook'; // { url } SL teilt den Discord-Webhook mit der Runde
 export const GM_WHISPER = 'whisper'; // { text }
 export const GM_BROADCAST = 'broadcast'; // { text }

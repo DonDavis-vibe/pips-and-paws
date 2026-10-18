@@ -4373,4 +4373,30 @@ body:has(.battlemap-fullscreen) .section-nav { display: none; }
 .secret-toggle.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .secret-toggle:focus-within { box-shadow: var(--ring); }
 
+/* Bank (BankPanel) und Lager-Einstellungen (SharedStash) */
+.bank-pips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
+.bank-balance { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; flex: 1 1 160px; }
+.bank-store { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.bank-store select { flex: 1 1 160px; min-width: 0; }
+.bank-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.bank-items li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raise);
+}
+.bank-item-name { flex: 1 1 140px; min-width: 0; font-weight: 600; }
+.bank-worth { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-dim); }
+.bank-worth input { width: 70px; }
+
+.stash-count-over { background: var(--bad); color: #fff; }
+.stash-cfg { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; margin-bottom: 10px; padding: 8px 10px; border: 1px dashed var(--line); border-radius: var(--radius); }
+.stash-cfg label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--ink-dim); }
+.stash-cfg input[type=number] { width: 80px; }
+.stash-cfg .hint { flex: 1 1 100%; margin: 0; }
+
 } /* @layer classic */

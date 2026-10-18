@@ -4,7 +4,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import {
-  Backpack, Timer, User, Gauge, Users, Map as MapIcon, FileText, Contact, UsersRound, ScrollText, NotebookPen, Dices,
+  Backpack, Timer, User, Gauge, Users, Landmark, Map as MapIcon, FileText, Contact, UsersRound, ScrollText, NotebookPen, Dices,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { Field, TextInput } from './ui.jsx';
@@ -28,6 +28,7 @@ import Panel from './Panel.jsx';
 import MouseIcon from './MouseIcon.jsx';
 import SortableItem from './SortableItem.jsx';
 import SectionNav from './SectionNav.jsx';
+import BankPanel from './BankPanel.jsx';
 import {
   tryMove, addItem, removeItem, firstFreeFit, placeInGrit,
 } from '../rules/inventory.js';
@@ -36,6 +37,7 @@ import { rollSave, rollDie } from '../rules/dice.js';
 import { shareSave, shareRoll } from '../utils/discord.js';
 import { useOrder } from '../useOrder.js';
 import { castSpell, spellEffectText } from '../rules/magic.js';
+import { stashHasRoom, stashUsed } from '../rules/stash.js';
 import { repairItem } from '../rules/economy.js';
 import AfterFight from './AfterFight.jsx';
 import { effectiveSaveMode } from '../rules/status.js';
@@ -43,13 +45,13 @@ import { rollLevelUp } from '../rules/levelup.js';
 
 // Sprungleiste: Symbol + Kurzname je Panel (Label-Schluessel nav.*).
 const NAV_ICONS = {
-  identity: User, attributes: Gauge, inventory: Backpack, hirelings: Users, battlemap: MapIcon,
+  identity: User, attributes: Gauge, inventory: Backpack, bank: Landmark, hirelings: Users, battlemap: MapIcon,
   handouts: FileText, npcs: Contact, group: UsersRound, log: ScrollText, notes: NotebookPen,
 };
 
 const PANEL_ORDER_KEY = 'pips-paws-panel-order';
 const DEFAULT_PANEL_ORDER = [
-  'identity', 'attributes', 'inventory', 'hirelings', 'battlemap', 'handouts', 'npcs', 'group', 'log', 'notes',
+  'identity', 'attributes', 'inventory', 'bank', 'hirelings', 'battlemap', 'handouts', 'npcs', 'group', 'log', 'notes',
 ];
 
 export default function CharacterSheet({
@@ -91,6 +93,11 @@ export default function CharacterSheet({
 
   // Spieler legt einen Gegenstand in die Tischmitte (optimistisch entfernen, dann melden).
   const onItemStash = (item) => {
+    // Lager mit Platzgrenze (Karren, Truhe): voll -> gar nicht erst ablegen.
+    if (!stashHasRoom(stash.cfg?.used ?? stashUsed(stash.items), item, stash.cfg?.capacity)) {
+      notify(t('stash.full', { name: stash.cfg?.name || t('stash.title') }), 'warn');
+      return;
+    }
     setCharacter((c) => removeItem(c, item.itemId));
     stash.drop(item);
   };
@@ -441,6 +448,7 @@ export default function CharacterSheet({
           <SharedStash
             mode="player"
             items={stash.items}
+            cfg={stash.cfg}
             onTake={(id) => stash.take(id)}
             draggable
           />
@@ -449,6 +457,7 @@ export default function CharacterSheet({
         <DragOverlay>{activeItem ? <ItemCard item={activeItem} overlay dragging /> : null}</DragOverlay>
       </DndContext>
     ),
+    bank: <BankPanel character={character} setCharacter={setCharacter} notify={notify} />,
     hirelings: (
       <HirelingsPanel
         hirelings={character.hirelings || []}

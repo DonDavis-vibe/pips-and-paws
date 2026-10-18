@@ -477,6 +477,8 @@ function GmDashboardView({ mp, notify, localApi }) {
       <SharedStash
         mode="gm"
         items={mp.stash}
+        cfg={mp.stashCfg}
+        onCfg={mp.setStashCfg}
         onAdd={mp.stashAddItem}
         onRemove={mp.stashRemoveItem}
         onToggleHidden={mp.stashToggleHidden}

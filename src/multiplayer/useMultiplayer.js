@@ -6,16 +6,18 @@ import {
   T_GROUP, T_SOUND_FX, T_SOUND_CUSTOM, T_SOUND_VOL, T_SOUND_STOP, T_SOUND_FADE,
   T_MAP_SHARE, T_MAP, T_MAP_IMG, T_HANDOUT,
   T_HELLO, T_AUTH, MAX_UNAUTH, AUTH_TIMEOUT_MS, CHALLENGE_TIMEOUT_MS, PENDING_TIMEOUT_MS,
-  GM_GIVE, GM_STASH_DENY,
+  GM_GIVE, GM_STASH_DENY, GM_STASH_FULL,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
 import {
   hasCrypto, deriveKey, makeProof, randomHex, safeEqual,
 } from './auth.js';
 import { readJSON, writeJSON, remove as removeStore } from '../utils/storage.js';
+import { stashUsed, stashHasRoom, normalizeStashCfg } from '../rules/stash.js';
 import { playFx, playBlob, setLiveVolume, stopAllAudio as stopAllAudioLocal, fadeOutAllAudio as fadeOutAllAudioLocal } from '../utils/sound.js';
 
 const GM_STASH_KEY = 'pips-paws-gm-stash';
+const GM_STASH_CFG_KEY = 'pips-paws-gm-stash-cfg'; // Name und Platzzahl des Lagers
 const CLIENT_ID_KEY = 'pips-paws-mp-client'; // zufaellige Geraete-ID (pro Browser), siehe Zugangskontrolle
 const GM_SECURITY_KEY = 'pips-paws-mp-gm-security'; // SL: Passwort + zugelassene/gesperrte Geraete (nur diese Browser-Sitzung)
 const APPROVAL_KEY = 'pips-paws-mp-approval'; // SL: Beitritt muss bestaetigt werden (bleibt gemerkt)
@@ -87,6 +89,8 @@ export function useMultiplayer() {
   const [liveLog, setLiveLog] = useState([]);
   const [gmCommand, setGmCommand] = useState(null); // Spieler: zuletzt empfangener SL-Befehl
   const [stash, setStash] = useState([]); // Tischmitte: beim SL kanonisch, bei Spielern eine Kopie
+  // Lager-Einstellungen (Name, Platzzahl) + belegte Plaetze. Beim SL kanonisch, bei Spielern eine Kopie.
+  const [stashCfg, setStashCfgState] = useState(() => ({ ...normalizeStashCfg(readJSON(GM_STASH_CFG_KEY)), used: 0 }));
   // Geteiltes Runden-Log: der SL schaltet es fuer die Runde an/aus, Spieler bekommen den Stand.
   const [partyLog, setPartyLog] = useState(() => readJSON(PARTY_LOG_KEY, true) !== false);
   // Geteilte Tageszeit: null = der SL zeigt sie den Spielern gerade nicht.
@@ -138,6 +142,8 @@ export function useMultiplayer() {
   playersRef.current = players;
   const stashRef = useRef([]);
   stashRef.current = stash;
+  const stashCfgRef = useRef(stashCfg);
+  stashCfgRef.current = stashCfg;
   const roleRef = useRef(null);
   roleRef.current = role;
   const partyLogRef = useRef(true);
@@ -422,8 +428,27 @@ export function useMultiplayer() {
       writeJSON(GM_STASH_KEY, next);
       // Versteckte Gegenstaende verlassen den SL-Rechner nicht.
       const visible = next.filter((i) => !i.hidden);
+      const cfg = { ...stashCfgRef.current, used: stashUsed(next) };
+      stashCfgRef.current = cfg;
+      setStashCfgState(cfg);
       Object.values(clientConnsRef.current).forEach((conn) => {
-        if (conn && conn.open) conn.send({ t: T_STASH, items: visible });
+        if (conn && conn.open) conn.send({ t: T_STASH, items: visible, cfg });
+      });
+    }
+  }, []);
+
+  // SL: Name und Platzzahl des Lagers aendern (z. B. "Karren", 6 Plaetze).
+  const setStashCfg = useCallback((patch) => {
+    const merged = { ...normalizeStashCfg({ ...stashCfgRef.current, ...patch }), used: stashUsed(stashRef.current) };
+    stashCfgRef.current = merged;
+    setStashCfgState(merged);
+    writeJSON(GM_STASH_CFG_KEY, { name: merged.name, capacity: merged.capacity });
+    if (roleRef.current === 'gm') {
+      const visible = stashRef.current.filter((i) => !i.hidden);
+      Object.values(clientConnsRef.current).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send({ t: T_STASH, items: visible, cfg: merged }); } catch { /* */ }
+        }
       });
     }
   }, []);
@@ -575,8 +600,15 @@ export function useMultiplayer() {
     } else if (payload.t === T_SAY) {
       pushLog({ kind: 'say', playerId: peerId, playerName: name, text: String(payload.text || '') });
     } else if (payload.t === T_STASH_DROP && payload.item) {
-      commitStash([{ ...payload.item, origin: 'stash' }, ...stashRef.current]);
-      pushLog({ kind: 'system', key: 'gm.log.stashDrop', vars: { name, item: itemLabel(payload.item) } });
+      const { bounce, ...dropped } = payload.item;
+      // Lager voll: der Gegenstand geht zurueck. Ein zurueckgeschickter (bounce) wird immer
+      // angenommen — sonst gaebe es eine Endlosschleife, wenn der Spieler keinen Platz mehr hat.
+      if (!bounce && !stashHasRoom(stashUsed(stashRef.current), dropped, stashCfgRef.current.capacity)) {
+        sendTo(peerId, { t: T_GM, cmd: GM_STASH_FULL, item: dropped });
+        return;
+      }
+      commitStash([{ ...dropped, origin: 'stash' }, ...stashRef.current]);
+      pushLog({ kind: 'system', key: 'gm.log.stashDrop', vars: { name, item: itemLabel(dropped) } });
     } else if (payload.t === T_STASH_TAKE) {
       // Versteckte Gegenstaende gelten als nicht vorhanden — sie wurden nie ausgeliefert.
       const found = stashRef.current.find((i) => i.itemId === payload.itemId && !i.hidden);
@@ -640,7 +672,13 @@ export function useMultiplayer() {
 
   // Alles, was ein neu zugelassener Spieler zum Start bekommt (frueher beim Verbindungsaufbau).
   const sendBundle = useCallback((conn) => {
-    try { conn.send({ t: T_STASH, items: stashRef.current.filter((i) => !i.hidden) }); } catch { /* */ }
+    try {
+      conn.send({
+        t: T_STASH,
+        items: stashRef.current.filter((i) => !i.hidden),
+        cfg: { ...stashCfgRef.current, used: stashUsed(stashRef.current) },
+      });
+    } catch { /* */ }
     try {
       conn.send({ t: T_LOGCFG, eid: uid(), shared: partyLogRef.current });
       if (partyLogRef.current) {
@@ -844,6 +882,7 @@ export function useMultiplayer() {
       const savedStash = readJSON(GM_STASH_KEY, []) || [];
       stashRef.current = savedStash;
       setStash(savedStash);
+      setStashCfgState((c) => ({ ...c, used: stashUsed(savedStash) }));
       setRoomCode(code);
       setRoomOnline(true);
       setRole('gm');
@@ -1051,6 +1090,7 @@ export function useMultiplayer() {
       if (!authedRef.current && !authFailedRef.current) becomeConnected();
       if (payload.t === T_STASH) {
         commitStash(Array.isArray(payload.items) ? payload.items : []);
+        if (payload.cfg) setStashCfgState({ ...normalizeStashCfg(payload.cfg), used: Math.max(0, Number(payload.cfg.used) || 0) });
       } else if (payload.t === T_GM) {
         // id vom Absender (eid) -> App entdedupliziert doppelt zugestellte Befehle
         setGmCommand({ ...payload, id: payload.eid ?? Date.now() + Math.random() });
@@ -1283,6 +1323,8 @@ export function useMultiplayer() {
     setIdentity,
     gmCommand,
     stash,
+    stashCfg,
+    setStashCfg,
     hostSession,
     joinSession,
     leaveSession,

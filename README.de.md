@@ -88,7 +88,11 @@ Betreibers laufen.
   (Begegnungswürfe bleiben immer privat), und einem
   Wurf-Protokoll, in dem auch die Würfe aller Spieler auftauchen.
 - **Tischmitte** — gemeinsamer Loot-Ablage; Gegenstände lassen sich vorbereiten
-  und vor den Spielern verstecken, bis sie „auf dem Tisch" liegen.
+  und vor den Spielern verstecken, bis sie „auf dem Tisch" liegen. Mit Namen und
+  Platzgrenze (Karren, Truhe): ist das Lager voll, können Spieler nichts mehr ablegen.
+- **Bank** — auf jedem Bogen: Pips einzahlen und abheben, Gegenstände einlagern und
+  abholen; beim Abholen fällt die Gebühr von 1 % an (Regeln). Die Bank belegt keine
+  Inventarplätze, eingelagerte Pips zählen nicht für Pip-Beutel.
 - **Zeit & Licht** — Zug-/Wachen-/Tag-Zähler, Fackel- und Begegnungs-Countdown,
   Alarmbanner bei Begegnung oder Vorzeichen, optionale Tageszeit-Anzeige für die Spieler.
 - **NSC- & Kampf-Tracker** — Kreaturen aus dem SRD oder eigene, Angriff und

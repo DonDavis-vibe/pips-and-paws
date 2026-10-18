@@ -78,6 +78,7 @@ export function blankCharacter() {
     inventory: Object.fromEntries(ALL_SLOTS.map((s) => [s, null])),
     items: {}, // itemId -> Item
     notes: '',
+    bank: { pips: 0, items: {} }, // siehe rules/bank.js — Pips/Gegenstaende in der Siedlung, 1 % beim Abholen
     hirelings: [], // siehe rules/hirelings.js — kein eigenes Inventarraster
     // Mumm/Grit (SRD §"Grit"): itemIds von Zustaenden, die im Mumm-Feld liegen
     // und dort ignoriert werden — siehe gritForLevel() unten + rules/inventory.js
@@ -115,6 +116,10 @@ export function normalizeCharacter(raw) {
   merged.inventory = { ...base.inventory, ...raw.inventory };
   merged.items = raw.items && typeof raw.items === 'object' ? raw.items : {};
   merged.hirelings = Array.isArray(raw.hirelings) ? raw.hirelings : [];
+  merged.bank = {
+    pips: Math.max(0, Math.floor(Number(raw.bank?.pips) || 0)),
+    items: raw.bank?.items && typeof raw.bank.items === 'object' ? raw.bank.items : {},
+  };
   merged.gritConditions = Array.isArray(raw.gritConditions) ? raw.gritConditions : [];
   // Alte Boegen kennen levelDone nicht: kein nachtraeglicher Aufstieg, sondern die aktuelle Stufe.
   merged.levelDone = Number.isFinite(raw.levelDone) ? raw.levelDone : merged.level;
