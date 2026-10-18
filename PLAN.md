@@ -9,7 +9,10 @@ Lager mit Name + Platzgrenze (`rules/stash.js`, `T_STASH.cfg`, `GM_STASH_FULL` s
 Gegenstand zurueck, `bounce` verhindert Schleifen). **Offen:** grosse Gegenstaende (4/6 Plaetze),
 vergleichende Probe. **Item-Bilder (2026-10-18):** 73 Linolschnitt-Bilder fuer Gegenstaende und Zauber
 (Krea 2 Turbo ueber ComfyUI, `tools/item-art/`, 128-px-WebP in `assets/ink/items/`, `data/itemArt.js`;
-ein gewaehltes Symbol hat Vorrang). Lizenz der Krea-2-Ausgaben weiter ungeprueft.
+ein gewaehltes Symbol hat Vorrang). Lizenz geprueft (krea.ai/krea-2-licensing, v.1 vom 22.06.2026): Outputs gehoeren
+uns (5.3), Kommerz nur unter 1 Mio. USD Umsatz (2.3), Attribution nur beim Verteilen des Modells (3.1), Inhaltsfilter/
+AI-Kennzeichnung (4.2/4.3) beachten; Krea darf mit 30 Tagen Frist kuendigen (9.2) — betrifft das Modell, nicht
+bereits erzeugte Bilder.
 
 **Runde 2026-10-17 (Zugangskontrolle im Multiplayer):** Der SL schickt erst Daten, wenn ein
 Spieler eingelassen ist (`unauthRef` -> `admitConn` in `useMultiplayer.js`). Optional: Raum-
@@ -41,7 +44,7 @@ Raster-Oberflaeche (Art, Groesse, Versatz, sichtbar) im Werkzeugmenue; PNP-Szene
 abgelehnt. (5) Neue Grafik: Linolschnitt-Illustrationen (Krea 2 Turbo ueber ComfyUI, transparentes
 WebP in `assets/ink/`, im Dunkelmodus per CSS invertiert), neues Logo/OG-Bild, elf Kreatur-Portraits
 fuer Kampf-Tracker, Spielerliste und Battlemap-Token (`data/creatureArt.js`, `battlemap/tokenArt.js`).
-**Offen:** Lizenz der Krea-2-Ausgaben nicht geprueft (LICENSE.pdf gesperrt); Screenshots in
+**Offen:** (Lizenz der Krea-2-Ausgaben inzwischen geprueft, siehe Runde 2026-10-18); Screenshots in
 `docs/screenshots/` zeigen noch den Stand vom 16.09.; Lagerbehaelter/Banking ungeklaert.
 
 **Runde 2026-09-16f (NSC-Angriffe auf der gemeinsamen Würfel-Bühne):** Letzten offenen Punkt aus der

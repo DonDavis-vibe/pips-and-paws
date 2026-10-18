@@ -1,0 +1,6 @@
+Tusche-Bilder (src/assets/ink/)
+
+Erzeugt mit Krea 2 Turbo ueber ComfyUI (siehe tools/item-art/ und PLAN.md).
+Die Bilder sind KI-generiert (Outputs im Sinne der Krea 2 Community License,
+https://www.krea.ai/krea-2-licensing) und kein offizielles Mausritter-Artwork.
+Das Modell selbst wird nicht mitgeliefert.

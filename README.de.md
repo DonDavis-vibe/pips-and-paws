@@ -235,10 +235,15 @@ Maschine vorbelegt zu werden. Ablauf und Schritte für eine neue Sprache:
 freien PDFs unter `reference/` liegen nur lokal (Artwork nicht CC BY, per
 `.gitignore` ausgeschlossen).
 
-Wappen, Logo, Social-Vorschau, Vignetten und Bild-Platzhalter sind eigene
-KI-Generierungen (Krea 2 Turbo über ComfyUI, Linolschnitt in schwarzer Tusche;
-ältere Quellen in `img/`), **kein** offizielles
-Mausritter-Artwork und **kein** Verlagslogo.
+Wappen, Logo, Social-Vorschau, Vignetten, Bild-Platzhalter, Kreaturen-Portraits
+sowie die Gegenstands- und Zauber-Illustrationen sind eigene KI-Generierungen
+(Krea 2 Turbo über ComfyUI, Linolschnitt in schwarzer Tusche; ältere Quellen in
+`img/`, Herstellung der Gegenstandsbilder in `tools/item-art/`), **kein**
+offizielles Mausritter-Artwork und **kein** Verlagslogo. Die erzeugten Bilder sind
+Outputs im Sinne der [Krea 2 Community License](https://www.krea.ai/krea-2-licensing):
+Sie gehören mir, für Outputs verlangt die Lizenz keine Namensnennung, und das
+Projekt ist kostenlos und nicht kommerziell. Das Modell selbst wird hier nicht
+verteilt.
 
 Die eingebauten Kurz-Effekte des SL-Soundboards (`src/assets/sfx/`) stammen aus
 Kenneys ["Music Jingles"](https://kenney.nl/assets/music-jingles)- und

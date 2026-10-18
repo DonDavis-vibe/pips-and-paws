@@ -222,10 +222,14 @@ machine translation. The flow and the steps for a new language are in
 Effect texts are summarised, not copied verbatim. The free PDFs under `reference/`
 are kept local only (their artwork is not CC BY, excluded via `.gitignore`).
 
-The crest, logo, social preview, vignettes and portrait placeholder are my own
-AI generations (Krea 2 Turbo via ComfyUI, black ink linocut style; older
-sources in `img/`) — **not** official Mausritter artwork and **not** a
-publisher logo.
+The crest, logo, social preview, vignettes, portrait placeholder, creature portraits
+and the item and spell illustrations are my own AI generations (Krea 2 Turbo via
+ComfyUI, black ink linocut style; older sources in `img/`, how the item art is made
+in `tools/item-art/`) — **not** official Mausritter artwork and **not** a publisher
+logo. The generated images are Outputs under the
+[Krea 2 Community License](https://www.krea.ai/krea-2-licensing): they belong to me,
+the license asks no attribution for Outputs, and the project is free and non-commercial.
+The model itself is not distributed here.
 
 The GM soundboard's built-in stingers (`src/assets/sfx/`) are from Kenney's
 ["Music Jingles"](https://kenney.nl/assets/music-jingles) and
