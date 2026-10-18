@@ -629,5 +629,13 @@
   "mp.log.kicked": "{name} è stato/a rimosso/a dalla stanza.",
   "gm.kick.button": "Espelli",
   "gm.kick.hint": "Rimuove il topo e blocca il dispositivo per questa sessione.",
-  "gm.kick.confirm": "Espellere {name} dalla stanza e bloccare il dispositivo?"
+  "gm.kick.confirm": "Espellere {name} dalla stanza e bloccare il dispositivo?",
+  "luck.title": "Fortuna",
+  "luck.hint": "Tiro di fortuna (p. 20): stabilisci una probabilità X su 6 e tira un d6 — uguale o inferiore significa che succede.",
+  "luck.label": "Fortuna {x} su 6",
+  "luck.yes": "Succede",
+  "luck.no": "Non succede",
+  "gm.log.luck": "Tiro di fortuna {x} su 6 — d6 {d}: {result}",
+  "gm.secret": "Segreto",
+  "gm.secret.hint": "Modalità segreta: i tuoi tiri compaiono solo nel tuo registro, mai per i giocatori né su Discord."
 }

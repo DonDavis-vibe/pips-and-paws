@@ -629,5 +629,13 @@
   "mp.log.kicked": "{name} をルームから外した。",
   "gm.kick.button": "退出させる",
   "gm.kick.hint": "ネズミを外し、このセッション中その端末をブロックする。",
-  "gm.kick.confirm": "{name} をルームから外してブロックする？"
+  "gm.kick.confirm": "{name} をルームから外してブロックする？",
+  "luck.title": "運",
+  "luck.hint": "運判定（p.20）：X/6 の確率を決めて d6 を振る — 以下なら起こる。",
+  "luck.label": "運 {x}/6",
+  "luck.yes": "起こる",
+  "luck.no": "起こらない",
+  "gm.log.luck": "運判定 {x}/6 — d6 {d}：{result}",
+  "gm.secret": "秘密",
+  "gm.secret.hint": "秘密モード：振った結果は自分のログにだけ表示され、プレイヤーにも Discord にも出ない。"
 }

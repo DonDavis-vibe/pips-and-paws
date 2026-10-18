@@ -629,5 +629,13 @@
   "mp.log.kicked": "{name} a été retiré(e) de la salle.",
   "gm.kick.button": "Exclure",
   "gm.kick.hint": "Retire la souris et bloque l'appareil pour cette session.",
-  "gm.kick.confirm": "Exclure {name} de la salle et bloquer l'appareil ?"
+  "gm.kick.confirm": "Exclure {name} de la salle et bloquer l'appareil ?",
+  "luck.title": "Chance",
+  "luck.hint": "Jet de chance (p. 20) : fixe une chance de X sur 6 et lance un d6 — égal ou inférieur, ça arrive.",
+  "luck.label": "Chance {x} sur 6",
+  "luck.yes": "Ça arrive",
+  "luck.no": "Ça n'arrive pas",
+  "gm.log.luck": "Jet de chance {x} sur 6 — d6 {d} : {result}",
+  "gm.secret": "Secret",
+  "gm.secret.hint": "Mode secret : tes jets n'apparaissent que dans ton journal, jamais chez les joueurs ni sur Discord."
 }

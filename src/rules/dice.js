@@ -41,6 +41,16 @@ export function rollSave(attrValue, mode = 'normal') {
   };
 }
 
+// Glueckswurf (Regeln S. 20): dem Ausgang wird eine "X-in-6"-Chance zugewiesen
+// (wenig fuer unwahrscheinlich, viel fuer wahrscheinlich), dann W6 — Wurf <= X
+// heisst: es passiert. Fuer alles, was keine STR-/DEX-/WIL-Probe ist (Gehoer an
+// der Tuer, Wetterumschwung, ob ein NSC da ist ...).
+export function rollLuck(chance) {
+  const x = Math.max(1, Math.min(5, Math.round(chance) || 1));
+  const d = rollDie(6);
+  return { d, chance: x, ok: d <= x };
+}
+
 // NSC-Reaktion: 2W6 (Mausritter GM-Screen / SRD).
 const REACTION_BY_TOTAL = {
   2: 'hostile',

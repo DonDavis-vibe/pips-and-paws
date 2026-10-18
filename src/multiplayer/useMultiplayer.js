@@ -26,10 +26,15 @@ const MAP_SHARE_KEY = 'pips-paws-gm-map-shared';
 const HANDOUTS_KEY = 'pips-paws-handouts'; // Spieler: erhaltene Handouts (pro Geraet)
 const MAX_HANDOUTS = 30;
 
-// Welche Log-Eintraege der Host an die Spieler spiegelt (kein Fluestern, keine Rohdaten).
+// Eintraege, die der SL nie an die Spieler spiegelt, auch wenn das Runden-Log
+// geteilt ist: Begegnungswuerfe laufen laut Regeln (S. 21) verdeckt.
+const PRIVATE_GM_KEYS = new Set(['gm.log.whisper', 'time.log.encounter', 'time.log.encHour']);
+
+// Welche Log-Eintraege der Host an die Spieler spiegelt (kein Fluestern, keine
+// Rohdaten, keine geheimen Wuerfe — `secret` setzt der SL im Wuerfel-Panel).
 const isShareable = (e) =>
   e.kind === 'event'
-  || (e.kind === 'gm' && e.key !== 'gm.log.whisper')
+  || (e.kind === 'gm' && !PRIVATE_GM_KEYS.has(e.key) && !e.secret)
   || (e.kind === 'system'
     && ['gm.log.stashDrop', 'gm.log.stashTake', 'mp.log.left', 'mp.log.joined'].includes(e.key));
 

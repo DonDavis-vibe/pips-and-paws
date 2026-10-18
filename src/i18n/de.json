@@ -826,5 +826,13 @@
   "mp.log.kicked": "{name} wurde aus dem Raum entfernt.",
   "gm.kick.button": "Rauswerfen",
   "gm.kick.hint": "Entfernt die Maus und sperrt das Gerät für diese Sitzung.",
-  "gm.kick.confirm": "{name} aus dem Raum werfen und sperren?"
+  "gm.kick.confirm": "{name} aus dem Raum werfen und sperren?",
+  "luck.title": "Glück",
+  "luck.hint": "Glückswurf (S. 20): Chance X-in-6 festlegen, W6 würfeln — gleich oder niedriger heißt: es passiert.",
+  "luck.label": "Glück {x} in 6",
+  "luck.yes": "Es passiert",
+  "luck.no": "Es passiert nicht",
+  "gm.log.luck": "Glückswurf {x} in 6 — W6 {d}: {result}",
+  "gm.secret": "Geheim",
+  "gm.secret.hint": "Geheimer Modus: Deine Würfe erscheinen nur bei dir im Protokoll, nie bei den Spielern oder in Discord."
 }

@@ -826,5 +826,13 @@
   "mp.log.kicked": "{name} was removed from the room.",
   "gm.kick.button": "Remove",
   "gm.kick.hint": "Removes the mouse and blocks the device for this session.",
-  "gm.kick.confirm": "Remove {name} from the room and block the device?"
+  "gm.kick.confirm": "Remove {name} from the room and block the device?",
+  "luck.title": "Luck",
+  "luck.hint": "Luck roll (p. 20): set an X-in-6 chance and roll a d6 — equal or under means it happens.",
+  "luck.label": "Luck {x} in 6",
+  "luck.yes": "It happens",
+  "luck.no": "It doesn't happen",
+  "gm.log.luck": "Luck roll {x} in 6 — d6 {d}: {result}",
+  "gm.secret": "Secret",
+  "gm.secret.hint": "Secret mode: your rolls only show in your own log, never for players or in Discord."
 }

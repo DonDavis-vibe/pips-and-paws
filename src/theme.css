@@ -4355,4 +4355,22 @@ body:has(.battlemap-fullscreen) .section-nav { display: none; }
 .mp-security-body .hint { margin: 0; }
 .mp-password { margin-top: 8px; }
 
+/* Glueckswurf und geheimer Modus im SL-Wuerfel-Panel */
+.luck-rolls { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 8px; }
+
+.secret-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+.secret-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.secret-toggle.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.secret-toggle:focus-within { box-shadow: var(--ring); }
+
 } /* @layer classic */

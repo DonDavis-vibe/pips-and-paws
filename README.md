@@ -77,7 +77,9 @@ data passing through the operator's server.
   slots, weapons, conditions.
 - **Per-mouse actions** — damage, heal, pips, XP, trigger a rest, call for a save
   or initiative, whisper, announce to all, give an item or a condition.
-- **Dice panel** with a result stage, reaction and treasure rolls, and a roll log
+- **Dice panel** with a result stage, reaction and treasure rolls, X-in-6 luck rolls, a
+  "secret" mode that keeps rolls out of the players' log and Discord (encounter rolls
+  are always private), and a roll log
   that also shows the players' rolls.
 - **Shared table** — a common loot drop; items can be prepared and hidden from the
   players until they're "on the table".

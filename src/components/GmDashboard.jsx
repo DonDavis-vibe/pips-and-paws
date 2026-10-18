@@ -5,7 +5,7 @@ import {
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import {
   Users, ScrollText, Megaphone, Dices, Save, FolderOpen, Handshake, Gem, Dice6,
-  Armchair, Music, Timer, Wand2, Crown, Swords, Map as MapIcon, FileText, PackageOpen, NotebookPen,
+  Armchair, Music, Timer, Wand2, Crown, Swords, Map as MapIcon, FileText, PackageOpen, NotebookPen, Lock,
 } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { RollButton, DiceStage } from './DiceKit.jsx';
@@ -34,16 +34,17 @@ import EmptyState from './EmptyState.jsx';
 import emptyLobby from '../assets/ink/lobby.webp';
 import { GM_BROADCAST, GM_SAVE, GM_DAMAGE, GM_LIGHT } from '../multiplayer/protocol.js';
 import { burnLights } from '../rules/light.js';
-import { rollDice, rollD66, rollReaction, rollTreasure } from '../rules/dice.js';
+import { rollDice, rollD66, rollReaction, rollTreasure, rollLuck } from '../rules/dice.js';
 import { CONDITION_CATALOG } from '../data/items.js';
 import { exportGmSession, importGmSession } from '../utils/gmSession.js';
+import { readJSON, writeJSON } from '../utils/storage.js';
 import { shareEvent } from '../utils/discord.js';
 import { playDiceRoll } from '../utils/sound.js';
 import { formatLogEntry, logEntryTone } from '../multiplayer/logFormat.js';
 
 const SHARE_KEYS = new Set([
   'gm.log.broadcast', 'gm.log.roll', 'combat.log.attack', 'combat.log.morale',
-  'gm.log.reaction', 'gm.log.treasure',
+  'gm.log.reaction', 'gm.log.treasure', 'gm.log.luck',
 ]);
 
 // Menschenlesbares Label fuer eine SL-Aktion im Live-Log. Auch von
@@ -69,6 +70,7 @@ const formatEntry = formatLogEntry;
 // Geraet gemerkt), Symbol fuer die Sprungleiste und welche auf breiten
 // Schirmen die volle Breite behalten (der Rest teilt sich zwei Spalten).
 const GM_ORDER_KEY = 'pips-paws-gm-panel-order';
+const SECRET_KEY = 'pips-paws-gm-secret-rolls';
 const GM_PANELS = [
   { id: 'players', icon: Users, wide: true },
   { id: 'local', icon: Armchair, wide: true },
@@ -90,7 +92,7 @@ const stamp = () => `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 // Welche Log-Eintraege gelten als "Wurf" und gehoeren damit ins Wuerfel-Protokoll
 // des SL — eigene Wuerfe, NSC-Wuerfe und die Wuerfe der Spieler.
 const ROLL_KEYS = new Set([
-  'gm.log.roll', 'gm.log.reaction', 'gm.log.treasure',
+  'gm.log.roll', 'gm.log.reaction', 'gm.log.treasure', 'gm.log.luck',
   'combat.log.attack', 'combat.log.morale',
 ]);
 
@@ -104,7 +106,7 @@ function isRollEntry(e) {
 // Protokoll, in dem auch die Wuerfe der Spieler auftauchen. Die Buehne (`result`)
 // lebt eine Ebene hoeher in GmDashboard, damit auch GmCombatTracker (NSC-Angriffe)
 // ueber `pushRoll` mitschreiben kann statt nur ins Log zu gehen.
-function GmDicePanel({ onLog, log, result, pushRoll }) {
+function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
   const { t } = useLang();
   const [customSides, setCustomSides] = useState('');
   const dieLabel = (sides) => `${t('dice.dieLetter')}${sides}`;
@@ -127,6 +129,16 @@ function GmDicePanel({ onLog, log, result, pushRoll }) {
     const sides = parseInt(customSides, 10);
     if (!Number.isFinite(sides) || sides < 2 || sides > 1000) return;
     rollN(sides, false);
+  };
+
+  // Glueckswurf X-in-6 (Regeln S. 20): W6, Wurf <= X = es passiert.
+  const luck = (x) => {
+    const r = rollLuck(x);
+    const verdict = t(r.ok ? 'luck.yes' : 'luck.no');
+    pushRoll({
+      label: t('luck.label', { x: r.chance }), value: r.d, max: 6, die: 6, tone: r.ok ? 'ok' : 'bad', verdict,
+    });
+    onLog('gm.log.luck', { x: r.chance, d: r.d, result: verdict });
   };
 
   const roll66 = () => {
@@ -179,7 +191,19 @@ function GmDicePanel({ onLog, log, result, pushRoll }) {
   }, [newest?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Panel id="gm-dice" anchorId="dice" icon={Dices} title={t('gm.diceTitle')} className="dice-panel">
+    <Panel
+      id="gm-dice"
+      anchorId="dice"
+      icon={Dices}
+      title={t('gm.diceTitle')}
+      className="dice-panel"
+      right={(
+        <label className={`secret-toggle${secret ? ' on' : ''}`} title={t('gm.secret.hint')}>
+          <input type="checkbox" checked={secret} onChange={(e) => setSecret(e.target.checked)} />
+          <Lock size={13} /> {t('gm.secret')}
+        </label>
+      )}
+    >
       <DiceStage result={result} idleIcon={<Dices size={24} />} idleText={t('dice.stageIdle')} />
 
       <div className="dice-buttons">
@@ -207,6 +231,15 @@ function GmDicePanel({ onLog, log, result, pushRoll }) {
           {t('dice.customRoll')}
         </button>
       </form>
+
+      <div className="luck-rolls" role="group" aria-label={t('luck.title')}>
+        <span className="dice-sep" title={t('luck.hint')}>{t('luck.title')}</span>
+        {[1, 2, 3, 4, 5].map((x) => (
+          <button key={x} type="button" className="btn btn-sm btn-ghost" title={t('luck.label', { x })} onClick={() => luck(x)}>
+            {x}/6
+          </button>
+        ))}
+      </div>
 
       <div className="gm-quick-rolls">
         <button type="button" className="btn btn-sm btn-ghost" onClick={reaction}>
@@ -261,9 +294,13 @@ function GmDashboardView({ mp, notify, localApi }) {
   const pushRoll = (stage) => setDiceResult({ id: stamp(), ...stage });
 
   // SL-Log + optional an Discord (nur die fuer die Runde relevanten Meldungen).
+  // Geheimer Modus (Wuerfel-Panel): gilt nur fuer Wuerfe — Ansagen, Befehle usw. bleiben offen.
+  const [secret, setSecretState] = useState(() => readJSON(SECRET_KEY, false) === true);
+  const setSecret = (on) => { setSecretState(on); writeJSON(SECRET_KEY, on); };
   const gmLog = (key, vars) => {
-    mp.logGmAction({ key, vars });
-    if (SHARE_KEYS.has(key)) {
+    const hidden = secret && ROLL_KEYS.has(key);
+    mp.logGmAction({ key, vars, ...(hidden ? { secret: true } : {}) });
+    if (SHARE_KEYS.has(key) && !hidden) {
       shareEvent(t('mp.badge.gm'), t(key, vars), key === 'combat.log.attack' ? 'bad' : 'info');
     }
   };
@@ -512,7 +549,7 @@ function GmDashboardView({ mp, notify, localApi }) {
         </DndContext>
       </div>
 
-      <GmDicePanel onLog={gmLog} log={mp.liveLog} result={diceResult} pushRoll={pushRoll} />
+      <GmDicePanel onLog={gmLog} log={mp.liveLog} result={diceResult} pushRoll={pushRoll} secret={secret} setSecret={setSecret} />
       <SectionNav
         items={[
           ...GM_PANELS.filter((p) => panelOrder.includes(p.id)).sort((a, b) => panelOrder.indexOf(a.id) - panelOrder.indexOf(b.id))

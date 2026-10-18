@@ -83,7 +83,9 @@ Betreibers laufen.
   Plätze, Waffen, Zustände.
 - **Eingriffe pro Maus** — Schaden, Heilen, Pips, EP, Rast auslösen, Probe
   oder Initiative fordern, flüstern, Ansage an alle, Gegenstand oder Zustand geben.
-- **Würfel-Panel** mit Ergebnis-Bühne, Reaktions- und Schatzwurf und einem
+- **Würfel-Panel** mit Ergebnis-Bühne, Reaktions- und Schatzwurf, Glückswurf (X-in-6),
+  einem „Geheim“-Modus, der Würfe aus dem Spieler-Log und Discord heraushält
+  (Begegnungswürfe bleiben immer privat), und einem
   Wurf-Protokoll, in dem auch die Würfe aller Spieler auftauchen.
 - **Tischmitte** — gemeinsamer Loot-Ablage; Gegenstände lassen sich vorbereiten
   und vor den Spielern verstecken, bis sie „auf dem Tisch" liegen.

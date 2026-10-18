@@ -4,7 +4,8 @@
 export function formatLogEntry(e, t) {
   if (!e) return '';
   if (e.kind === 'system') return t(e.key, e.vars || {});
-  if (e.kind === 'gm') return t(e.key, e.vars || {});
+  // Geheime Wuerfe zeigt nur der SL selbst — mit Schloss, damit er sie von offenen unterscheidet.
+  if (e.kind === 'gm') return `${e.secret ? '🔒 ' : ''}${t(e.key, e.vars || {})}`;
   if (e.kind === 'say') return `${e.playerName}: ${e.text}`;
   if (e.kind === 'event' && e.ev) {
     const ev = e.ev;
