@@ -7,6 +7,8 @@ import { useLang, loc } from '../i18n/index.jsx';
 import { InfoHint } from './ui.jsx';
 import { weaponDamageOptions } from '../rules/dice.js';
 import { iconForItem } from '../data/icons.js';
+import { itemArt } from '../data/itemArt.js';
+import InkArt from './InkArt.jsx';
 import { SPELL_CATALOG } from '../data/items.js';
 import { spellUsesLeft } from '../rules/magic.js';
 import { repairCost } from '../rules/economy.js';
@@ -28,6 +30,7 @@ export default function ItemCard({
   const [renaming, setRenaming] = useState(false);
   const [draftName, setDraftName] = useState('');
   const Icon = iconForItem(item);
+  const art = itemArt(item); // Tusche-Bild, solange kein eigenes Symbol gewaehlt ist
   const dmgOptions = weaponDamageOptions(item);
   // Symbol wechseln darf, wer die Karte auch sonst aendern darf.
   const canPickIcon = !overlay && !!onChange;
@@ -90,8 +93,10 @@ export default function ItemCard({
             aria-label={t('icon.pick')}
             title={t('icon.pick')}
           >
-            <Icon size={14} />
+            {art ? <InkArt src={art} className="item-art" /> : <Icon size={14} />}
           </button>
+        ) : art ? (
+          <InkArt src={art} className="item-art item-type-icon" />
         ) : (
           <Icon size={14} className="item-type-icon" />
         )}

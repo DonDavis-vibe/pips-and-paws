@@ -4399,4 +4399,8 @@ body:has(.battlemap-fullscreen) .section-nav { display: none; }
 .stash-cfg input[type=number] { width: 80px; }
 .stash-cfg .hint { flex: 1 1 100%; margin: 0; }
 
+/* Tusche-Bild eines Gegenstands in der Kartenzeile (ItemCard) */
+.item-art { width: 40px; height: 40px; flex: 0 0 40px; }
+.item-icon-btn:has(.item-art) { width: auto; height: auto; padding: 0; border: 0; background: none; }
+
 } /* @layer classic */

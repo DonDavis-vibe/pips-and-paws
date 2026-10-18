@@ -35,8 +35,9 @@ Betreibers laufen.
   vollständige 36er-Hintergrundtabelle mit Startausrüstung, Schwache-Maus-Regel,
   Sternzeichen · Fell · Merkmal.
 - **Inventar per Drag & Drop** — zwei Pfoten, zwei Körper, sechs Rucksack; 1- und
-  2-Platz-Gegenstände, Tausch, Nutzungspunkte, Zustände als Kärtchen. Jeder
-  Gegenstand hat ein Symbol, das sich austauschen lässt.
+  2-Platz-Gegenstände, Tausch, Nutzungspunkte, Zustände als Kärtchen. Gegenstände und
+  Zauber tragen kleine Tusche-Bilder (bisher 73); jeder Gegenstand hat außerdem ein
+  Symbol, das sich stattdessen wählen lässt.
 - **Würfeln** — W6 und W66 als echte, taumelnde 3D-Würfel; Probe (W20 ≤
   Attribut) mit Vorteil / Nachteil. Ein Klick auf den Schadenswert einer Waffe
   würfelt den Schaden (ein- und zweihändig getrennt). Jeder Wurf landet sichtbar

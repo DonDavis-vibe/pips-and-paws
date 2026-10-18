@@ -7,7 +7,9 @@ geheimer Modus im SL-Wuerfel-Panel (Begegnungswuerfe nie an Spieler), Bank am Bo
 (`rules/bank.js`, `BankPanel.jsx`, 1 % beim Abholen, Gegenstaende mit eigenem `worth`) und
 Lager mit Name + Platzgrenze (`rules/stash.js`, `T_STASH.cfg`, `GM_STASH_FULL` schickt den
 Gegenstand zurueck, `bounce` verhindert Schleifen). **Offen:** grosse Gegenstaende (4/6 Plaetze),
-vergleichende Probe, Item-Bilder per ComfyUI.
+vergleichende Probe. **Item-Bilder (2026-10-18):** 73 Linolschnitt-Bilder fuer Gegenstaende und Zauber
+(Krea 2 Turbo ueber ComfyUI, `tools/item-art/`, 128-px-WebP in `assets/ink/items/`, `data/itemArt.js`;
+ein gewaehltes Symbol hat Vorrang). Lizenz der Krea-2-Ausgaben weiter ungeprueft.
 
 **Runde 2026-10-17 (Zugangskontrolle im Multiplayer):** Der SL schickt erst Daten, wenn ein
 Spieler eingelassen ist (`unauthRef` -> `admitConn` in `useMultiplayer.js`). Optional: Raum-

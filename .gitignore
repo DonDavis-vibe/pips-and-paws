@@ -26,3 +26,6 @@ imp/
 
 # Einmal-Werkzeug zum Bereinigen der History (enthaelt PII im Klartext) — nach Gebrauch loeschen
 /.scrub/
+
+# Rohbilder der Item-Bild-Erzeugung (tools/item-art)
+tools/item-art/raw/

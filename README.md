@@ -34,7 +34,8 @@ data passing through the operator's server.
   each, the full 36-entry background table with starting gear, the weak-mouse rule,
   birthsign · coat · detail.
 - **Drag-and-drop inventory** — two paws, two body, six pack; 1- and 2-slot items,
-  swapping, usage dice, conditions as cards. Every item has an icon you can change.
+  swapping, usage dice, conditions as cards. Items and spells carry small ink
+  illustrations (73 so far); every item also has an icon you can pick instead.
 - **Dice** — d6 and d66 roll as real tumbling 3D cubes; saves (d20 ≤ attribute) with
   advantage / disadvantage. Clicking a weapon's damage value rolls it (one-paw and
   two-paw separately). Every roll shows up in the dice panel.
