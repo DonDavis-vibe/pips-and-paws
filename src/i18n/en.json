@@ -866,5 +866,13 @@
   "stash.cfgCapacity": "Slots (0 = unlimited)",
   "stash.cfgHint": "Players can't add anything once the storage is full. You can still put loot in yourself.",
   "footer.imagesAi": "Images: AI-generated",
-  "footer.imagesAiHint": "The illustrations are AI-generated (Krea 2 Turbo) and not official Mausritter artwork."
+  "footer.imagesAiHint": "The illustrations are AI-generated (Krea 2 Turbo) and not official Mausritter artwork.",
+  "header.dice3d": "3D dice",
+  "common.on": "on",
+  "common.off": "off",
+  "formula.label": "Dice formula",
+  "formula.placeholder": "Formula, e.g. 3d6+2",
+  "formula.roll": "Roll",
+  "formula.hint": "Free formula: 3d6+2, 4d6kh3 (keep the 3 highest), 2d20kl1 (advantage), 2d20kh1 (disadvantage), 3d6! (exploding), 1d20r1 (reroll a 1), 12d6>=5 (count successes).",
+  "formula.error": "That is not a valid dice formula."
 }

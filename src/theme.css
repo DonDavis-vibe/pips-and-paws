@@ -4403,4 +4403,10 @@ body:has(.battlemap-fullscreen) .section-nav { display: none; }
 .item-art { width: 40px; height: 40px; flex: 0 0 40px; }
 .item-icon-btn:has(.item-art) { width: auto; height: auto; padding: 0; border: 0; background: none; }
 
+/* Wuerfel-Formel und 3D-Schalter */
+.formula-roller { flex-wrap: wrap; }
+.formula-input { flex: 1 1 120px; min-width: 0; }
+.formula-error { flex: 1 1 100%; font-size: 12px; color: var(--bad); }
+.btn-icon-only.is-on { color: var(--accent); border-color: var(--accent); }
+
 } /* @layer classic */

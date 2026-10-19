@@ -5,6 +5,8 @@ import { rollDice, rollD66, rollSave } from '../rules/dice.js';
 import { shareRoll, shareSave } from '../utils/discord.js';
 import { RollButton, DiceStage } from './DiceKit.jsx';
 import { effectiveSaveMode, forcedDisadvantage } from '../rules/status.js';
+import { dN, saveSpec, specFromResult, stageFromFormula } from '../utils/dice3d.js';
+import FormulaRoller from './FormulaRoller.jsx';
 import Panel from './Panel.jsx';
 
 const SAVE_MODES = ['disadv', 'normal', 'adv'];
@@ -39,9 +41,9 @@ export default function DiceRoller({ character, onEvent, external }) {
     const { total } = rollDice(1, 6);
     record(
       { label: t('dice.d6'), verdict: t('dice.rolled', { value: total }) },
-      { label: t('dice.d6'), value: total, max: 6, die: 6 },
+      { label: t('dice.d6'), value: total, max: 6, die: 6, dice3d: dN(6, total) },
     );
-    if (onEvent) onEvent({ kind: 'roll', label: '1W6', value: total });
+    if (onEvent) onEvent({ kind: 'roll', label: '1W6', value: total, dice3d: dN(6, total) });
     shareRoll(who, '1W6', total, '');
   };
 
@@ -57,9 +59,10 @@ export default function DiceRoller({ character, onEvent, external }) {
           { value: r.tens, label: t('dice.tens') },
           { value: r.ones, label: t('dice.ones') },
         ],
+        dice3d: dN(6, r.tens, r.ones),
       },
     );
-    if (onEvent) onEvent({ kind: 'roll', label: t('dice.d66'), value: r.value });
+    if (onEvent) onEvent({ kind: 'roll', label: t('dice.d66'), value: r.value, dice3d: dN(6, r.tens, r.ones) });
     shareRoll(who, t('dice.d66'), r.value, '');
   };
 
@@ -75,14 +78,23 @@ export default function DiceRoller({ character, onEvent, external }) {
     const label = `${t('dice.dieLetter')}${sides}`;
     record(
       { label, verdict: t('dice.rolled', { value: total }) },
-      { label, value: total, max: sides },
+      { label, value: total, max: sides, dice3d: dN(sides, total) },
     );
-    if (onEvent) onEvent({ kind: 'roll', label, value: total });
+    if (onEvent) onEvent({ kind: 'roll', label, value: total, dice3d: dN(sides, total) });
     shareRoll(who, label, total, '');
   };
 
   // Zustaende (Verletzt, Entkraeftet, Belastet) zwingen Nachteil auf — der
   // gewaehlte Modus wird damit verrechnet (rules/status.js#effectiveSaveMode).
+  // Freie Formel: PnpDice hat schon gewuerfelt und animiert; hier nur Buehne, Protokoll, Mitspieler.
+  const onFormula = (r) => {
+    const stage = stageFromFormula(r);
+    record({ label: stage.label, verdict: `${r.total} (${stage.verdict})` }, stage);
+    const spec = specFromResult(r);
+    if (onEvent) onEvent({ kind: 'roll', label: stage.label, value: r.total, ...(spec ? { dice3d: spec } : {}) });
+    shareRoll(who, stage.label, r.total, stage.verdict);
+  };
+
   const save = (attrKey) => {
     const mode = effectiveSaveMode(character, attrKey, saveMode);
     const r = rollSave(character[attrKey].current, mode);
@@ -107,9 +119,9 @@ export default function DiceRoller({ character, onEvent, external }) {
         ok: r.ok,
         tone,
       },
-      { label: `${t('dice.saveVs', { attr })}${modeTag}`, value: r.d, max: 20, tone, verdict, parts },
+      { label: `${t('dice.saveVs', { attr })}${modeTag}`, value: r.d, max: 20, tone, verdict, parts, dice3d: saveSpec(r) },
     );
-    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode });
+    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode, dice3d: saveSpec(r) });
     shareSave(who, `${attr}${modeTag}`, r.d, r.target, r.ok);
   };
 
@@ -171,6 +183,8 @@ export default function DiceRoller({ character, onEvent, external }) {
           {t('dice.customRoll')}
         </button>
       </form>
+
+      <FormulaRoller onResult={onFormula} />
 
       <div className="save-mode" role="group" aria-label={t('dice.mode.label')}>
         {SAVE_MODES.map((m) => (

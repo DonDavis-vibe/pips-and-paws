@@ -866,5 +866,13 @@
   "stash.cfgCapacity": "Plätze (0 = unbegrenzt)",
   "stash.cfgHint": "Spieler können nichts mehr ablegen, wenn das Lager voll ist. Du selbst darfst weiter Beute hineinlegen.",
   "footer.imagesAi": "Bilder: KI-generiert",
-  "footer.imagesAiHint": "Die Illustrationen sind mit KI erzeugt (Krea 2 Turbo) und kein offizielles Mausritter-Artwork."
+  "footer.imagesAiHint": "Die Illustrationen sind mit KI erzeugt (Krea 2 Turbo) und kein offizielles Mausritter-Artwork.",
+  "header.dice3d": "3D-Würfel",
+  "common.on": "an",
+  "common.off": "aus",
+  "formula.label": "Würfelformel",
+  "formula.placeholder": "Formel, z. B. 3w6+2",
+  "formula.roll": "Würfeln",
+  "formula.hint": "Freie Formel: 3w6+2, 4w6kh3 (die 3 höchsten), 2w20kl1 (Vorteil), 2w20kh1 (Nachteil), 3w6! (explodierend), 1w20r1 (bei 1 neu würfeln), 12w6>=5 (Erfolge zählen).",
+  "formula.error": "Das ist keine gültige Würfelformel."
 }

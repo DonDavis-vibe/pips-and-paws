@@ -669,5 +669,13 @@
   "stash.cfgCapacity": "Emplacements (0 = illimité)",
   "stash.cfgHint": "Les joueurs ne peuvent plus rien déposer quand le stockage est plein. Toi, tu peux toujours y mettre du butin.",
   "footer.imagesAi": "Images : générées par IA",
-  "footer.imagesAiHint": "Les illustrations sont générées par IA (Krea 2 Turbo) et ne sont pas des illustrations officielles de Mausritter."
+  "footer.imagesAiHint": "Les illustrations sont générées par IA (Krea 2 Turbo) et ne sont pas des illustrations officielles de Mausritter.",
+  "header.dice3d": "Dés 3D",
+  "common.on": "activé",
+  "common.off": "désactivé",
+  "formula.label": "Formule de dés",
+  "formula.placeholder": "Formule, p. ex. 3d6+2",
+  "formula.roll": "Lancer",
+  "formula.hint": "Formule libre : 3d6+2, 4d6kh3 (garde les 3 meilleurs), 2d20kl1 (avantage), 2d20kh1 (désavantage), 3d6! (explosif), 1d20r1 (relancer un 1), 12d6>=5 (compter les réussites).",
+  "formula.error": "Ce n'est pas une formule de dés valide."
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { playDiceRoll } from '../utils/sound.js';
+import { animateDice, isDice3dEnabled } from '../utils/dice3d.js';
 
 // Wuerfel-Optik: SVG-Glyphen, Knoepfe mit Wurf-Animation und eine
 // Ergebnis-Buehne, in der die Zahl kurz "taumelt" und dann landet.
@@ -292,7 +293,6 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
 
   useEffect(() => {
     if (!result) return undefined;
-    playDiceRoll(result.id);
     const span = Math.max(6, result.max || 20);
     setRolling(true);
     setShown(1 + Math.floor(Math.random() * span));
@@ -305,6 +305,21 @@ export function DiceStage({ result, idleIcon, idleText, compact }) {
       setShown(result.value);
       setRolling(false);
     };
+    // Animierte 3D-Wuerfel (utils/dice3d.js): das Ergebnis erscheint erst, wenn
+    // sie liegen. Mit dem Geraeusch der Wuerfel selbst (kein zweites Klackern).
+    // Ohne 3D (aus, reduzierte Bewegung, Fehler) laeuft die einfache Zahlenanimation.
+    if (result.dice3d && isDice3dEnabled()) {
+      let cancelled = false;
+      animateDice(result.dice3d, result.id).then((shownOk) => {
+        if (cancelled) return;
+        if (shownOk) settle();
+        else { playDiceRoll(result.id); timer.current = setInterval(() => { frames += 1; setShown(1 + Math.floor(Math.random() * span)); if (frames >= 9) settle(); }, 45); fallback = setTimeout(settle, 650); }
+      });
+      // Sicherheitsnetz: nie laenger als 4 s auf die Wuerfel warten.
+      const cap = setTimeout(() => { if (!cancelled) settle(); }, 4000);
+      return () => { cancelled = true; clearTimeout(cap); clearInterval(timer.current); clearTimeout(fallback); };
+    }
+    if (!result.animated) playDiceRoll(result.id);
     timer.current = setInterval(() => {
       frames += 1;
       setShown(1 + Math.floor(Math.random() * span));

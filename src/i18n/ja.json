@@ -669,5 +669,13 @@
   "stash.cfgCapacity": "枠数（0 = 無制限）",
   "stash.cfgHint": "満杯になるとプレイヤーは何も置けない。GMは引き続き戦利品を入れられる。",
   "footer.imagesAi": "画像：AI生成",
-  "footer.imagesAiHint": "イラストは AI（Krea 2 Turbo）で生成したもので、Mausritter 公式のアートではない。"
+  "footer.imagesAiHint": "イラストは AI（Krea 2 Turbo）で生成したもので、Mausritter 公式のアートではない。",
+  "header.dice3d": "3Dダイス",
+  "common.on": "オン",
+  "common.off": "オフ",
+  "formula.label": "ダイス式",
+  "formula.placeholder": "式（例：3d6+2）",
+  "formula.roll": "振る",
+  "formula.hint": "自由な式：3d6+2、4d6kh3（高い方3つ）、2d20kl1（有利）、2d20kh1（不利）、3d6!（爆発）、1d20r1（1を振り直し）、12d6>=5（成功数）。",
+  "formula.error": "有効なダイス式ではありません。"
 }

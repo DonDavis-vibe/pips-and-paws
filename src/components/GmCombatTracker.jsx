@@ -11,6 +11,7 @@ import Panel from './Panel.jsx';
 import { usePnpHandler } from '../pnp/PnpBridge.jsx';
 import { pnpNpcId } from '../pnp/party.js';
 import { emitGm } from '../utils/gmBus.js';
+import { dN } from '../utils/dice3d.js';
 
 const KEY = 'pips-paws-gm-combat';
 const fresh = () => ({ round: 0, npcs: [] });
@@ -125,7 +126,9 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
   const attack = (n, sides = n.dmg) => {
     const roll = rollDie(sides);
     onLog('combat.log.attack', { name: n.name, roll, die: `W${sides}` });
-    pushRoll?.({ label: `${n.name} · ${t('dice.dieLetter')}${sides}`, value: roll, max: sides, die: sides });
+    pushRoll?.({
+      label: `${n.name} · ${t('dice.dieLetter')}${sides}`, value: roll, max: sides, die: sides, dice3d: dN(sides, roll),
+    });
   };
 
   // Treffer auf einen NSC (Regel S. 10): minus Ruestung auf TP, Rest auf STR,

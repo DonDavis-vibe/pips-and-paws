@@ -41,6 +41,7 @@ import { stashHasRoom, stashUsed } from '../rules/stash.js';
 import { repairItem } from '../rules/economy.js';
 import AfterFight from './AfterFight.jsx';
 import { effectiveSaveMode } from '../rules/status.js';
+import { dN, combine, saveSpec } from '../utils/dice3d.js';
 import { rollLevelUp } from '../rules/levelup.js';
 
 // Sprungleiste: Symbol + Kurzname je Panel (Label-Schluessel nav.*).
@@ -189,11 +190,13 @@ export default function CharacterSheet({
         tone: 'bad',
         verdict,
         parts: rolls.length > 1 ? rolls.map((r) => ({ value: r, label: die })) : undefined,
+        // zwei leichte Waffen: beide Wuerfel liegen, der hoehere zaehlt
+        dice3d: rolls.length > 1 ? { notation: `2w${opt.sides}kh1`, values: rolls } : dN(opt.sides, rolls[0]),
       },
       { label: `${label} ${die}`, verdict },
     );
     notify(`${label} ${die} — ${verdict}`, 'bad');
-    if (onEvent) onEvent({ kind: 'roll', label: `${label} ${die}`, value });
+    if (onEvent) onEvent({ kind: 'roll', label: `${label} ${die}`, value, dice3d: rolls.length > 1 ? { notation: `2w${opt.sides}kh1`, values: rolls } : dN(opt.sides, rolls[0]) });
     shareRoll(character.name || t('app.title'), `${label} ${die}`, value);
   };
 
@@ -235,6 +238,8 @@ export default function CharacterSheet({
         tone: res.sixes ? 'bad' : 'ok',
         verdict,
         parts: res.dice.map((d) => ({ value: d, label: d >= 4 ? t('spell.markShort') : t('dice.roll') })),
+        // Zauberwuerfel, bei einem Patzer dazu die W6 fuer den WIL-Schaden
+        dice3d: dN(6, ...res.dice, ...(res.wilDice || [])),
       },
       { label, verdict: `${verdict} — ${effect}` },
     );
@@ -272,11 +277,12 @@ export default function CharacterSheet({
           ...r.dice.map((d) => ({ value: d, label: t('dice.roll') })),
           { value: `≤ ${r.target}`, label: t('dice.target') },
         ],
+        dice3d: saveSpec(r),
       },
       { label, verdict: `${r.d} · ${verdict}`, ok: r.ok, tone },
     );
     notify(`${label} — d20 ${r.d} ≤ ${r.target} · ${verdict}`, tone);
-    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode });
+    if (onEvent) onEvent({ kind: 'save', attr: attrKey, roll: r.d, target: r.target, ok: r.ok, mode, dice3d: saveSpec(r) });
     shareSave(character.name || t('app.title'), attr, r.d, r.target, r.ok);
   };
 
@@ -302,6 +308,8 @@ export default function CharacterSheet({
           ...report.attrs.map((a) => ({ value: a.roll, label: `${t(`attr.abbr.${a.key}`)}${a.up ? ' ↑' : ''}` })),
           ...report.hd.dice.map((d) => ({ value: d, label: t('levelup.hd') })),
         ],
+        // drei W20 fuer die Attribute, dazu die Trefferwuerfel
+        dice3d: combine(dN(20, ...report.attrs.map((a) => a.roll)), dN(6, ...report.hd.dice)),
       },
       { label, verdict },
     );
@@ -329,6 +337,7 @@ export default function CharacterSheet({
           { value: r.d, label: t('dice.roll') },
           { value: `≤ ${r.target}`, label: t('dice.target') },
         ],
+        dice3d: dN(20, r.d),
       },
       { label, verdict: `${r.d} · ${verdict}`, ok: r.ok, tone },
     );

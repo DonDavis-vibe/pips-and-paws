@@ -3,6 +3,7 @@ import { Swords } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import { itemLabel } from '../data/items.js';
 import { afterFightCandidates, rollAfterFight } from '../rules/usage.js';
+import { dN } from '../utils/dice3d.js';
 
 // "Nach dem Kampf" (Regel S. 8): fuer jede benutzte Waffe, Ruestung und
 // Munition W6 — bei 4-6 Nutzung markieren. Vorausgewaehlt ist, was an Pfoten
@@ -36,6 +37,7 @@ export default function AfterFight({ character, setCharacter, notify, pushRoll }
         max: results.length,
         verdict: t('fight.marked', { n: marked }),
         parts: results.filter((r) => !r.always).map((r) => ({ value: r.roll, label: r.marked ? '●' : '○' })),
+        dice3d: results.some((r) => !r.always) ? dN(6, ...results.filter((r) => !r.always).map((r) => r.roll)) : undefined,
       },
       { label: t('fight.title'), verdict: text },
     );

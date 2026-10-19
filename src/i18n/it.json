@@ -669,5 +669,13 @@
   "stash.cfgCapacity": "Spazi (0 = illimitato)",
   "stash.cfgHint": "I giocatori non possono più aggiungere nulla quando il deposito è pieno. Tu puoi comunque metterci bottino.",
   "footer.imagesAi": "Immagini: generate da IA",
-  "footer.imagesAiHint": "Le illustrazioni sono generate da IA (Krea 2 Turbo) e non sono artwork ufficiale di Mausritter."
+  "footer.imagesAiHint": "Le illustrazioni sono generate da IA (Krea 2 Turbo) e non sono artwork ufficiale di Mausritter.",
+  "header.dice3d": "Dadi 3D",
+  "common.on": "attivo",
+  "common.off": "disattivo",
+  "formula.label": "Formula dei dadi",
+  "formula.placeholder": "Formula, es. 3d6+2",
+  "formula.roll": "Tira",
+  "formula.hint": "Formula libera: 3d6+2, 4d6kh3 (tieni i 3 più alti), 2d20kl1 (vantaggio), 2d20kh1 (svantaggio), 3d6! (esplosivo), 1d20r1 (ritira un 1), 12d6>=5 (conta i successi).",
+  "formula.error": "Non è una formula valida."
 }

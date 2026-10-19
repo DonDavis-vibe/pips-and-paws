@@ -77,7 +77,6 @@ function sectionOf(key) {
 }
 
 function lengthHint(key, en) {
-  const flat = en.replace(/\s+/g, ' ');
   if (key.startsWith('help.') || key.startsWith('hint.') || en.length > 80) return '';
   if (en.length <= 14 && !/\{/.test(en)) return 'Short UI text (button/label): keep it about as short as the English.';
   return '';

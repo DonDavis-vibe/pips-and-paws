@@ -40,6 +40,10 @@ import { exportGmSession, importGmSession } from '../utils/gmSession.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { shareEvent } from '../utils/discord.js';
 import { playDiceRoll } from '../utils/sound.js';
+import {
+  dN, animateDice, isDice3dEnabled, stageFromFormula,
+} from '../utils/dice3d.js';
+import FormulaRoller from './FormulaRoller.jsx';
 import { formatLogEntry, logEntryTone } from '../multiplayer/logFormat.js';
 
 const SHARE_KEYS = new Set([
@@ -116,7 +120,9 @@ function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
   // siehe Kommentar bei rollCustom).
   const rollN = (sides, preset = true) => {
     const r = rollDice(1, sides);
-    pushRoll({ label: dieLabel(sides), value: r.total, max: sides, ...(preset ? { die: sides } : {}) });
+    pushRoll({
+      label: dieLabel(sides), value: r.total, max: sides, ...(preset ? { die: sides } : {}), dice3d: dN(sides, r.total),
+    });
     onLog('gm.log.roll', { label: dieLabel(sides), value: r.total });
   };
 
@@ -136,9 +142,16 @@ function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
     const r = rollLuck(x);
     const verdict = t(r.ok ? 'luck.yes' : 'luck.no');
     pushRoll({
-      label: t('luck.label', { x: r.chance }), value: r.d, max: 6, die: 6, tone: r.ok ? 'ok' : 'bad', verdict,
+      label: t('luck.label', { x: r.chance }), value: r.d, max: 6, die: 6, tone: r.ok ? 'ok' : 'bad', verdict, dice3d: dN(6, r.d),
     });
     onLog('gm.log.luck', { x: r.chance, d: r.d, result: verdict });
+  };
+
+  // Freie Formel des SL: PnpDice hat schon gewuerfelt; Buehne und Protokoll wie bei den Schnellwuerfen.
+  const onFormula = (r) => {
+    const stage = stageFromFormula(r);
+    pushRoll(stage);
+    onLog('gm.log.roll', { label: stage.label, value: r.total });
   };
 
   const roll66 = () => {
@@ -151,6 +164,7 @@ function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
         { value: r.tens, label: t('dice.tens') },
         { value: r.ones, label: t('dice.ones') },
       ],
+      dice3d: dN(6, r.tens, r.ones),
     });
     onLog('gm.log.roll', { label: t('dice.d66'), value: r.value });
   };
@@ -164,6 +178,7 @@ function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
       max: 12,
       verdict,
       parts: [{ value: r.total, label: t('dice.roll') }],
+      dice3d: dN(6, ...r.dice),
     });
     onLog('gm.log.reaction', { roll: r.total, result: verdict });
   };
@@ -171,7 +186,9 @@ function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
   const treasure = () => {
     const r = rollTreasure();
     const verdict = r.key === 'pips' ? t('treasure.pips', { n: r.pips }) : t(`treasure.${r.key}`);
-    pushRoll({ label: t('gm.treasure'), value: r.d, max: 20, verdict });
+    pushRoll({
+      label: t('gm.treasure'), value: r.d, max: 20, verdict, dice3d: dN(20, r.d),
+    });
     onLog('gm.log.treasure', { d: r.d, result: verdict });
   };
 
@@ -185,7 +202,12 @@ function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
   useEffect(() => {
     const id = newest?.id ?? null;
     if (heardRef.current !== undefined && id && id !== heardRef.current && newest.kind === 'event') {
-      playDiceRoll(id);
+      // Der Spieler schickt mit, welche Wuerfel gefallen sind (ev.dice3d): dann rollen sie auch hier
+      // ueber den Bildschirm. Aeltere Clients schicken nur die Zahl -> bei Proben ein W20, sonst Geraeusch.
+      const ev = newest.ev || {};
+      const spec = ev.dice3d || (ev.kind === 'save' && Number.isFinite(ev.roll) ? dN(20, ev.roll) : null);
+      if (!isDice3dEnabled() || !spec) playDiceRoll(id);
+      else animateDice(spec, id).then((shown) => { if (!shown) playDiceRoll(id); });
     }
     heardRef.current = id;
   }, [newest?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -213,6 +235,8 @@ function GmDicePanel({ onLog, log, result, pushRoll, secret, setSecret }) {
         ))}
         <RollButton d66 label={t('dice.d66')} kind="gm" onRoll={roll66} />
       </div>
+
+      <FormulaRoller onResult={onFormula} />
 
       <form className="dice-custom" onSubmit={rollCustom}>
         <Dice6 size={15} className="dice-custom-icon" aria-hidden="true" />

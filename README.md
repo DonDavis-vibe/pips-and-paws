@@ -162,6 +162,13 @@ dark mode), no stock icons for the brand. The previous app
 look is still there as **Classic** — the brush button in the header switches
 between the two, the choice is remembered.
 
+**Animated 3D dice** (PnpDice, MIT, bundled in `src/vendor/`): every roll tumbles
+across the page and the result is shown once the dice settle. The rules code
+rolls the numbers; the animation only visualises them, so results never depend
+on the physics. The cube button in the header switches it off (it starts off for
+visitors who prefer reduced motion). The dice panels also take free formulas such
+as `3d6+2`, `4d6kh3` or `2d20kl1`.
+
 ## Also
 
 Collapsible panels (state remembered) · light / dark toggle (Classic has its

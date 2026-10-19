@@ -35,6 +35,7 @@ import HelpModal from './components/HelpModal.jsx';
 import RosterModal from './components/RosterModal.jsx';
 import Footer from './components/Footer.jsx';
 import VolumeControl from './components/VolumeControl.jsx';
+import Dice3dToggle from './components/Dice3dToggle.jsx';
 
 const STORAGE_KEY = 'pips-paws-character-v1';
 
@@ -292,6 +293,7 @@ export default function App() {
             {theme === 'system' ? <Monitor size={16} /> : theme === 'light' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <VolumeControl />
+          <Dice3dToggle />
           <button
             type="button"
             className="btn btn-ghost btn-icon-only"
