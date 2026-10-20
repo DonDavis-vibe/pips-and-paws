@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Download, Upload, Sparkles, Languages, CircleHelp, Monitor, Sun, Moon, Brush, BookCopy,
 } from 'lucide-react';
@@ -382,7 +383,8 @@ export default function App() {
         />
       ) : null}
 
-      {toast ? <div className={`toast toast-${toast.kind}`}>{toast.message}</div> : null}
+      {/* Am body statt in .app: .app bildet eine Stapelebene (z-index 1), darin laege der Toast unter der Sprungleiste. */}
+      {toast ? createPortal(<div className={`toast toast-${toast.kind}`} role="status">{toast.message}</div>, document.body) : null}
     </div>
   );
 }

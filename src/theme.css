@@ -2633,7 +2633,8 @@ summary,
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 24px;
+  /* ueber der Sprungleiste (ca. 56 px hoch), nicht darauf */
+  bottom: calc(max(8px, env(safe-area-inset-bottom)) + 66px);
   transform: translateX(-50%);
   max-width: 90vw;
   padding: 12px 18px;
