@@ -71,10 +71,12 @@ proofread. Apply it the same way.
 `npm run i18n -- package <code|new>` builds `tools/i18n/out/pips-and-paws-translation-<code>.zip`
 with everything a person needs: `START-HERE.md`, the commented template, `checker.html`
 (opens in any browser, checks placeholders, nothing installed or uploaded) and screenshots,
-plus a ready-to-paste Discord message (`discord-message-<code>.txt`). When the filled-in file
+plus a ready-to-paste Discord message (`discord-message-<code>.txt`). For a language that does not exist yet, `package <code>` (e.g. `package pl`) builds a ready package with the language's name and its notes; language-specific hints (plural forms, address, dice notation ...) live in `tools/i18n/langnotes.json` and end up in the template header and `START-HERE.md`. When the filled-in file
 comes back: `npm run i18n -- apply <file> <code>` (and `register` for a new language).
 
 ## Notes for maintainers
+
+- Polish is in preparation: `docs/translations/pl.jsonc` is the blank all-keys template with the Polish notes. When the file comes back: `npm run i18n -- apply <file> pl`, then `register pl PL`.
 
 - When you add UI texts: add the key to `en.json` and `de.json`; `fr/it/ja` may follow.
   Put new keys in a section that `tools/i18n/context.json` knows (or add one) and, for

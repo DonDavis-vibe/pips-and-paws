@@ -28,6 +28,11 @@ const SRC_REF = 'en';
 const SECOND_REF = 'de'; // shown next to English: the most complete second language
 
 const ctx = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'i18n', 'context.json'), 'utf8'));
+const notesFile = path.join(ROOT, 'tools', 'i18n', 'langnotes.json');
+const langNotes = fs.existsSync(notesFile) ? JSON.parse(fs.readFileSync(notesFile, 'utf8')) : {};
+// 'new' = the blank preset; any other code without a src/i18n/<code>.json is a new language too.
+const isNewLang = (lang) => lang === 'new' || !fs.existsSync(path.join(I18N, `${lang}.json`));
+const languageName = (code) => { try { return new Intl.DisplayNames(['en'], { type: 'language' }).of(code) || code; } catch { return code; } };
 
 const readDict = (lang) => {
   const file = path.join(I18N, `${lang}.json`);
@@ -147,13 +152,13 @@ async function glossaryLines(lang, dicts) {
 
 async function cmdTemplate(lang, all) {
   if (!lang) { console.error('usage: template <lang> [--all]'); process.exit(2); }
-  const isNew = lang === 'new';
+  const isNew = isNewLang(lang);
   if (isNew) all = true;
   const en = readDict(SRC_REF);
   const dicts = Object.fromEntries(languages().map((l) => [l, readDict(l)]));
   const mine = isNew ? {} : (dicts[lang] || {});
   const a = isNew ? { missing: Object.keys(en), empty: [], untranslated: [], badPlaceholders: [] } : analyse(lang, en);
-  const code = isNew ? '<code>' : lang;
+  const code = lang === 'new' ? '<code>' : lang;
   const wanted = new Set(all ? Object.keys(en) : [...a.missing, ...a.empty, ...a.untranslated, ...a.badPlaceholders]);
   const usage = usageMap(Object.keys(en));
   // Group by section (first appearance order) so the file reads topic by topic.
@@ -164,7 +169,7 @@ async function cmdTemplate(lang, all) {
   const out = [];
   const w = (s = '') => out.push(s);
 
-  w(isNew ? '// Pips & Paws — blank translation preset for a NEW language' : `// Pips & Paws — translation template for "${lang}"`);
+  w(lang === 'new' ? '// Pips & Paws — blank translation preset for a NEW language' : isNew ? `// Pips & Paws — translation template for ${languageName(lang)} ("${lang}", new language, all keys)` : `// Pips & Paws — translation template for "${lang}"`);
   w(`// Generated ${new Date().toISOString().slice(0, 10)} by tools/i18n/i18n.mjs — ${keys.length} of ${Object.keys(en).length} keys${all ? ' (all keys)' : ' (missing, empty, identical-to-English or broken)'}.`);
   w('//');
   w('// HOW TO USE');
@@ -172,7 +177,7 @@ async function cmdTemplate(lang, all) {
   w('//  2. Keep every {placeholder} exactly as written (same name, braces included). Words around it can move.');
   w('//  3. Keep line breaks as \\n, keep [SQUARE_BRACKET] markers, keep product and licence names (Pips & Paws, Mausritter, PenNodePaper, MIT, CC BY 4.0).');
   w('//  4. Lines starting with // are comments for you; they are ignored.');
-  w(`//  5. Check:  node tools/i18n/i18n.mjs apply ${isNew ? '<this file>' : path.relative(ROOT, path.join(OUT, `${lang}.jsonc`))} ${code}`);
+  w(`//  5. Check:  node tools/i18n/i18n.mjs apply ${lang === 'new' ? '<this file>' : path.relative(ROOT, path.join(OUT, `${lang}.jsonc`))} ${code}`);
   w('//     That writes src/i18n/' + code + '.json (use the two-letter language code, e.g. pl). Then run the app (npm run dev) with ?lang=' + code + ' to see your text in place.');
   w('//  New language? Also see docs/translations/GUIDE.md (register it in src/i18n/index.jsx).');
   w('//');
@@ -182,6 +187,11 @@ async function cmdTemplate(lang, all) {
   w('//  - Button labels: short, imperative, no full stop. Messages: full sentences.');
   w('//  - If your language has an official Mausritter translation, use its terms for the glossary below.');
   w('//');
+  if ((langNotes[lang] || []).length) {
+    w(`// NOTES FOR ${languageName(lang).toUpperCase()}`);
+    for (const n of langNotes[lang]) w(`//  - ${n}`);
+    w('//');
+  }
   w('// GLOSSARY — existing translations of core terms (stay consistent with them)');
   for (const l of await glossaryLines(lang, dicts)) w(l);
   w('//');
@@ -220,7 +230,7 @@ async function cmdTemplate(lang, all) {
   w('');
 
   fs.mkdirSync(OUT, { recursive: true });
-  const file = path.join(OUT, isNew ? '_new-language.jsonc' : `${lang}.jsonc`);
+  const file = path.join(OUT, lang === 'new' ? '_new-language.jsonc' : `${lang}.jsonc`);
   fs.writeFileSync(file, out.join('\n'), 'utf8');
   console.log(`Wrote ${path.relative(ROOT, file)} (${keys.length} keys).`);
 }
@@ -298,30 +308,32 @@ function cmdRegister(code, labelArg) {
 // the commented template, a browser-based checker (no install), a short guide and screenshots.
 async function cmdPackage(lang) {
   if (!lang) { console.error('usage: package <lang|new>'); process.exit(2); }
-  const isNew = lang === 'new';
+  const isNew = isNewLang(lang);
+  const blank = lang === 'new';
   await cmdTemplate(lang, false);
   const en = readDict(SRC_REF);
-  const name = isNew ? 'new-language' : lang;
+  const name = blank ? 'new-language' : lang;
   const outRoot = path.join(ROOT, 'tools', 'i18n', 'out');
   const dir = path.join(outRoot, `pips-and-paws-translation-${name}`);
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(path.join(dir, 'screenshots'), { recursive: true });
 
-  const template = path.join(OUT, isNew ? '_new-language.jsonc' : `${lang}.jsonc`);
+  const template = path.join(OUT, blank ? '_new-language.jsonc' : `${lang}.jsonc`);
   const count = (fs.readFileSync(template, 'utf8').match(/^ {2}"[^"]+": /gm) || []).length;
   fs.copyFileSync(template, path.join(dir, `translate-${name}.jsonc`));
 
   const table = Object.fromEntries(Object.entries(en).map(([k, v]) => [k, { ph: placeholders(v), en: v }]));
   const html = fs.readFileSync(path.join(ROOT, 'tools', 'i18n', 'checker.template.html'), 'utf8')
-    .replace('__LANG__', isNew ? 'new language' : lang)
+    .replace('__LANG__', blank ? 'new language' : lang)
     .replace('__EN__', JSON.stringify(table).replace(/</g, '\\u003c'));
   fs.writeFileSync(path.join(dir, 'checker.html'), html, 'utf8');
 
   const shots = path.join(ROOT, 'docs', 'screenshots');
   if (fs.existsSync(shots)) for (const f of fs.readdirSync(shots)) fs.copyFileSync(path.join(shots, f), path.join(dir, 'screenshots', f));
 
-  const langName = isNew ? 'your language' : { fr: 'French', it: 'Italian', ja: 'Japanese', es: 'Spanish', de: 'German' }[lang] || lang;
+  const langName = blank ? 'your language' : languageName(lang);
   const a = isNew ? null : analyse(lang, en);
+  const extra = (langNotes[lang] || []).map((n) => `   - ${n}`).join('\n');
   const guide = `# Translating Pips & Paws into ${langName}
 
 Pips & Paws is a free, browser-based helper for the tabletop game **Mausritter** (brave little mice
@@ -346,7 +358,7 @@ Live app to look around: https://mausritter.redneck-design.de/  (the screenshots
    - Do not translate: Pips & Paws, Mausritter, PenNodePaper, Discord, MIT, CC BY 4.0.
    - Friendly, plain wording like the rulebook; buttons short, messages full sentences; one form of "you".
    - If Mausritter exists in ${langName}, use the official game terms.
-4. Open \`checker.html\` in your browser, choose your file, fix anything it reports.
+${extra ? `\n   Notes for ${langName}:\n${extra}\n` : ''}4. Open \`checker.html\` in your browser, choose your file, fix anything it reports.
 5. Send the file back (the \`.jsonc\` you edited is perfect). Partial is welcome — send what you have,
    we can add the rest later.
 

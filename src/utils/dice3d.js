@@ -113,8 +113,13 @@ export function saveSpec(r) {
 }
 
 // Eigene Formel (z. B. "3w6+2") frei wuerfeln — PnpDice wuerfelt selbst.
+// "3k6+2" (polnisch: kosc) -> "3d6+2". Ein k direkt vor einer Ziffer ist nie ein
+// Behalten-Modifikator (der heisst kh/kl), also eindeutig.
+const normalizeNotation = (s) => String(s || '').replace(/(\d*)k(?=\d)/gi, '$1d');
+
 export async function rollFormula(notation, label, lang) {
   setup();
+  notation = normalizeNotation(notation);
   // PnpDice kennt Meldungen auf Deutsch und Englisch.
   PnpDice.configure({ lang: lang === 'de' ? 'de' : 'en' });
   return PnpDice.roll(notation, { label });
