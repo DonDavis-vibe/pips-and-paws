@@ -145,6 +145,13 @@ Betreibers laufen.
 - **Serverloser Multiplayer** über WebRTC / PeerJS. Die Spielleitung ist der Host;
   Spieler treten per 6-Zeichen-Code oder `?join`-Link bei. Reconnect und
   Reload-Wiederherstellung sind eingebaut.
+- **Verbindungshilfe** — wer in einem strengen Netz sitzt (Mobilfunk, Firmen- oder Hotel-WLAN),
+  braucht einen TURN-Relay; mit STUN allein klappen nur direkte Wege. Das Mehrspieler-Fenster hat
+  einen Verbindungstest und ein Feld für einen TURN-Server (bleibt auf dem Gerät), gescheiterte
+  Beitritte sagen *warum* (WebRTC gesperrt, strenges NAT, Signalisierungsserver nicht erreichbar),
+  und der Raum des SL meldet sich nach einem Netz-Aussetzer selbst wieder an. Wer die App selbst hostet,
+  baut einen Relay (`VITE_TURN_URLS`, `VITE_TURN_USER`, `VITE_TURN_PASS`) und einen eigenen
+  PeerJS-Signalisierungsserver (`VITE_PEER_HOST`, `VITE_PEER_PORT`, `VITE_PEER_PATH`) fest ein.
 - **Zugangskontrolle für den Raum** — an ein Gerät geht erst etwas raus, wenn die
   Spielleitung es eingelassen hat. Optionales Raum-Passwort (per Challenge-Response
   geprüft, nie übertragen; auf Wunsch im Einladungslink hinter dem `#`), optional

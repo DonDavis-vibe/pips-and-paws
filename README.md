@@ -140,6 +140,13 @@ data passing through the operator's server.
 - **Serverless multiplayer** over WebRTC / PeerJS. The GM is the host; players join
   with a 6-character code or a `?join` link. Reconnect and reload recovery are
   built in.
+- **Connection help** — players behind strict networks (mobile data, company or hotel
+  Wi-Fi) need a TURN relay; plain STUN only works for direct routes. The multiplayer
+  window has a connection test and a field for a TURN server (stored on the device),
+  failed joins say *why* (WebRTC blocked, strict NAT, signalling server unreachable),
+  and the GM's room re-registers itself after a network hiccup. Self-hosters can build
+  in a relay (`VITE_TURN_URLS`, `VITE_TURN_USER`, `VITE_TURN_PASS`) and their own PeerJS
+  signalling server (`VITE_PEER_HOST`, `VITE_PEER_PORT`, `VITE_PEER_PATH`).
 - **Room access control** — nothing is sent to a device before the GM has let it in.
   Optional room password (checked by challenge-response, never transmitted; it can
   ride in the invite link behind the `#`), optional "approve joins" with an

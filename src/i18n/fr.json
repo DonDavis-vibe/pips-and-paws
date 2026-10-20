@@ -160,7 +160,7 @@
   "mp.status.needCode": "Saisis un code de salon.",
   "mp.status.joinFailed": "Connexion impossible. Vérifie le code ou demande au MJ de réhéberger.",
   "mp.status.roomNotFound": "Salon introuvable. Vérifie le code ou demande au MJ de réhéberger.",
-  "mp.status.serverUnreachable": "Serveur de signalisation injoignable. Réessaie plus tard.",
+  "mp.status.serverUnreachable": "Serveur de signalisation injoignable (pare-feu, VPN ou bloqueur de pub ?). Réessayez plus tard.",
   "mp.status.hostGone": "MJ injoignable. Reconnecte-toi manuellement.",
   "mp.status.hostInterrupted": "Connexion au MJ interrompue — nouvelle tentative ...",
   "mp.status.idTaken": "Code de salon déjà utilisé. Héberge à nouveau.",
@@ -369,7 +369,6 @@
   "mp.discord.events": "Événements",
   "mp.discord.share": "Envoyer à tous les joueurs",
   "player.gm.webhookShared": "Le MJ a partagé le canal Discord.",
-
   "header.help": "Aide",
   "header.volume": "Volume",
   "header.roster": "Mes souris",
@@ -402,12 +401,10 @@
   "help.gm.p": "Chaque carte de joueur montre les caractéristiques, la protection, l'armure, les emplacements utilisés, les armes et les états. En dessous, des actions : dégâts, soin, pips, XP, demander une sauvegarde ou l'initiative, chuchoter, donner un objet ou un état.\nTable commune : un inventaire partagé — le MJ y dépose le butin, les joueurs le glissent sur leur feuille.\nPlus des compteurs pour le temps, la lumière et les rencontres, un compteur PNJ/combat et des notes du MJ.\nEnregistrer la session écrit la table, les compteurs et les notes dans un fichier.",
   "help.rules.h": "Règles & licence",
   "help.rules.p": "Cette application modélise les règles mais ne remplace pas le livre de règles. Le SRD Mausritter complet et gratuit ainsi que les règles originales sont liés ici. Pips & Paws est une production de fans non officielle et n'est pas affiliée à Losing Games.",
-
   "dice.mode.label": "Mode de sauvegarde",
   "dice.mode.normal": "Normal",
   "dice.mode.adv": "Avantage",
   "dice.mode.disadv": "Désavantage",
-
   "gm.reaction": "Réaction",
   "gm.treasure": "Trésor",
   "gm.log.reaction": "Réaction 2d6 {roll} : {result}",
@@ -425,14 +422,12 @@
   "treasure.large": "Grand trésor (SRD p. 38)",
   "treasure.useful": "Trésor utile (SRD p. 38)",
   "treasure.pips": "Bourse de {n} pips",
-
   "combat.wil": "WIL",
   "combat.morale": "Moral",
   "combat.morale.hint": "Test de moral : sauvegarde de WIL. En cas d'échec, la créature fuit ou se rend.",
   "combat.morale.hold": "tient bon",
   "combat.morale.flee": "fuit",
   "combat.log.morale": "{name} moral : d20 {roll} ≤ {wil} · {result}",
-
   "rest.title": "Repos",
   "rest.short": "Court",
   "rest.long": "Long",
@@ -446,7 +441,6 @@
   "rest.log.longFull": "Repos long : déjà totalement reposé",
   "rest.log.full": "Repos complet : protection et caractéristiques restaurées",
   "rest.noRation": "aucune ration dans le sac",
-
   "panel.collapse": "Réduire",
   "panel.expand": "Déplier",
   "party.title": "Journal de partie",
@@ -460,7 +454,6 @@
   "gm.restLock.hint": "Les joueurs ne peuvent plus se reposer seuls — tu déclenches le repos par souris dans le tableau de bord.",
   "gm.log.rest": "{name} : repos {kind} déclenché",
   "rest.locked": "Le MJ déclenche les repos.",
-
   "meta.title": "Pips & Paws — feuille de personnage Mausritter, tableau de bord MJ & multijoueur",
   "meta.description": "Feuille de personnage et tableau de bord de meneur de jeu gratuits pour Mausritter, dans le navigateur. Multijoueur en temps réel, inventaire glisser-déposer, dés, création de personnage. Sans inscription.",
   "nav.label": "Aller à la section",
@@ -677,5 +670,25 @@
   "formula.placeholder": "Formule, p. ex. 3d6+2",
   "formula.roll": "Lancer",
   "formula.hint": "Formule libre : 3d6+2, 4d6kh3 (garde les 3 meilleurs), 2d20kl1 (avantage), 2d20kh1 (désavantage), 3d6! (explosif), 1d20r1 (relancer un 1), 12d6>=5 (compter les réussites).",
-  "formula.error": "Ce n'est pas une formule de dés valide."
+  "formula.error": "Ce n'est pas une formule de dés valide.",
+  "mp.net.title": "Problèmes de connexion ?",
+  "mp.net.help": "La plupart des joueurs se connectent directement. Dans les réseaux stricts (données mobiles, Wi-Fi d'entreprise ou d'hôtel), il faut un serveur relais TURN. Si vous en avez un, saisissez-le ici — il reste sur cet appareil.",
+  "mp.net.test": "Tester ma connexion",
+  "mp.net.testing": "Test en cours ...",
+  "mp.net.ok": "Une connexion directe semble possible.",
+  "mp.net.okRelay": "Le relais (TURN) fonctionne — vous pouvez vous connecter même depuis un réseau strict.",
+  "mp.net.noDirect": "Aucun chemin direct (réseau strict). Un serveur relais TURN est nécessaire.",
+  "mp.net.noRtc": "WebRTC est bloqué dans ce navigateur — souvent un VPN ou une extension de confidentialité.",
+  "mp.net.turnFail": "Le serveur TURN est injoignable — vérifiez l'adresse et les identifiants.",
+  "mp.net.turnUrl": "Serveur TURN (turn:hôte:3478, plusieurs séparés par des virgules)",
+  "mp.net.turnUser": "Nom d'utilisateur",
+  "mp.net.turnPass": "Mot de passe",
+  "mp.net.save": "Enregistrer",
+  "mp.net.saved": "Enregistré sur cet appareil.",
+  "mp.net.removed": "Serveur TURN supprimé.",
+  "mp.net.badUrl": "L'adresse doit commencer par turn: ou turns:.",
+  "mp.status.diagBlocked": "WebRTC est bloqué dans ce navigateur — souvent un VPN ou une extension de confidentialité. Désactivez-la ou changez de navigateur.",
+  "mp.status.diagNoAnswer": "La salle existe, mais le MJ n'a envoyé aucune donnée de connexion. WebRTC est peut-être bloqué chez le MJ.",
+  "mp.status.diagNeedTurn": "Connexion directe impossible — probablement un réseau strict (données mobiles, Wi-Fi d'entreprise ou d'hôtel). Un serveur relais TURN est nécessaire, voir « Problèmes de connexion ? » ci-dessous.",
+  "mp.status.diagFailed": "Échec de la connexion, même avec un relais. Vérifiez le réseau et les identifiants TURN."
 }
