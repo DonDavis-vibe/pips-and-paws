@@ -265,7 +265,10 @@ own imprint (see `CONTRIBUTING.md`).
 
 Code: **MIT** (`LICENSE`).
 
-> *Pips &amp; Paws is an independent production by DonDavis and is not affiliated with Losing Games.*
+> *Pips &amp; Paws is an independent production by DonDavis and is not affiliated with Losing Games.
+> It is published under the Mausritter Third Party Licence.*
 >
 > *This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is
 > licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence.*
+>
+> *Mausritter is copyright Losing Games.*

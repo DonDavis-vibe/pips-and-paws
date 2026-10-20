@@ -42,7 +42,7 @@ const languages = () => fs.readdirSync(I18N).filter((f) => /^[a-z]{2,3}(-[A-Za-z
 const placeholders = (s) => [...new Set([...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
 const sameSet = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
 // Keys whose text is legal/technical and meant to stay English everywhere.
-const KEEP_ENGLISH = new Set(['footer.disclaimer1', 'footer.disclaimer2']);
+const KEEP_ENGLISH = new Set(['footer.disclaimer1', 'footer.disclaimer2', 'footer.disclaimer3', 'footer.disclaimer4']);
 // A value identical to English is only suspicious when it is real prose.
 const looksUntranslated = (key, en, val) => val === en && /[a-z]{4}/.test(en) && !KEEP_ENGLISH.has(key) && !/^[A-Z0-9 ./:&+-]+$/.test(en);
 

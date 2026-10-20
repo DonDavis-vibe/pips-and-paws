@@ -43,8 +43,8 @@ mistakes. `npm run i18n:templates` regenerates the templates in this folder.
 - **`\n`** in a value is a line break between paragraphs — keep it.
 - **`[SUM]`, `[DICE]`** style markers are used by the spell texts — keep them.
 - **Do not translate** product and licence names: *Pips & Paws*, *Mausritter*,
-  *PenNodePaper*, *Discord*, *Ko-fi*, *MIT*, *CC BY 4.0*. The two legal disclaimers in the
-  footer (`footer.disclaimer1/2`) stay English in every language on purpose.
+  *PenNodePaper*, *Discord*, *Ko-fi*, *MIT*, *CC BY 4.0*. The legal disclaimers in the
+  footer (`footer.disclaimer1` to `4`, wording required by the Mausritter licences) stay English in every language on purpose.
 - **Terms:** use one consistent word for each core term (see the glossary at the top of
   every template). If Mausritter has an official translation in your language, use its
   terms. *Hit Protection*, *Save*, *Grit*, *Watch* and *Turn* are game terms, not everyday words.

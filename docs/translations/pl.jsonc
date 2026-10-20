@@ -1,5 +1,5 @@
 // Pips & Paws — translation template for Polish ("pl", new language, all keys)
-// Generated 2026-10-20 by tools/i18n/i18n.mjs — 889 of 889 keys (all keys).
+// Generated 2026-10-20 by tools/i18n/i18n.mjs — 891 of 891 keys (all keys).
 //
 // HOW TO USE
 //  1. Fill in the empty "" values below. Leave a value empty to skip a key — it falls back to English.
@@ -2222,6 +2222,18 @@
   // EN: "This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence."
   // DE: "This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence."
   "footer.disclaimer2": "",
+
+  // Used in: Footer.jsx
+  // NOTE: Legal text required by the licence: it is intentionally left in English in every language. Do not translate.
+  // EN: "It is published under the Mausritter Third Party Licence."
+  // DE: "It is published under the Mausritter Third Party Licence."
+  "footer.disclaimer3": "",
+
+  // Used in: Footer.jsx
+  // NOTE: Legal text required by the licence: it is intentionally left in English in every language. Do not translate.
+  // EN: "Mausritter is copyright Losing Games."
+  // DE: "Mausritter is copyright Losing Games."
+  "footer.disclaimer4": "",
 
   // Used in: Footer.jsx
   // Short UI text (button/label): keep it about as short as the English.

@@ -261,6 +261,8 @@
   "footer.translatorEs": "Traducción al Español: {name}",
   "footer.disclaimer1": "Pips & Paws es una producción independiente desarrollada por {name} y no está afiliada con Losing Games.",
   "footer.disclaimer2": "Este trabajo está basado en Mausritter, un producto de Losing Games e Isaac Williams, y tiene licencia de uso bajo Creative Commons Attribution 4.0 International (CC BY 4.0).",
+  "footer.disclaimer3": "Se publica bajo la Mausritter Third Party Licence.",
+  "footer.disclaimer4": "Mausritter es copyright de Losing Games.",
   "footer.impressum": "Impressum",
   "footer.privacy": "Privacidad",
   "common.close": "Cerrar",

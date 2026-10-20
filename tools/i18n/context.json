@@ -141,7 +141,9 @@
     "footer.codeLicense": "Licence name: keep 'MIT'.",
     "footer.rulesLicense": "Licence name: keep 'CC BY 4.0'.",
     "footer.disclaimer1": "Legal text required by the licence: it is intentionally left in English in every language. Do not translate.",
-    "footer.disclaimer2": "Legal text required by the licence: it is intentionally left in English in every language. Do not translate."
+    "footer.disclaimer2": "Legal text required by the licence: it is intentionally left in English in every language. Do not translate.",
+    "footer.disclaimer3": "Legal text required by the licence: it is intentionally left in English in every language. Do not translate.",
+    "footer.disclaimer4": "Legal text required by the licence: it is intentionally left in English in every language. Do not translate."
   },
   "glossary": [
     { "term": "Hit Protection (HP)", "key": "res.hp", "note": "A buffer: damage goes here first, then to STR." },
