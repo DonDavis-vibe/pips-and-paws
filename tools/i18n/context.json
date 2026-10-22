@@ -69,6 +69,7 @@
     "confirm": { "title": "Confirmations", "note": "Questions before something is deleted or overwritten." }
   },
   "placeholders": {
+    "q": "the text the player typed into a search field",
     "n": "a number (count, amount)",
     "name": "a name: a mouse, a player, an item or a spell",
     "item": "the name of an item",
@@ -114,6 +115,8 @@
     "v": "a raw status code"
   },
   "keys": {
+    "inv.search": "Placeholder text inside the search field of the add-item dialog (it also serves as the field's accessible name). Short, e.g. 'Search…'.",
+    "inv.noMatch": "Shown under the search field when nothing matches. {q} is what the player typed; the quotation marks around it are typographic, use your language's own.",
     "app.title": "Product name — keep 'Pips & Paws'.",
     "attr.save": "Button text on an attribute box: roll a d20, equal or under the attribute = success. English 'Save' is the official Mausritter term; use the term of the official translation if one exists.",
     "attr.saveShort": "Very short form of 'Save'. Used where space is tight.",

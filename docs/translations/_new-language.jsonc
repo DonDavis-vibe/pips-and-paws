@@ -1,5 +1,5 @@
 // Pips & Paws — blank translation preset for a NEW language
-// Generated 2026-10-20 by tools/i18n/i18n.mjs — 891 of 891 keys (all keys).
+// Generated 2026-10-22 by tools/i18n/i18n.mjs — 893 of 893 keys (all keys).
 //
 // HOW TO USE
 //  1. Fill in the empty "" values below. Leave a value empty to skip a key — it falls back to English.
@@ -80,6 +80,7 @@
 //   {names} = a comma-separated list of names
 //   {need} = number of pip purses needed
 //   {pips} = pips
+//   {q} = the text the player typed into a search field
 //   {result} = a short result phrase such as 'success' or 'hold' (already translated)
 //   {role} = a role name from PenNodePaper
 //   {roll} = the number rolled on a die
@@ -471,6 +472,20 @@
   // EN: "Item name"
   // DE: "Name des Gegenstands"
   "inv.customName": "",
+
+  // Used in: AddItemMenu.jsx, CharacterSheet.jsx
+  // NOTE: Placeholder text inside the search field of the add-item dialog (it also serves as the field's accessible name). Short, e.g. 'Search…'.
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Search…"
+  // DE: "Suchen…"
+  "inv.search": "",
+
+  // Used in: AddItemMenu.jsx, CharacterSheet.jsx
+  // NOTE: Shown under the search field when nothing matches. {q} is what the player typed; the quotation marks around it are typographic, use your language's own.
+  // Placeholders: {q}
+  // EN: "Nothing matches “{q}”."
+  // DE: "Nichts passt zu „{q}“."
+  "inv.noMatch": "",
 
   // Used in: BankPanel.jsx, CharacterSheet.jsx, HirelingsPanel.jsx
   // EN: "No room in inventory"

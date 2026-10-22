@@ -1,5 +1,5 @@
 // Pips & Paws — translation template for "es"
-// Generated 2026-10-20 by tools/i18n/i18n.mjs — 404 of 891 keys (missing, empty, identical-to-English or broken).
+// Generated 2026-10-22 by tools/i18n/i18n.mjs — 406 of 893 keys (missing, empty, identical-to-English or broken).
 //
 // HOW TO USE
 //  1. Fill in the empty "" values below. Leave a value empty to skip a key — it falls back to English.
@@ -71,6 +71,7 @@
 //   {name} = a name: a mouse, a player, an item or a spell
 //   {names} = a comma-separated list of names
 //   {need} = number of pip purses needed
+//   {q} = the text the player typed into a search field
 //   {result} = a short result phrase such as 'success' or 'hold' (already translated)
 //   {role} = a role name from PenNodePaper
 //   {s} = a number: damage that went to STR
@@ -96,6 +97,20 @@
 
   // ═══ Inventory (inv.*) ════════════════════════════════════════
   // Paws, body and pack slots; add-item dialog.
+
+  // Used in: AddItemMenu.jsx, CharacterSheet.jsx
+  // NOTE: Placeholder text inside the search field of the add-item dialog (it also serves as the field's accessible name). Short, e.g. 'Search…'.
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Search…"
+  // DE: "Suchen…"
+  "inv.search": "",
+
+  // Used in: AddItemMenu.jsx, CharacterSheet.jsx
+  // NOTE: Shown under the search field when nothing matches. {q} is what the player typed; the quotation marks around it are typographic, use your language's own.
+  // Placeholders: {q}
+  // EN: "Nothing matches “{q}”."
+  // DE: "Nichts passt zu „{q}“."
+  "inv.noMatch": "",
 
   // Used in: CharacterSheet.jsx, InventoryGrid.jsx
   // EN: "No slot — encumbered"
