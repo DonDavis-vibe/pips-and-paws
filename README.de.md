@@ -237,6 +237,10 @@ damit sie für eine muttersprachliche Übersetzung offen bleibt statt von einer
 Maschine vorbelegt zu werden. Ablauf und Schritte für eine neue Sprache:
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+**Danke** an [@Salgraphics](https://github.com/Salgraphics) (Spanisch-Übersetzung) und
+[@Phantom1092](https://github.com/Phantom1092) (Suche im Gegenstands-Dialog,
+[#6](https://github.com/DonDavis-vibe/pips-and-paws/pull/6)).
+
 ## Regeldaten & Bilder
 
 `src/data/*` ist aus dem offiziellen **Mausritter SRD 2.3.1** abgeleitet

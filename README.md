@@ -232,6 +232,10 @@ that gap stays open for a native speaker rather than getting pre-filled by a
 machine translation. The flow and the steps for a new language are in
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+**Thanks** to [@Salgraphics](https://github.com/Salgraphics) (Spanish translation) and
+[@Phantom1092](https://github.com/Phantom1092) (search in the add-item dialog,
+[#6](https://github.com/DonDavis-vibe/pips-and-paws/pull/6)).
+
 ## Rules data & images
 
 `src/data/*` is derived from the official **Mausritter SRD 2.3.1** (CC BY 4.0).
