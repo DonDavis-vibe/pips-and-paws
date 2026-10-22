@@ -2,6 +2,11 @@
 
 Stand: 2026-10-17 · v0.6.3
 
+**Runde 2026-10-22 (Suche im Gegenstands-Dialog):** Suchfeld ueber den Reitern Ausruestung /
+Zauber / Zustaende in `AddItemMenu.jsx` (gilt damit fuer Bogen, Spielerkarte, Lager und
+Gefolge). Gross/Klein und Akzente egal, mehrere Woerter muessen alle passen; durchsucht Name
+(aktuelle Sprache + Englisch), Typ, Schaden und Effekttext.
+
 **Runde 2026-10-18 (Luecken gegen foundry-mausritter, Teil 1+2):** Glueckswurf X-in-6 und
 geheimer Modus im SL-Wuerfel-Panel (Begegnungswuerfe nie an Spieler), Bank am Bogen
 (`rules/bank.js`, `BankPanel.jsx`, 1 % beim Abholen, Gegenstaende mit eigenem `worth`) und

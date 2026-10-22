@@ -80,9 +80,10 @@ export default function Footer({ onHelp }) {
             <a href={PRODUCER_URL} target="_blank" rel="noopener noreferrer">
               {PRODUCER}
             </a>
-            {d1post}
+            {d1post}{' '}
+            {t('footer.disclaimer3')}
           </p>
-          <p>{t('footer.disclaimer2')}</p>
+          <p>{t('footer.disclaimer2')} {t('footer.disclaimer4')}</p>
           {typeof window !== 'undefined' && window.location.protocol !== 'file:' ? (
             <p className="footer-legal-links">
               <a className="footer-link" href="impressum.html#impressum">{t('footer.impressum')}</a>

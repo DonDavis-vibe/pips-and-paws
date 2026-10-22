@@ -2,7 +2,8 @@
 // Alle Nachrichten haben ein Feld `t` (Typ). Freitext wird beim Rendern escaped.
 
 export const ROOM_PREFIX = 'pips-paws-';
-export const JOIN_TIMEOUT_MS = 20000;
+export const JOIN_TIMEOUT_MS = 25000; // Datenkanal zum SL muss so schnell stehen
+export const SIGNAL_TIMEOUT_MS = 15000; // Signalisierungsserver muss so schnell antworten
 export const MAX_RECONNECT_ATTEMPTS = 8;
 export const SESSION_KEY = 'pips-paws-mp-session';
 export const TURN_KEY = 'pips-paws-mp-turn';
@@ -11,7 +12,24 @@ export const STUN_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:stun.cloudflare.com:3478' },
 ];
+
+// STUN reicht nur, solange beide Seiten direkt zueinander finden. Hinter
+// symmetrischem NAT (Mobilfunk/CGNAT, Firmen- und Hotelnetze) oder bei gesperrtem
+// UDP braucht es einen TURN-Server, der den Verkehr weiterreicht. Wer die App
+// selbst hostet, baut ihn mit ein (Build-Variablen, nicht im Quelltext):
+//   VITE_TURN_URLS=turn:turn.example.org:3478,turns:turn.example.org:5349
+//   VITE_TURN_USER=...  VITE_TURN_PASS=...
+// Optional auch ein eigener PeerJS-Signalisierungsserver:
+//   VITE_PEER_HOST=peer.example.org  VITE_PEER_PORT=443  VITE_PEER_PATH=/  (VITE_PEER_SECURE=0 fuer http)
+const ENV = import.meta.env || {};
+
+export function builtInTurn() {
+  const urls = String(ENV.VITE_TURN_URLS || '').split(',').map((u) => u.trim()).filter(Boolean);
+  if (!urls.length) return null;
+  return { urls, username: ENV.VITE_TURN_USER || undefined, credential: ENV.VITE_TURN_PASS || undefined };
+}
 
 // Zugang (siehe auth.js und useMultiplayer.js): erst wenn der SL einen Spieler
 // eingelassen hat, schickt er Daten. Bis dahin laufen nur diese Nachrichten.
@@ -111,11 +129,26 @@ export function setTurnServer(server) {
   }
 }
 
-export function peerConfig() {
+export function iceServerList() {
   const iceServers = [...STUN_SERVERS];
+  const builtIn = builtInTurn();
+  if (builtIn) iceServers.push(builtIn);
   const turn = getTurnServer();
   if (turn) iceServers.push(turn);
-  return { config: { iceServers } };
+  return iceServers;
+}
+
+export const hasTurn = () => !!(builtInTurn() || getTurnServer());
+
+export function peerConfig() {
+  const cfg = { config: { iceServers: iceServerList() } };
+  if (ENV.VITE_PEER_HOST) {
+    cfg.host = ENV.VITE_PEER_HOST;
+    cfg.port = Number(ENV.VITE_PEER_PORT) || 443;
+    cfg.path = ENV.VITE_PEER_PATH || '/';
+    cfg.secure = ENV.VITE_PEER_SECURE !== '0';
+  }
+  return cfg;
 }
 
 // Handouts (PenNodePaper-Bruecke, siehe src/pnp): der SL zeigt einen Vorlesetext

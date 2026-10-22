@@ -140,6 +140,13 @@ data passing through the operator's server.
 - **Serverless multiplayer** over WebRTC / PeerJS. The GM is the host; players join
   with a 6-character code or a `?join` link. Reconnect and reload recovery are
   built in.
+- **Connection help** — players behind strict networks (mobile data, company or hotel
+  Wi-Fi) need a TURN relay; plain STUN only works for direct routes. The multiplayer
+  window has a connection test and a field for a TURN server (stored on the device),
+  failed joins say *why* (WebRTC blocked, strict NAT, signalling server unreachable),
+  and the GM's room re-registers itself after a network hiccup. Self-hosters can build
+  in a relay (`VITE_TURN_URLS`, `VITE_TURN_USER`, `VITE_TURN_PASS`) and their own PeerJS
+  signalling server (`VITE_PEER_HOST`, `VITE_PEER_PORT`, `VITE_PEER_PATH`).
 - **Room access control** — nothing is sent to a device before the GM has let it in.
   Optional room password (checked by challenge-response, never transmitted; it can
   ride in the invite link behind the `#`), optional "approve joins" with an
@@ -225,6 +232,10 @@ that gap stays open for a native speaker rather than getting pre-filled by a
 machine translation. The flow and the steps for a new language are in
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+**Thanks** to [@Salgraphics](https://github.com/Salgraphics) (Spanish translation) and
+[@Phantom1092](https://github.com/Phantom1092) (search in the add-item dialog,
+[#6](https://github.com/DonDavis-vibe/pips-and-paws/pull/6)).
+
 ## Rules data & images
 
 `src/data/*` is derived from the official **Mausritter SRD 2.3.1** (CC BY 4.0).
@@ -258,7 +269,10 @@ own imprint (see `CONTRIBUTING.md`).
 
 Code: **MIT** (`LICENSE`).
 
-> *Pips &amp; Paws is an independent production by DonDavis and is not affiliated with Losing Games.*
+> *Pips &amp; Paws is an independent production by DonDavis and is not affiliated with Losing Games.
+> It is published under the Mausritter Third Party Licence.*
 >
 > *This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is
 > licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence.*
+>
+> *Mausritter is copyright Losing Games.*

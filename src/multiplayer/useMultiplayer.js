@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import {
-  ROOM_PREFIX, JOIN_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
+  ROOM_PREFIX, JOIN_TIMEOUT_MS, SIGNAL_TIMEOUT_MS, MAX_RECONNECT_ATTEMPTS, SESSION_KEY,
   T_STATE, T_EVENT, T_SAY, T_GM, T_STASH, T_STASH_DROP, T_STASH_TAKE, T_LOG, T_LOGCFG, T_TIME, T_RESTCFG, T_NPCS,
   T_GROUP, T_SOUND_FX, T_SOUND_CUSTOM, T_SOUND_VOL, T_SOUND_STOP, T_SOUND_FADE,
   T_MAP_SHARE, T_MAP, T_MAP_IMG, T_HANDOUT,
@@ -9,6 +9,7 @@ import {
   GM_GIVE, GM_STASH_DENY, GM_STASH_FULL,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
+import { diagnoseFailedConnection } from './diagnose.js';
 import {
   hasCrypto, deriveKey, makeProof, randomHex, safeEqual,
 } from './auth.js';
@@ -172,6 +173,8 @@ export function useMultiplayer() {
   const joinTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
   const reconnectPendingRef = useRef(false);
+  const rehostTimerRef = useRef(null);
+  const rehostAttemptsRef = useRef(0);
   const retryJoinAttemptsRef = useRef(0);
   const retryJoinPendingRef = useRef(false);
   const wireHostRef = useRef(null);
@@ -483,10 +486,12 @@ export function useMultiplayer() {
 
   const cleanupPeer = useCallback(() => {
     clearTimeout(joinTimeoutRef.current);
-    if (peerRef.current) {
-      try { peerRef.current.destroy(); } catch { /* schon zerstoert */ }
+    clearTimeout(rehostTimerRef.current);
+    const old = peerRef.current;
+    peerRef.current = null; // zuerst leeren: die 'close'-Handler erkennen so ein gewolltes Beenden
+    if (old) {
+      try { old.destroy(); } catch { /* schon zerstoert */ }
     }
-    peerRef.current = null;
     hostConnRef.current = null;
     clientConnsRef.current = {};
     Object.values(unauthRef.current).forEach((u) => clearTimeout(u.timer));
@@ -539,11 +544,12 @@ export function useMultiplayer() {
   const reconnectHost = useCallback(() => {
     const peer = peerRef.current;
     if (!peer || peer.destroyed || peer.open || reconnectPendingRef.current) return;
-    if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+    // Nach mehreren Fehlversuchen einmal melden, aber weiter versuchen (alle 30 s):
+    // Spieler mit stehender Verbindung brauchen den Raum, neue Spieler den Server.
+    if (reconnectAttemptsRef.current === MAX_RECONNECT_ATTEMPTS) {
       pushLog({ kind: 'system', key: 'mp.log.serverLost' });
-      return;
     }
-    const delay = Math.min(2000 * 2 ** reconnectAttemptsRef.current, 30000);
+    const delay = Math.min(2000 * 2 ** Math.min(reconnectAttemptsRef.current, 5), 30000);
     reconnectAttemptsRef.current += 1;
     reconnectPendingRef.current = true;
     setTimeout(() => {
@@ -852,14 +858,25 @@ export function useMultiplayer() {
     setBannedCount(0);
   }, [persistSecurity]);
 
+  // --- SL: Raum mit demselben Code neu oeffnen (nach Zerstoerung des Peers) ---
+  const hostSessionRef = useRef(null);
+  const scheduleRehost = useCallback((code, delay = 3000) => {
+    clearTimeout(rehostTimerRef.current);
+    rehostTimerRef.current = setTimeout(() => {
+      if (roleRef.current !== 'gm' && rehostAttemptsRef.current === 0) return;
+      hostSessionRef.current?.(code, true);
+    }, delay);
+  }, []);
+
   // --- SL: Sitzung hosten ---
-  const hostSession = useCallback((preferredCodeArg) => {
+  const hostSession = useCallback((preferredCodeArg, isRetry) => {
     const preferredCode = typeof preferredCodeArg === 'string' ? preferredCodeArg : undefined;
     cleanupPeer();
+    if (!isRetry) rehostAttemptsRef.current = 0;
     setConnectionState('connecting');
     setStatusMessage(preferredCode ? 'restore' : 'creating');
     setPlayers({});
-    setLiveLog([]);
+    if (!isRetry) setLiveLog([]);
 
     const code = preferredCode || generateRoomCode();
     roomCodeRef.current = code;
@@ -878,6 +895,7 @@ export function useMultiplayer() {
       if (opened) return; // 'open' feuert nach Reconnect erneut
       opened = true;
       reconnectAttemptsRef.current = 0;
+      rehostAttemptsRef.current = 0;
       roleRef.current = 'gm';
       const savedStash = readJSON(GM_STASH_KEY, []) || [];
       stashRef.current = savedStash;
@@ -955,16 +973,45 @@ export function useMultiplayer() {
     });
 
     peer.on('error', (err) => {
+      if (opened) {
+        // Der Raum laeuft schon. Nur Fehler der Verbindung zum Signalisierungsserver
+        // betreffen ihn (die Spieler bleiben verbunden, neue finden den Raum nicht);
+        // 'webrtc' / 'peer-unavailable' sind einzelne gescheiterte Spieler — kein Grund,
+        // den SL hinauszuwerfen.
+        if (['network', 'socket-error', 'socket-closed', 'server-error'].includes(err.type)) {
+          setRoomOnline(false);
+          if (peer.destroyed) scheduleRehost(code);
+          else reconnectHost();
+        }
+        return;
+      }
       if (err.type === 'unavailable-id') {
+        // Nach einem Neuladen haelt der Server die alte ID noch kurz: von selbst weiter versuchen.
+        if (preferredCode && rehostAttemptsRef.current < 6) {
+          rehostAttemptsRef.current += 1;
+          setStatusMessage('restore');
+          scheduleRehost(preferredCode, 6000);
+          return;
+        }
         clearSession();
         setStatusMessage(preferredCode ? 'idTakenRetry' : 'idTaken');
+      } else if (['network', 'socket-error', 'socket-closed', 'server-error'].includes(err.type)) {
+        setStatusMessage('serverUnreachable');
       } else {
         setStatusMessage(`error:${err.type}`);
       }
       setConnectionState('error');
       setRole(null);
     });
-  }, [cleanupPeer, handleIncoming, handleUnauth, armUnauthTimer, dropUnauth, pushLog, reconnectHost, scheduleGroupBroadcast]);
+
+    // Peer wurde ohne unser Zutun zerstoert (z. B. nach langem Verbindungsverlust): neu aufmachen.
+    peer.on('close', () => {
+      if (peerRef.current !== peer || !opened) return;
+      setRoomOnline(false);
+      scheduleRehost(code);
+    });
+  }, [cleanupPeer, scheduleRehost, handleIncoming, handleUnauth, armUnauthTimer, dropUnauth, pushLog, reconnectHost, scheduleGroupBroadcast]);
+  hostSessionRef.current = hostSession;
 
   // --- Spieler: Reconnect zum SL ---
   const attemptReconnectToHost = useCallback((code) => {
@@ -980,9 +1027,24 @@ export function useMultiplayer() {
     retryJoinPendingRef.current = true;
     setTimeout(() => {
       retryJoinPendingRef.current = false;
-      if (!peerRef.current || peerRef.current.destroyed) return;
-      const conn = peerRef.current.connect(ROOM_PREFIX + code, { reliable: true });
+      const live = peerRef.current;
+      if (!live || live.destroyed) return;
+      // Ohne Verbindung zum Signalisierungsserver kann der Peer niemanden anrufen:
+      // erst wieder anmelden, der naechste Versuch verbindet dann.
+      if (live.disconnected) {
+        try { live.reconnect(); } catch { /* naechster Versuch */ }
+        attemptReconnectToHost(code);
+        return;
+      }
+      const conn = live.connect(ROOM_PREFIX + code, { reliable: true });
       wireHostRef.current(conn, code);
+      // Kommt der Datenkanal nicht zustande, feuert PeerJS kein 'close': selbst weiterzaehlen.
+      setTimeout(() => {
+        if (conn.open || hostConnRef.current !== conn || authedRef.current) return;
+        try { conn.close(); } catch { /* */ }
+        retryJoinPendingRef.current = false;
+        attemptReconnectToHost(code);
+      }, JOIN_TIMEOUT_MS);
     }, delay);
   }, []);
 
@@ -1176,13 +1238,28 @@ export function useMultiplayer() {
     peerRef.current = peer;
     let connected = false;
 
+    // Antwortet der Signalisierungsserver gar nicht (Firewall, VPN, Werbeblocker),
+    // meldet PeerJS oft nichts — dann haengt die Anzeige ewig auf "Verbinde ...".
+    clearTimeout(joinTimeoutRef.current);
+    joinTimeoutRef.current = setTimeout(() => {
+      if (connected || peerRef.current !== peer) return;
+      setStatusMessage('serverUnreachable');
+      setConnectionState('error');
+      clearSession();
+      try { peer.destroy(); } catch { /* */ }
+    }, SIGNAL_TIMEOUT_MS);
+
     peer.on('open', () => {
       if (connected) return; // 'open' kann nach Reconnect erneut feuern
       connected = true;
+      clearTimeout(joinTimeoutRef.current);
       const conn = peer.connect(ROOM_PREFIX + code, { reliable: true });
-      joinTimeoutRef.current = setTimeout(() => {
-        if (conn.open) return;
-        setStatusMessage('joinFailed');
+      joinTimeoutRef.current = setTimeout(async () => {
+        if (conn.open || hostConnRef.current !== conn) return;
+        // WARUM es nicht klappt, verraten die ICE-Kandidaten (strenges NAT, WebRTC gesperrt ...).
+        const why = await diagnoseFailedConnection(conn);
+        if (hostConnRef.current !== conn) return;
+        setStatusMessage(why);
         setConnectionState('error');
         clearSession();
         conn.close();
@@ -1191,14 +1268,25 @@ export function useMultiplayer() {
     });
 
     peer.on('error', (err) => {
+      // Schon eingelassen oder gerade am Wiederverbinden: die Fehler des Signalisierungsservers
+      // und einzelner Aufbauversuche sind kein Grund, den Spieler hinauszuwerfen.
+      const settled = authedRef.current || retryJoinAttemptsRef.current > 0;
+      if (settled && !authFailedRef.current) {
+        if (err.type === 'peer-unavailable' && !authedRef.current) {
+          // Der SL ist gerade selbst offline (z. B. meldet sich neu beim Server an): nochmal versuchen.
+          retryJoinPendingRef.current = false;
+          attemptReconnectToHost(code);
+        }
+        return;
+      }
       clearTimeout(joinTimeoutRef.current);
       setConnectionState('error');
       clearSession();
       if (err.type === 'peer-unavailable') setStatusMessage('roomNotFound');
-      else if (['network', 'server-error', 'socket-error'].includes(err.type)) setStatusMessage('serverUnreachable');
+      else if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(err.type)) setStatusMessage('serverUnreachable');
       else setStatusMessage(`error:${err.type}`);
     });
-  }, [cleanupPeer, wireHostConnection]);
+  }, [cleanupPeer, wireHostConnection, attemptReconnectToHost]);
 
   // Spieler: Passwort eintippen. Laeuft die Verbindung noch (Frage wartet), wird einfach geantwortet,
   // sonst (nach "falsches Passwort") neu verbunden.
@@ -1243,6 +1331,28 @@ export function useMultiplayer() {
 
   const logGmAction = useCallback((entry) => pushLog({ kind: 'gm', ...entry }), [pushLog]);
   const clearGmCommand = useCallback(() => setGmCommand(null), []);
+
+  // Netz wieder da / Tab wieder sichtbar: nicht auf den naechsten Backoff warten.
+  // (Hintergrund-Tabs werden gedrosselt, dann verpasst der Signalisierungs-Heartbeat sein Zeitfenster.)
+  useEffect(() => {
+    const wake = () => {
+      if (document.visibilityState === 'hidden') return;
+      const peer = peerRef.current;
+      if (!peer || peer.destroyed) return;
+      if (roleRef.current === 'gm' && !peer.open) {
+        reconnectAttemptsRef.current = 0;
+        reconnectHost();
+      } else if (roleRef.current === 'player' && peer.disconnected) {
+        try { peer.reconnect(); } catch { /* */ }
+      }
+    };
+    window.addEventListener('online', wake);
+    document.addEventListener('visibilitychange', wake);
+    return () => {
+      window.removeEventListener('online', wake);
+      document.removeEventListener('visibilitychange', wake);
+    };
+  }, [reconnectHost]);
 
   // Beim Start: unterbrochene Sitzung wiederherstellen, sonst ?join=CODE pruefen.
   useEffect(() => {

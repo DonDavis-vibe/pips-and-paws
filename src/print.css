@@ -504,6 +504,10 @@
     outline: none;
   }
 
+  /* Suchfeld im Gegenstands-Dialog: Platz fuer die Lupe (die obige Regel haette das Classic-Padding ueberstimmt) */
+  .catalog-search .text-input { padding-left: 26px; }
+  .catalog-search svg { left: 4px; color: var(--ink-2); }
+
   select.text-input {
     border: 2.5px solid var(--ink);
     border-radius: var(--wob-b);

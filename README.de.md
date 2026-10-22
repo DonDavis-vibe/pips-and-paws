@@ -145,6 +145,13 @@ Betreibers laufen.
 - **Serverloser Multiplayer** über WebRTC / PeerJS. Die Spielleitung ist der Host;
   Spieler treten per 6-Zeichen-Code oder `?join`-Link bei. Reconnect und
   Reload-Wiederherstellung sind eingebaut.
+- **Verbindungshilfe** — wer in einem strengen Netz sitzt (Mobilfunk, Firmen- oder Hotel-WLAN),
+  braucht einen TURN-Relay; mit STUN allein klappen nur direkte Wege. Das Mehrspieler-Fenster hat
+  einen Verbindungstest und ein Feld für einen TURN-Server (bleibt auf dem Gerät), gescheiterte
+  Beitritte sagen *warum* (WebRTC gesperrt, strenges NAT, Signalisierungsserver nicht erreichbar),
+  und der Raum des SL meldet sich nach einem Netz-Aussetzer selbst wieder an. Wer die App selbst hostet,
+  baut einen Relay (`VITE_TURN_URLS`, `VITE_TURN_USER`, `VITE_TURN_PASS`) und einen eigenen
+  PeerJS-Signalisierungsserver (`VITE_PEER_HOST`, `VITE_PEER_PORT`, `VITE_PEER_PATH`) fest ein.
 - **Zugangskontrolle für den Raum** — an ein Gerät geht erst etwas raus, wenn die
   Spielleitung es eingelassen hat. Optionales Raum-Passwort (per Challenge-Response
   geprüft, nie übertragen; auf Wunsch im Einladungslink hinter dem `#`), optional
@@ -230,6 +237,10 @@ damit sie für eine muttersprachliche Übersetzung offen bleibt statt von einer
 Maschine vorbelegt zu werden. Ablauf und Schritte für eine neue Sprache:
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+**Danke** an [@Salgraphics](https://github.com/Salgraphics) (Spanisch-Übersetzung) und
+[@Phantom1092](https://github.com/Phantom1092) (Suche im Gegenstands-Dialog,
+[#6](https://github.com/DonDavis-vibe/pips-and-paws/pull/6)).
+
 ## Regeldaten & Bilder
 
 `src/data/*` ist aus dem offiziellen **Mausritter SRD 2.3.1** abgeleitet
@@ -265,7 +276,10 @@ betreibt, braucht ein eigenes Impressum (siehe `CONTRIBUTING.md`).
 
 Code: **MIT** (`LICENSE`).
 
-> *Pips &amp; Paws is an independent production by DonDavis and is not affiliated with Losing Games.*
+> *Pips &amp; Paws is an independent production by DonDavis and is not affiliated with Losing Games.
+> It is published under the Mausritter Third Party Licence.*
 >
 > *This work is based on Mausritter, a product of Losing Games and Isaac Williams, and is
 > licensed for use under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence.*
+>
+> *Mausritter is copyright Losing Games.*

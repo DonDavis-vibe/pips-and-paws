@@ -1,5 +1,5 @@
 // Pips & Paws — translation template for "es"
-// Generated 2026-10-18 by tools/i18n/i18n.mjs — 376 of 861 keys (missing, empty, identical-to-English or broken).
+// Generated 2026-10-22 by tools/i18n/i18n.mjs — 406 of 893 keys (missing, empty, identical-to-English or broken).
 //
 // HOW TO USE
 //  1. Fill in the empty "" values below. Leave a value empty to skip a key — it falls back to English.
@@ -71,6 +71,7 @@
 //   {name} = a name: a mouse, a player, an item or a spell
 //   {names} = a comma-separated list of names
 //   {need} = number of pip purses needed
+//   {q} = the text the player typed into a search field
 //   {result} = a short result phrase such as 'success' or 'hold' (already translated)
 //   {role} = a role name from PenNodePaper
 //   {s} = a number: damage that went to STR
@@ -85,8 +86,31 @@
 
 {
 
+  // ═══ Top bar (header.*) ═══════════════════════════════════════
+  // Buttons and tooltips in the header. Mostly icon buttons with a tooltip; keep short.
+
+  // Used in: Dice3dToggle.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "3D dice"
+  // DE: "3D-Würfel"
+  "header.dice3d": "",
+
   // ═══ Inventory (inv.*) ════════════════════════════════════════
   // Paws, body and pack slots; add-item dialog.
+
+  // Used in: AddItemMenu.jsx, CharacterSheet.jsx
+  // NOTE: Placeholder text inside the search field of the add-item dialog (it also serves as the field's accessible name). Short, e.g. 'Search…'.
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Search…"
+  // DE: "Suchen…"
+  "inv.search": "",
+
+  // Used in: AddItemMenu.jsx, CharacterSheet.jsx
+  // NOTE: Shown under the search field when nothing matches. {q} is what the player typed; the quotation marks around it are typographic, use your language's own.
+  // Placeholders: {q}
+  // EN: "Nothing matches “{q}”."
+  // DE: "Nichts passt zu „{q}“."
+  "inv.noMatch": "",
 
   // Used in: CharacterSheet.jsx, InventoryGrid.jsx
   // EN: "No slot — encumbered"
@@ -192,6 +216,90 @@
   // DE: "{name} wurde aus dem Raum entfernt."
   "mp.log.kicked": "",
 
+  // Used in: MultiplayerModal.jsx
+  // EN: "Connection problems?"
+  // DE: "Verbindungsprobleme?"
+  "mp.net.title": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Most players connect directly. In strict networks (mobile data, company or hotel Wi-Fi) the connection needs a TURN relay server. If you have one, enter it here — it stays on this device."
+  // DE: "Die meisten Spieler verbinden sich direkt. In strengen Netzen (Mobilfunk, Firmen- oder Hotel-WLAN) braucht die Verbindung einen TURN-Relay-Server. Wer einen hat, trägt ihn hier ein — er bleibt auf diesem Gerät."
+  "mp.net.help": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Test my connection"
+  // DE: "Meine Verbindung testen"
+  "mp.net.test": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Testing ..."
+  // DE: "Teste ..."
+  "mp.net.testing": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Direct connection looks possible."
+  // DE: "Eine direkte Verbindung scheint möglich."
+  "mp.net.ok": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The relay (TURN) works — you can connect even from strict networks."
+  // DE: "Der Relay (TURN) funktioniert — du kannst dich auch aus strengen Netzen verbinden."
+  "mp.net.okRelay": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "No direct route found (strict network). A TURN relay server is needed."
+  // DE: "Kein direkter Weg gefunden (strenges Netz). Ein TURN-Relay-Server wird gebraucht."
+  "mp.net.noDirect": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "WebRTC is blocked in this browser — often a VPN or privacy extension."
+  // DE: "WebRTC ist in diesem Browser gesperrt — oft ein VPN oder eine Privacy-Erweiterung."
+  "mp.net.noRtc": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The TURN server is not reachable — check address and credentials."
+  // DE: "Der TURN-Server ist nicht erreichbar — Adresse und Zugangsdaten prüfen."
+  "mp.net.turnFail": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "TURN server (turn:host:3478, several separated by commas)"
+  // DE: "TURN-Server (turn:host:3478, mehrere mit Komma)"
+  "mp.net.turnUrl": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "User name"
+  // DE: "Benutzername"
+  "mp.net.turnUser": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Password"
+  // DE: "Passwort"
+  "mp.net.turnPass": "",
+
+  // Used in: MultiplayerModal.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Save"
+  // DE: "Speichern"
+  "mp.net.save": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Saved on this device."
+  // DE: "Auf diesem Gerät gespeichert."
+  "mp.net.saved": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "TURN server removed."
+  // DE: "TURN-Server entfernt."
+  "mp.net.removed": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The address must start with turn: or turns:."
+  // DE: "Die Adresse muss mit turn: oder turns: beginnen."
+  "mp.net.badUrl": "",
+
   // ═══ Connection status messages (mp.status.*) ═════════════════
   // Shown while connecting; full sentences.
 
@@ -244,6 +352,26 @@
   // EN: "This password cannot be checked here (secure connection needed)."
   // DE: "Dieses Passwort kann hier nicht geprüft werden (sichere Verbindung nötig)."
   "mp.status.noCrypto": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "WebRTC is blocked in this browser — often a VPN or privacy extension with WebRTC leak protection. Disable it or try another browser."
+  // DE: "WebRTC ist in diesem Browser gesperrt — oft ein VPN oder eine Privacy-Erweiterung mit WebRTC-Schutz. Ausschalten oder einen anderen Browser nehmen."
+  "mp.status.diagBlocked": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "The room exists, but the GM sent no connection data. WebRTC may be blocked on the GM side."
+  // DE: "Der Raum existiert, aber der SL hat keine Verbindungsdaten geschickt. Beim SL könnte WebRTC gesperrt sein."
+  "mp.status.diagNoAnswer": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "No direct connection possible — probably a strict network (mobile data, company or hotel Wi-Fi). A TURN relay server is needed, see \"Connection problems?\" below."
+  // DE: "Keine direkte Verbindung möglich — wahrscheinlich ein strenges Netz (Mobilfunk, Firmen- oder Hotel-WLAN). Ein TURN-Relay-Server wird gebraucht, siehe „Verbindungsprobleme?“ unten."
+  "mp.status.diagNeedTurn": "",
+
+  // Used in: MultiplayerModal.jsx
+  // EN: "Connection setup failed, even with a relay. Check the network and the TURN credentials."
+  // DE: "Verbindungsaufbau fehlgeschlagen, auch mit Relay. Netzwerk und TURN-Zugangsdaten prüfen."
+  "mp.status.diagFailed": "",
 
   // ═══ GM dashboard (gm.*) ══════════════════════════════════════
   // Everything the Game Master sees: players, actions, logs.
@@ -304,6 +432,21 @@
   // EN: "The illustrations are AI-generated (Krea 2 Turbo) and not official Mausritter artwork."
   // DE: "Die Illustrationen sind mit KI erzeugt (Krea 2 Turbo) und kein offizielles Mausritter-Artwork."
   "footer.imagesAiHint": "",
+
+  // ═══ Common words (common.*) ══════════════════════════════════
+  // Short words reused in many places (OK, Cancel, or ...).
+
+  // Used in: Dice3dToggle.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "on"
+  // DE: "an"
+  "common.on": "",
+
+  // Used in: Dice3dToggle.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "off"
+  // DE: "aus"
+  "common.off": "",
 
   // ═══ Shared stash (table centre) (stash.*) ════════════════════
   // A common loot pile / cart / chest that GM and players share.
@@ -2352,5 +2495,34 @@
   // Used in: BankPanel.jsx
   // EN: "Conditions can't be stored."
   // DE: "Zustände lassen sich nicht einlagern."
-  "bank.notStorable": ""
+  "bank.notStorable": "",
+
+  // ═══ formula (formula.*) ══════════════════════════════════════
+
+  // Used in: FormulaRoller.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Dice formula"
+  // DE: "Würfelformel"
+  "formula.label": "",
+
+  // Used in: FormulaRoller.jsx
+  // EN: "Formula, e.g. 3d6+2"
+  // DE: "Formel, z. B. 3w6+2"
+  "formula.placeholder": "",
+
+  // Used in: FormulaRoller.jsx
+  // Short UI text (button/label): keep it about as short as the English.
+  // EN: "Roll"
+  // DE: "Würfeln"
+  "formula.roll": "",
+
+  // Used in: FormulaRoller.jsx
+  // EN: "Free formula: 3d6+2, 4d6kh3 (keep the 3 highest), 2d20kl1 (advantage), 2d20kh1 (disadvantage), 3d6! (exploding), 1d20r1 (reroll a 1), 12d6>=5 (count successes)."
+  // DE: "Freie Formel: 3w6+2, 4w6kh3 (die 3 höchsten), 2w20kl1 (Vorteil), 2w20kh1 (Nachteil), 3w6! (explodierend), 1w20r1 (bei 1 neu würfeln), 12w6>=5 (Erfolge zählen)."
+  "formula.hint": "",
+
+  // Used in: FormulaRoller.jsx
+  // EN: "That is not a valid dice formula."
+  // DE: "Das ist keine gültige Würfelformel."
+  "formula.error": ""
 }

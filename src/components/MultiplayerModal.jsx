@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import {
-  Radio, Users, LogOut, Copy, Check, MessagesSquare, Send, Lock, ShieldCheck, KeyRound,
+  Radio, Users, LogOut, Copy, Check, MessagesSquare, Send, Lock, ShieldCheck, KeyRound, Wifi,
 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { Modal, Field, TextInput } from './ui.jsx';
-import { GM_WEBHOOK, ROOM_CODE_LENGTH, ROOM_CODE_MIN } from '../multiplayer/protocol.js';
+import {
+  GM_WEBHOOK, ROOM_CODE_LENGTH, ROOM_CODE_MIN, getTurnServer, setTurnServer,
+} from '../multiplayer/protocol.js';
+import { testConnectivity } from '../multiplayer/diagnose.js';
 import { hasCrypto } from '../multiplayer/auth.js';
 import JoinRequests from './JoinRequests.jsx';
 import {
@@ -188,6 +191,74 @@ function DiscordSettings({ mp }) {
   );
 }
 
+// Verbindungsprobleme: Test, was dieses Netz zulaesst, und optional ein eigener TURN-Relay.
+// Die Eintraege bleiben auf diesem Geraet (localStorage), nie im Bogen.
+function ConnectionHelp() {
+  const { t } = useLang();
+  const stored = getTurnServer();
+  const [urls, setUrls] = useState(stored ? [].concat(stored.urls).join(', ') : '');
+  const [user, setUser] = useState(stored?.username || '');
+  const [pass, setPass] = useState(stored?.credential || '');
+  const [note, setNote] = useState('');
+  const [result, setResult] = useState(null); // null | 'pending' | Ergebnis von testConnectivity
+
+  const save = () => {
+    const list = urls.split(',').map((u) => u.trim()).filter(Boolean);
+    if (!list.length) {
+      setTurnServer(null);
+      setNote(t('mp.net.removed'));
+    } else if (!list.every((u) => /^turns?:/i.test(u))) {
+      setNote(t('mp.net.badUrl'));
+    } else {
+      setTurnServer({ urls: list.length === 1 ? list[0] : list, username: user.trim(), credential: pass });
+      setNote(t('mp.net.saved'));
+    }
+    setResult(null);
+  };
+
+  const run = async () => {
+    setResult('pending');
+    setResult(await testConnectivity());
+  };
+
+  let verdict = '';
+  if (result && result !== 'pending') {
+    if (result.unsupported || !(result.host || result.srflx || result.relay)) verdict = t('mp.net.noRtc');
+    else if (result.relay) verdict = t('mp.net.okRelay');
+    else if (result.turn) verdict = t('mp.net.turnFail');
+    else if (result.srflx) verdict = t('mp.net.ok');
+    else verdict = t('mp.net.noDirect');
+  }
+
+  return (
+    <details className="mp-discord mp-net">
+      <summary>
+        <Wifi size={15} /> {t('mp.net.title')}
+      </summary>
+      <div className="mp-discord-body">
+        <p className="hint">{t('mp.net.help')}</p>
+        <div className="inline-roll">
+          <button type="button" className="btn btn-sm" disabled={result === 'pending'} onClick={run}>
+            {result === 'pending' ? t('mp.net.testing') : t('mp.net.test')}
+          </button>
+          {verdict ? <span className="mp-status">{verdict}</span> : null}
+        </div>
+        <Field label={t('mp.net.turnUrl')}>
+          <TextInput value={urls} onChange={setUrls} placeholder="turn:turn.example.org:3478" />
+        </Field>
+        <div className="inline-roll">
+          <TextInput value={user} onChange={setUser} placeholder={t('mp.net.turnUser')} />
+          <TextInput value={pass} onChange={setPass} placeholder={t('mp.net.turnPass')} />
+        </div>
+        <div className="inline-roll">
+          <button type="button" className="btn btn-sm" onClick={save}>{t('mp.net.save')}</button>
+          {note ? <span className="hint">{note}</span> : null}
+        </div>
+      </div>
+    </details>
+  );
+}
+
 export default function MultiplayerModal({ mp, onClose }) {
   const { t } = useLang();
   const [code, setCode] = useState('');
@@ -278,6 +349,7 @@ export default function MultiplayerModal({ mp, onClose }) {
         </div>
       )}
 
+      <ConnectionHelp />
       <DiscordSettings mp={mp} />
     </Modal>
   );

@@ -1,0 +1,10 @@
+{
+  "_readme": "Language-specific hints for translators. Read by tools/i18n/i18n.mjs and put into the template header and START-HERE.md of the package. Key = language code, value = list of short bullet points.",
+  "pl": [
+    "Save the file as UTF-8 so the letters ąćęłńóśźż survive (VS Code and Notepad++ do this by default; check the encoding in the status bar if letters look broken).",
+    "Numbers and nouns: Polish nouns change with the number (1 / 2–4 / 5+). Where {n} stands next to a noun, prefer a wording that does not need declension, e.g. 'Gracze: {n}' or 'Obrażenia: {n}' instead of '{n} graczy'. The same goes for {total}, {max}, {hp}.",
+    "Gender and address: the app says 'you' to the player and often talks about 'your mouse' (mysz is feminine). Use one consistent form of address for the whole app — informal 'ty' like the other languages, unless you think the Mausritter community would expect something else.",
+    "Dice: Polish uses 'k6', 'k20' (kość). The dice labels are normal keys (dice.d6, dice.d66 ...) — translate them as you would write them at the table. The formula field in the app also accepts k as in '3k6+2'.",
+    "If Mausritter has a Polish edition or fan translation, please use its terms for Hit Protection (HP), Save, Grit, Watch, Turn and the three attributes, and tell us the source."
+  ]
+}
