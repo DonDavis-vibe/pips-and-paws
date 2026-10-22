@@ -52,6 +52,8 @@
   "inv.addFromCatalog": "Depuis la liste",
   "inv.addCustom": "Objet sur mesure",
   "inv.customName": "Nom de l'objet",
+  "inv.search": "Rechercher…",
+  "inv.noMatch": "Aucun résultat pour « {q} ».",
   "inv.noRoom": "Pas de place dans l'inventaire",
   "inv.slotOccupied": "Emplacement occupé",
   "inv.needsTwoSlots": "Nécessite deux emplacements libres et adjacents",

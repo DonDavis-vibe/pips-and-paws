@@ -52,6 +52,8 @@
   "inv.addFromCatalog": "一覧から",
   "inv.addCustom": "カスタムアイテム",
   "inv.customName": "アイテム名",
+  "inv.search": "検索…",
+  "inv.noMatch": "「{q}」に一致するものはありません。",
   "inv.noRoom": "所持品に空きがありません",
   "inv.slotOccupied": "その枠は使用中です",
   "inv.needsTwoSlots": "隣り合った空き枠が2つ必要です",

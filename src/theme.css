@@ -2446,6 +2446,24 @@ summary,
 }
 
 /* ---- Catalog ---- */
+.catalog-search {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.catalog-search svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-dim);
+  pointer-events: none;
+}
+
+.catalog-search .text-input {
+  padding-left: 32px;
+}
+
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

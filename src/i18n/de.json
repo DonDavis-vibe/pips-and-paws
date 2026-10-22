@@ -52,6 +52,8 @@
   "inv.addFromCatalog": "Aus Liste",
   "inv.addCustom": "Eigener Gegenstand",
   "inv.customName": "Name des Gegenstands",
+  "inv.search": "Suchen…",
+  "inv.noMatch": "Nichts passt zu „{q}“.",
   "inv.noRoom": "Kein Platz im Inventar",
   "inv.slotOccupied": "Platz belegt",
   "inv.needsTwoSlots": "Braucht zwei freie, benachbarte Plätze",
