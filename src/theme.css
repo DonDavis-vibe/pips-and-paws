@@ -2454,8 +2454,9 @@ summary,
 .catalog-search svg {
   position: absolute;
   left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  margin: auto 0; /* ohne transform: der Druckbogen-Skin ueberschreibt transform an svg */
   color: var(--ink-dim);
   pointer-events: none;
 }
