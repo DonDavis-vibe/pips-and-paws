@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useLang, loc } from '../i18n/index.jsx';
 import {
   ITEM_CATALOG, CATALOG_KEYS, CONDITION_CATALOG, SPELL_CATALOG, makeItem, makeCondition,
@@ -7,6 +7,17 @@ import {
 import { Modal, Field, TextInput } from './ui.jsx';
 
 const TABS = ['catalog', 'spell', 'condition', 'custom'];
+
+// Suche: Gross/Klein und Akzente egal ("schwert" findet "Schwert", "epee" findet "Épée").
+const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// Alle Woerter der Suche muessen irgendwo im Text vorkommen (Name, Typ, Effekt …).
+const matches = (query, ...texts) => {
+  const words = norm(query).split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const hay = norm(texts.join(' '));
+  return words.every((w) => hay.includes(w));
+};
 
 // onBuy(item, price) + pips: Katalog-Gegenstaende auf Wunsch kaufen (Preis wird
 // abgezogen) — nur auf dem Spielerbogen; der SL gibt Dinge immer kostenlos.
@@ -19,6 +30,22 @@ export default function AddItemMenu({ onAdd, onBuy, pips = 0, triggerLabel, trig
   const [customSize, setCustomSize] = useState(1);
   const [customUses, setCustomUses] = useState(0);
   const [buying, setBuying] = useState(false);
+  const [query, setQuery] = useState('');
+
+  // Englischer Name immer mit durchsuchen, damit SRD-Begriffe auch in anderen Sprachen greifen.
+  const catalogKeys = CATALOG_KEYS.filter((key) => {
+    const c = ITEM_CATALOG[key];
+    return matches(query, loc(c.name, lang), c.name?.en, t(`type.${c.type}`), c.damage, loc(c.effect, lang));
+  });
+  const spellKeys = Object.keys(SPELL_CATALOG).filter((key) => {
+    const c = SPELL_CATALOG[key];
+    return matches(query, loc(c.name, lang), c.name?.en, loc(c.effect, lang));
+  });
+  const conditionKeys = Object.keys(CONDITION_CATALOG).filter((key) => {
+    const c = CONDITION_CATALOG[key];
+    return matches(query, loc(c.name, lang), c.name?.en, loc(c.effect, lang));
+  });
+  const shownCount = { catalog: catalogKeys.length, spell: spellKeys.length, condition: conditionKeys.length }[tab];
 
   const add = (item) => {
     onAdd(item);
@@ -28,7 +55,7 @@ export default function AddItemMenu({ onAdd, onBuy, pips = 0, triggerLabel, trig
 
   return (
     <>
-      <button type="button" className={triggerClass} onClick={() => setOpen(true)}>
+      <button type="button" className={triggerClass} onClick={() => { setQuery(''); setOpen(true); }}>
         <Plus size={16} /> {triggerLabel || t('inv.add')}
       </button>
 
@@ -47,6 +74,21 @@ export default function AddItemMenu({ onAdd, onBuy, pips = 0, triggerLabel, trig
             ))}
           </div>
 
+          {tab !== 'custom' ? (
+            <div className="catalog-search">
+              <Search size={15} aria-hidden="true" />
+              <input
+                type="search"
+                className="text-input"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t('inv.search')}
+                aria-label={t('inv.search')}
+                autoFocus
+              />
+            </div>
+          ) : null}
+
           {tab === 'catalog' && onBuy ? (
             <label className="gm-dmg-check catalog-buy">
               <input type="checkbox" checked={buying} onChange={(e) => setBuying(e.target.checked)} />
@@ -56,7 +98,7 @@ export default function AddItemMenu({ onAdd, onBuy, pips = 0, triggerLabel, trig
 
           {tab === 'catalog' ? (
             <div className="catalog-grid">
-              {CATALOG_KEYS.map((key) => {
+              {catalogKeys.map((key) => {
                 const c = ITEM_CATALOG[key];
                 const tooDear = buying && c.cost > pips;
                 return (
@@ -88,7 +130,7 @@ export default function AddItemMenu({ onAdd, onBuy, pips = 0, triggerLabel, trig
 
           {tab === 'spell' ? (
             <div className="catalog-grid">
-              {Object.keys(SPELL_CATALOG).map((key) => (
+              {spellKeys.map((key) => (
                 <button key={key} type="button" className="catalog-item" onClick={() => add(makeItem(key))}>
                   <span className="catalog-name">{loc(SPELL_CATALOG[key].name, lang)}</span>
                   <span className="catalog-tags">{loc(SPELL_CATALOG[key].effect, lang)}</span>
@@ -99,13 +141,17 @@ export default function AddItemMenu({ onAdd, onBuy, pips = 0, triggerLabel, trig
 
           {tab === 'condition' ? (
             <div className="catalog-grid">
-              {Object.keys(CONDITION_CATALOG).map((key) => (
+              {conditionKeys.map((key) => (
                 <button key={key} type="button" className="catalog-item" onClick={() => add(makeCondition(key))}>
                   <span className="catalog-name">{loc(CONDITION_CATALOG[key].name, lang)}</span>
                   <span className="catalog-tags">{loc(CONDITION_CATALOG[key].effect, lang)}</span>
                 </button>
               ))}
             </div>
+          ) : null}
+
+          {tab !== 'custom' && shownCount === 0 ? (
+            <p className="hint">{t('inv.noMatch', { q: query.trim() })}</p>
           ) : null}
 
           {tab === 'custom' ? (

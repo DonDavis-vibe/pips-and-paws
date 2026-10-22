@@ -52,6 +52,8 @@
   "inv.addFromCatalog": "From list",
   "inv.addCustom": "Custom item",
   "inv.customName": "Item name",
+  "inv.search": "Search…",
+  "inv.noMatch": "Nothing matches “{q}”.",
   "inv.noRoom": "No room in inventory",
   "inv.slotOccupied": "Slot occupied",
   "inv.needsTwoSlots": "Needs two free, adjacent slots",
