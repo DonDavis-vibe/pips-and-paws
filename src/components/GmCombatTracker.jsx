@@ -28,6 +28,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
   const [pick, setPick] = useState('rat');
   const [customName, setCustomName] = useState('');
   const [customHp, setCustomHp] = useState(3);
+  const [customStr, setCustomStr] = useState(10);
   const [customDmg, setCustomDmg] = useState(6);
   const [customWil, setCustomWil] = useState(8);
   const sRef = useRef(s);
@@ -111,7 +112,7 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
     if (!base) return;
     commit({
       ...s,
-      npcs: [...s.npcs, { id: nid(), base, name: nameWithNumber(base), hp: { current: customHp, max: customHp }, str: { current: 10, max: 10 }, dmg: customDmg, armour: 0, wil: customWil, note: '', attack: `W${customDmg}` }],
+      npcs: [...s.npcs, { id: nid(), base, name: nameWithNumber(base), hp: { current: customHp, max: customHp }, str: { current: customStr, max: customStr }, dmg: customDmg, armour: 0, wil: customWil, note: '', attack: `W${customDmg}` }],
     });
     setCustomName('');
     setAddOpen(false);
@@ -230,6 +231,9 @@ export default function GmCombatTracker({ onLog, onInitiative, shareNpcs, pushRo
             </Field>
             <Field label={t('res.hpShort')}>
               <Stepper value={customHp} min={1} max={200} onChange={setCustomHp} />
+            </Field>
+            <Field label={t('attr.abbr.str')}>
+              <Stepper value={customStr} min={1} max={30} onChange={setCustomStr} />
             </Field>
             <Field label={t('item.damage')}>
               <select className="text-input" value={customDmg} onChange={(e) => setCustomDmg(+e.target.value)}>
