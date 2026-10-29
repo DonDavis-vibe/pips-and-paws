@@ -402,7 +402,6 @@
   "mp.discord.events": "Eventos",
   "mp.discord.share": "Enviar a todos los jugadores",
   "player.gm.webhookShared": "El GM compartió el canal de Discord.",
-
   "header.help": "Ayuda",
   "header.volume": "Volumen",
   "header.roster": "Mi ratón",
@@ -430,17 +429,15 @@
   "help.inventory.h": "Inventario",
   "help.inventory.p": "Diez espacios: 2 en patas, 2 en el cuerpo, 6 en la mochila. Arrastra objetos para organizarlos o intercambiarlos; intercambia de lugar objetos que ocupan un espacio poniendo un objeto sobre otro.\nLos objetos grandes ocupan dos espacios.\nLos pequeños círculos en los objetos son las casillas de uso (raciones, hechizos, etc.) — Haz click en ellos para marcar un uso.\nLas condiciones son tarjetas que ocupan un espacio real en el inventario hasta que los borres o los marques como despejados.",
   "help.multiplayer.h": "Multijugador",
-  "help.multiplayer.p": "En multijugador, el Game Master abre una partida y recibe un código de 4 dígitos además de un link de invitación. El dispositivo del GM sirve como anfitrión.\nLos jugadores se unen utilizando el código o el enlace — sin necesidad de crear una cuenta. Quien se une a la partida ve su propia hoja de personaje; el GM ve la de todos.\nLos cambios aparecen inmediatamente para los demás (pérdida de PG, soltar un objeto …).\nLa pestaña del anfitrión debe permanecer abierta. Las recargas y las interrupciones breves se restablecen automáticamente.",
+  "help.multiplayer.p": "En multijugador, el Game Master abre una partida y recibe un código de 6 caracteres además de un link de invitación. El dispositivo del GM sirve como anfitrión.\nLos jugadores se unen utilizando el código o el enlace — sin necesidad de crear una cuenta. Quien se une a la partida ve su propia hoja de personaje; el GM ve la de todos.\nLos cambios aparecen inmediatamente para los demás (pérdida de PG, soltar un objeto …).\nLa pestaña del anfitrión debe permanecer abierta. Las recargas y las interrupciones breves se restablecen automáticamente.",
   "help.gm.h": "Herramientas para el Game Master",
   "help.gm.p": "La tarjeta de cada jugador muestra sus estadísticas, PG, armadura, espacios usados, armas y condiciones. Debajo están las acciones: daño, curación, pepitas, XP, pedir una tirada de salvación o de iniciativa, rumores, dar un objeto o una condición.\nCofre compartido: un inventario comunitario — el GM agrega objetos al cofre y los jugadores toman lo que quieren a sus inventarios.\nAdemás herramientas para el seguimiento del clima, luz y encuentros, una herramienta para llevar el conteo de NPC/combate y notas para el GM.\nAL guardar la sesión queda guardada en el archivo, los contadores y las notas se guardan en otro archivo.",
   "help.rules.h": "Reglas y Licencia",
   "help.rules.p": "Esta aplicación simula las reglas, pero no reemplaza el reglamento. El reglamento completo y gratuito de Mausritter SRD y las reglas originales están enlazados aquí. Pips & Paws es una producción no oficial de fans y no está afiliada a Losing Games.",
-
   "dice.mode.label": "Modo tirada de salvación",
   "dice.mode.normal": "Normal",
   "dice.mode.adv": "Ventaja",
   "dice.mode.disadv": "Desventaja",
-
   "gm.reaction": "Reacción",
   "gm.treasure": "Tesoro",
   "gm.log.reaction": "Reacción 2d6 {roll}: {result}",
@@ -458,14 +455,12 @@
   "treasure.large": "Tesoro grande (SRD p. 38)",
   "treasure.useful": "Tesoro útil (SRD p. 38)",
   "treasure.pips": "Saco con {n} pepitas",
-
   "combat.wil": "VOL",
   "combat.morale": "Moral",
   "combat.morale.hint": "Tirada de moral: Salvación de VOL. Con un fallo, la criatura debe huir o rendirse.",
   "combat.morale.hold": "se mantiene",
   "combat.morale.flee": "huye",
   "combat.log.morale": "{name} moral: d20 {roll} ≤ {wil} · {result}",
-
   "rest.title": "Descanso",
   "rest.short": "Corto",
   "rest.long": "Largo",
@@ -479,7 +474,6 @@
   "rest.log.longFull": "Descanso largo: ya estás totalmente recuperado",
   "rest.log.full": "Descanso completo: PG y atributos recuperados al máximo",
   "rest.noRation": "no hay raciones en tu mochila",
-
   "panel.collapse": "Colapsar",
   "panel.expand": "Expandir",
   "party.title": "Bitácora del grupo",
@@ -493,7 +487,6 @@
   "gm.restLock.hint": "Los jugadores ya no pueden descansar por su cuenta — tú activas el descanso por ratón en el panel.",
   "gm.log.rest": "{name}: descanso {kind} activado",
   "rest.locked": "El GM activa los descansos.",
-
   "meta.title": "Pips & Paws — hoja de personaje de Mausritter, panel para GM y multijugador",
   "meta.description": "Hoja de personaje y panel para el Game Master gratuitos para Mausritter, en el navegador. Multijugador en tiempo real, inventario para arrastrar y soltar, dados, creación de personaje. Sin registro."
 }
