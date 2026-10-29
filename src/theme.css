@@ -4431,4 +4431,6 @@ body:has(.battlemap-fullscreen) .section-nav { display: none; }
 
 .mp-net .inline-roll { flex-wrap: wrap; align-items: center; }
 
+.mp-detail code { font-size: 11px; word-break: break-all; user-select: all; }
+
 } /* @layer classic */

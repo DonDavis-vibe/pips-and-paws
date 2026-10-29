@@ -679,7 +679,7 @@
   "mp.net.help": "La maggior parte dei giocatori si collega direttamente. Nelle reti rigide (dati mobili, Wi-Fi aziendale o d'albergo) serve un server relay TURN. Se ne hai uno, inseriscilo qui — resta su questo dispositivo.",
   "mp.net.test": "Testa la mia connessione",
   "mp.net.testing": "Test in corso ...",
-  "mp.net.ok": "Una connessione diretta sembra possibile.",
+  "mp.net.ok": "Una connessione diretta sembra possibile ({ip}). Il risultato dipende anche dalla rete del GM.",
   "mp.net.okRelay": "Il relay (TURN) funziona — puoi collegarti anche da reti rigide.",
   "mp.net.noDirect": "Nessun percorso diretto (rete rigida). Serve un server relay TURN.",
   "mp.net.noRtc": "WebRTC è bloccato in questo browser — spesso una VPN o un'estensione per la privacy.",
@@ -692,7 +692,15 @@
   "mp.net.removed": "Server TURN rimosso.",
   "mp.net.badUrl": "L'indirizzo deve iniziare con turn: o turns:.",
   "mp.status.diagBlocked": "WebRTC è bloccato in questo browser — spesso una VPN o un'estensione per la privacy. Disattivala o usa un altro browser.",
-  "mp.status.diagNoAnswer": "La stanza esiste, ma il GM non ha inviato dati di connessione. Forse WebRTC è bloccato dal lato del GM.",
-  "mp.status.diagNeedTurn": "Connessione diretta impossibile — probabilmente una rete rigida (dati mobili, Wi-Fi aziendale o d'albergo). Serve un server relay TURN, vedi «Problemi di connessione?» qui sotto.",
-  "mp.status.diagFailed": "Connessione non riuscita, anche con un relay. Controlla la rete e le credenziali TURN."
+  "mp.status.diagNoAnswer": "La stanza esiste, ma il browser del GM non ha risposto. Chiedi al GM di ricaricare la pagina, poi riprova.",
+  "mp.status.diagNeedTurn": "Non esiste un percorso diretto tra la tua rete e quella del GM (capita spesso se uno dei due usa dati mobili o è dietro un NAT dell'operatore). Nessuno sbaglia nulla — questa combinazione richiede un server relay (TURN), vedi «Problemi di connessione?» qui sotto.",
+  "mp.status.diagFailed": "Connessione non riuscita anche se era disponibile un relay. Controlla la rete e riprova.",
+  "mp.status.diagGmNoCandidates": "Il GM ha risposto ma non ha inviato indirizzi di rete — probabilmente WebRTC è limitato sul suo dispositivo (VPN o estensione per la privacy).",
+  "mp.status.diagIpMismatch": "La tua rete e quella del GM usano versioni IP diverse (una solo IPv4, l'altra solo IPv6), quindi non c'è un percorso diretto. Serve un server relay (TURN).",
+  "mp.status.detail": "Dettagli tecnici (per il supporto):",
+  "mp.net.v4only": "solo IPv4",
+  "mp.net.symmetric": "La tua rete assegna un nuovo indirizzo per ogni destinazione (NAT simmetrico, tipico dei dati mobili o dei NAT dell'operatore). Raggiungerai alcuni GM direttamente, ma non tutti — per quelli serve un server relay (TURN).",
+  "mp.log.joinNoRoute": "Un giocatore ha provato a entrare, ma tra le vostre reti non c'è un percorso diretto — serve un server relay (TURN). Dettagli: {d}",
+  "mp.log.joinBlocked": "Un giocatore ha provato a entrare, ma il tuo browser non invia indirizzi di rete — probabilmente WebRTC è limitato sul tuo dispositivo (VPN o estensione per la privacy). Dettagli: {d}",
+  "mp.log.joinNoCandidates": "È arrivato un tentativo di accesso, ma il dispositivo del giocatore non ha inviato indirizzi di rete (interrotto, o WebRTC limitato dal suo lato). Dettagli: {d}"
 }

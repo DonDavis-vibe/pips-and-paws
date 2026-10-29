@@ -9,7 +9,7 @@ import {
   GM_GIVE, GM_STASH_DENY, GM_STASH_FULL,
   generateRoomCode, isMessage, peerConfig,
 } from './protocol.js';
-import { diagnoseFailedConnection } from './diagnose.js';
+import { diagnoseFailedConnection, watchConnection, classifyIncomingFailure, diagDetail } from './diagnose.js';
 import {
   hasCrypto, deriveKey, makeProof, randomHex, safeEqual,
 } from './auth.js';
@@ -86,6 +86,7 @@ export function useMultiplayer() {
   const [roomOnline, setRoomOnline] = useState(false);
   const [connectionState, setConnectionState] = useState('idle'); // idle|connecting|connected|error
   const [statusMessage, setStatusMessage] = useState('');
+  const [statusDetail, setStatusDetail] = useState(''); // technische Kurzinfo zu einem gescheiterten Beitritt
   const [players, setPlayers] = useState({}); // peerId -> { character, items, lastSeen }
   const [liveLog, setLiveLog] = useState([]);
   const [gmCommand, setGmCommand] = useState(null); // Spieler: zuletzt empfangener SL-Befehl
@@ -513,6 +514,7 @@ export function useMultiplayer() {
     setRoomOnline(false);
     setConnectionState('idle');
     setStatusMessage('');
+    setStatusDetail('');
     setPlayers({});
     setLiveLog([]);
     setGmCommand(null);
@@ -656,6 +658,16 @@ export function useMultiplayer() {
     refreshPending();
   }, [refreshPending]);
 
+  // SL: ein Beitrittsversuch kam an, der Datenkanal aber nie zustande — dem SL zeigen
+  // (sonst sieht er nichts und haelt das Problem fuer eines beim Spieler). Hoechstens
+  // ein Eintrag alle 30 s, ein Spieler versucht es meist mehrmals hintereinander.
+  const lastJoinFailRef = useRef(0);
+  const reportFailedJoin = useCallback((conn) => {
+    if (Date.now() - lastJoinFailRef.current < 30000) return;
+    lastJoinFailRef.current = Date.now();
+    pushLog({ kind: 'system', key: classifyIncomingFailure(conn), vars: { d: diagDetail(conn.pnpDiag || { local: new Set(), remote: new Set(), ice: '?' }) } });
+  }, [pushLog]);
+
   const armUnauthTimer = useCallback((peerId, ms, reason = 'timeout') => {
     const u = unauthRef.current[peerId];
     if (!u) return;
@@ -663,11 +675,12 @@ export function useMultiplayer() {
     u.timer = setTimeout(() => {
       const cur = unauthRef.current[peerId];
       if (!cur) return;
+      if (!cur.conn.open) reportFailedJoin(cur.conn);
       try { cur.conn.send({ t: T_AUTH, step: 'denied', reason }); } catch { /* */ }
       try { cur.conn.close(); } catch { /* */ }
       dropUnauth(peerId);
     }, ms);
-  }, [dropUnauth]);
+  }, [dropUnauth, reportFailedJoin]);
 
   const denyConn = useCallback((conn, reason) => {
     try { conn.send({ t: T_AUTH, step: 'denied', reason }); } catch { /* */ }
@@ -933,6 +946,7 @@ export function useMultiplayer() {
     });
 
     peer.on('connection', (conn) => {
+      watchConnection(conn);
       const pid = conn.peer;
       // Neue Verbindung: unauthentifiziert. Daten bekommt sie erst nach dem Einlass
       // (admitConn) — bis dahin ist sie NICHT in clientConnsRef und sieht keinen Broadcast.
@@ -1037,6 +1051,7 @@ export function useMultiplayer() {
         return;
       }
       const conn = live.connect(ROOM_PREFIX + code, { reliable: true });
+      watchConnection(conn);
       wireHostRef.current(conn, code);
       // Kommt der Datenkanal nicht zustande, feuert PeerJS kein 'close': selbst weiterzaehlen.
       setTimeout(() => {
@@ -1233,6 +1248,7 @@ export function useMultiplayer() {
     setAuthPrompt(null);
     setConnectionState('connecting');
     setStatusMessage('connecting');
+    setStatusDetail('');
 
     const peer = new Peer(peerConfig());
     peerRef.current = peer;
@@ -1254,12 +1270,13 @@ export function useMultiplayer() {
       connected = true;
       clearTimeout(joinTimeoutRef.current);
       const conn = peer.connect(ROOM_PREFIX + code, { reliable: true });
-      joinTimeoutRef.current = setTimeout(async () => {
+      watchConnection(conn);
+      joinTimeoutRef.current = setTimeout(() => {
         if (conn.open || hostConnRef.current !== conn) return;
-        // WARUM es nicht klappt, verraten die ICE-Kandidaten (strenges NAT, WebRTC gesperrt ...).
-        const why = await diagnoseFailedConnection(conn);
-        if (hostConnRef.current !== conn) return;
-        setStatusMessage(why);
+        // WARUM es nicht klappt, verraet der Mitschnitt des Aufbaus (kein Weg, WebRTC gesperrt ...).
+        const { key, detail } = diagnoseFailedConnection(conn);
+        setStatusMessage(key);
+        setStatusDetail(detail);
         setConnectionState('error');
         clearSession();
         conn.close();
@@ -1387,6 +1404,7 @@ export function useMultiplayer() {
     roomOnline,
     connectionState,
     statusMessage,
+    statusDetail,
     players,
     liveLog,
     partyLog,

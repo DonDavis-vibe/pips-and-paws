@@ -226,8 +226,9 @@ function ConnectionHelp() {
     if (result.unsupported || !(result.host || result.srflx || result.relay)) verdict = t('mp.net.noRtc');
     else if (result.relay) verdict = t('mp.net.okRelay');
     else if (result.turn) verdict = t('mp.net.turnFail');
-    else if (result.srflx) verdict = t('mp.net.ok');
-    else verdict = t('mp.net.noDirect');
+    else if (!result.srflx) verdict = t('mp.net.noDirect');
+    else if (result.symmetric) verdict = t('mp.net.symmetric');
+    else verdict = t('mp.net.ok', { ip: result.v6 ? 'IPv4 + IPv6' : t('mp.net.v4only') });
   }
 
   return (
@@ -300,6 +301,11 @@ export default function MultiplayerModal({ mp, onClose }) {
             </div>
           </Field>
           {status ? <p className="mp-status">{status}</p> : null}
+          {mp.statusDetail && mp.connectionState === 'error' ? (
+            <p className="hint mp-detail">
+              {t('mp.status.detail')} <code>{mp.statusDetail}</code>
+            </p>
+          ) : null}
           {mp.authPrompt === 'password' ? <PasswordPrompt mp={mp} /> : null}
           {mp.connectionState === 'connecting' ? (
             <button type="button" className="btn btn-ghost" onClick={mp.leaveSession}>
