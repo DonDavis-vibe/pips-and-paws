@@ -1,5 +1,5 @@
 import {
-  Info, ShieldCheck, ScrollText, Backpack, Radio, Swords, BookOpen,
+  Info, ShieldCheck, ScrollText, Backpack, Radio, Swords, BookOpen, Wifi,
 } from 'lucide-react';
 import { useLang } from '../i18n/index.jsx';
 import { Modal } from './ui.jsx';
@@ -11,6 +11,7 @@ const SECTIONS = [
   { key: 'sheet', icon: ScrollText },
   { key: 'inventory', icon: Backpack },
   { key: 'multiplayer', icon: Radio },
+  { key: 'relay', icon: Wifi },
   { key: 'gm', icon: Swords },
 ];
 

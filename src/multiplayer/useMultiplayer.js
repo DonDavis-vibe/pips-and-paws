@@ -7,7 +7,7 @@ import {
   T_MAP_SHARE, T_MAP, T_MAP_IMG, T_HANDOUT,
   T_HELLO, T_AUTH, MAX_UNAUTH, AUTH_TIMEOUT_MS, CHALLENGE_TIMEOUT_MS, PENDING_TIMEOUT_MS,
   GM_GIVE, GM_STASH_DENY, GM_STASH_FULL,
-  generateRoomCode, isMessage, peerConfig,
+  generateRoomCode, isMessage, peerConfig, iceServerList,
 } from './protocol.js';
 import { diagnoseFailedConnection, watchConnection, classifyIncomingFailure, diagDetail } from './diagnose.js';
 import {
@@ -87,6 +87,7 @@ export function useMultiplayer() {
   const [connectionState, setConnectionState] = useState('idle'); // idle|connecting|connected|error
   const [statusMessage, setStatusMessage] = useState('');
   const [statusDetail, setStatusDetail] = useState(''); // technische Kurzinfo zu einem gescheiterten Beitritt
+  const [joinFailures, setJoinFailures] = useState(0); // SL: gescheiterte Beitrittsversuche in diesem Raum
   const [players, setPlayers] = useState({}); // peerId -> { character, items, lastSeen }
   const [liveLog, setLiveLog] = useState([]);
   const [gmCommand, setGmCommand] = useState(null); // Spieler: zuletzt empfangener SL-Befehl
@@ -515,6 +516,7 @@ export function useMultiplayer() {
     setConnectionState('idle');
     setStatusMessage('');
     setStatusDetail('');
+    setJoinFailures(0);
     setPlayers({});
     setLiveLog([]);
     setGmCommand(null);
@@ -665,8 +667,16 @@ export function useMultiplayer() {
   const reportFailedJoin = useCallback((conn) => {
     if (Date.now() - lastJoinFailRef.current < 30000) return;
     lastJoinFailRef.current = Date.now();
+    setJoinFailures((n) => n + 1);
     pushLog({ kind: 'system', key: classifyIncomingFailure(conn), vars: { d: diagDetail(conn.pnpDiag || { local: new Set(), remote: new Set(), ice: '?' }) } });
   }, [pushLog]);
+
+  // Neu eingetragener Relay (TURN) gilt sofort fuer neue Verbindungen im laufenden Raum:
+  // PeerJS liest options.config bei jeder neuen RTCPeerConnection.
+  const refreshIceServers = useCallback(() => {
+    const cfg = peerRef.current?.options?.config;
+    if (cfg) cfg.iceServers = iceServerList();
+  }, []);
 
   const armUnauthTimer = useCallback((peerId, ms, reason = 'timeout') => {
     const u = unauthRef.current[peerId];
@@ -885,7 +895,7 @@ export function useMultiplayer() {
   const hostSession = useCallback((preferredCodeArg, isRetry) => {
     const preferredCode = typeof preferredCodeArg === 'string' ? preferredCodeArg : undefined;
     cleanupPeer();
-    if (!isRetry) rehostAttemptsRef.current = 0;
+    if (!isRetry) { rehostAttemptsRef.current = 0; setJoinFailures(0); }
     setConnectionState('connecting');
     setStatusMessage(preferredCode ? 'restore' : 'creating');
     setPlayers({});
@@ -1405,6 +1415,8 @@ export function useMultiplayer() {
     connectionState,
     statusMessage,
     statusDetail,
+    joinFailures,
+    refreshIceServers,
     players,
     liveLog,
     partyLog,

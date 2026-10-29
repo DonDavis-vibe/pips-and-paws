@@ -5,7 +5,7 @@ import {
 import { useLang } from '../i18n/index.jsx';
 import { Modal, Field, TextInput } from './ui.jsx';
 import {
-  GM_WEBHOOK, ROOM_CODE_LENGTH, ROOM_CODE_MIN, getTurnServer, setTurnServer,
+  GM_WEBHOOK, ROOM_CODE_LENGTH, ROOM_CODE_MIN, getTurnServer, setTurnServer, hasTurn,
 } from '../multiplayer/protocol.js';
 import { testConnectivity } from '../multiplayer/diagnose.js';
 import { hasCrypto } from '../multiplayer/auth.js';
@@ -192,9 +192,15 @@ function DiscordSettings({ mp }) {
 }
 
 // Verbindungsprobleme: Test, was dieses Netz zulaesst, und optional ein eigener TURN-Relay.
-// Die Eintraege bleiben auf diesem Geraet (localStorage), nie im Bogen.
-function ConnectionHelp() {
+// Die Eintraege bleiben auf diesem Geraet (localStorage), nie im Bogen. Ein Relay auf
+// EINER Seite genuegt — am besten beim SL, dann brauchen die Spieler nichts.
+const NO_ROUTE = ['diagNeedTurn', 'diagIpMismatch'];
+
+function ConnectionHelp({ mp }) {
   const { t } = useLang();
+  const [active, setActive] = useState(hasTurn());
+  // Von selbst aufklappen, wenn es genau hier weitergeht.
+  const needsRelay = (mp.role === 'gm' && mp.joinFailures > 0) || NO_ROUTE.includes(mp.statusMessage);
   const stored = getTurnServer();
   const [urls, setUrls] = useState(stored ? [].concat(stored.urls).join(', ') : '');
   const [user, setUser] = useState(stored?.username || '');
@@ -206,13 +212,16 @@ function ConnectionHelp() {
     const list = urls.split(',').map((u) => u.trim()).filter(Boolean);
     if (!list.length) {
       setTurnServer(null);
+      mp.refreshIceServers();
       setNote(t('mp.net.removed'));
     } else if (!list.every((u) => /^turns?:/i.test(u))) {
       setNote(t('mp.net.badUrl'));
     } else {
       setTurnServer({ urls: list.length === 1 ? list[0] : list, username: user.trim(), credential: pass });
-      setNote(t('mp.net.saved'));
+      mp.refreshIceServers(); // gilt sofort fuer neue Beitritte, ohne neu zu hosten
+      setNote(t(mp.role === 'gm' ? 'mp.net.savedLive' : 'mp.net.saved'));
     }
+    setActive(hasTurn());
     setResult(null);
   };
 
@@ -232,11 +241,15 @@ function ConnectionHelp() {
   }
 
   return (
-    <details className="mp-discord mp-net">
+    <details className="mp-discord mp-net" open={needsRelay || undefined}>
       <summary>
         <Wifi size={15} /> {t('mp.net.title')}
+        {active ? <span className="mp-net-badge">{t('mp.net.active')}</span> : null}
       </summary>
       <div className="mp-discord-body">
+        {mp.role === 'gm' && mp.joinFailures > 0 ? (
+          <p className="mp-status mp-net-alert">{t('mp.net.gmHint', { n: mp.joinFailures })}</p>
+        ) : null}
         <p className="hint">{t('mp.net.help')}</p>
         <div className="inline-roll">
           <button type="button" className="btn btn-sm" disabled={result === 'pending'} onClick={run}>
@@ -249,7 +262,7 @@ function ConnectionHelp() {
         </Field>
         <div className="inline-roll">
           <TextInput value={user} onChange={setUser} placeholder={t('mp.net.turnUser')} />
-          <TextInput value={pass} onChange={setPass} placeholder={t('mp.net.turnPass')} />
+          <TextInput value={pass} onChange={setPass} placeholder={t('mp.net.turnPass')} type="password" autoComplete="off" />
         </div>
         <div className="inline-roll">
           <button type="button" className="btn btn-sm" onClick={save}>{t('mp.net.save')}</button>
@@ -355,7 +368,7 @@ export default function MultiplayerModal({ mp, onClose }) {
         </div>
       )}
 
-      <ConnectionHelp />
+      <ConnectionHelp mp={mp} />
       <DiscordSettings mp={mp} />
     </Modal>
   );

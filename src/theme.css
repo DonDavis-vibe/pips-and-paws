@@ -4433,4 +4433,7 @@ body:has(.battlemap-fullscreen) .section-nav { display: none; }
 
 .mp-detail code { font-size: 11px; word-break: break-all; user-select: all; }
 
+.mp-net-badge { margin-left: auto; padding: 1px 8px; border: 1px solid var(--ok); border-radius: 999px; color: var(--ok); font-size: 11px; }
+.mp-net-alert { color: var(--warn); }
+
 } /* @layer classic */
